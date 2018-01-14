@@ -6,6 +6,7 @@ Runs on Windows or Linux, needs to be left running 24/7
 
 Requires Python 3
 Requires a valid IG Index Account - https://www.ig.com/uk/welcome-page
+
 Requires you to install the packages listed in the requirements.txt file
 
 More information/discussions and questions here
