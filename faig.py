@@ -133,10 +133,10 @@ MARKET_ID = d['instrument']['marketId']
 #*******************************************************************
 #*******************************************************************
 
-TIME_WAIT_MULTIPLIER = 60
+TIME_WAIT_MULTIPLIER = 80
 #STOP_LOSS_MULTIPLIER = 4 #Not currently in use, 13th Jan
 #THIS IS STILL NOT GOOD ENOUGH TO TRADE ON, TAKE OPPOSITE TRADE?????
-predict_accuracy = 0.80
+predict_accuracy = 0.60
 profitable_trade_count = 0
 
 print ("START TIME : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
@@ -581,9 +581,6 @@ for times_round_loop in range(1, 9999):
 		#########################PREDICTION CODE#############################
 		#####################################################################
 		
-		print (x)
-		print (y)
-		
 		x = np.asarray(x)
 		y = np.asarray(y)
 		# Initialize the model then train it on the data
@@ -765,10 +762,20 @@ for times_round_loop in range(1, 9999):
 			d = json.loads(auth_r.text)
 			
 			while not int(auth_r.status_code) == 200:
+				if int(auth_r.status_code) == 404:
+					break
+					#This is a good thing!! It means that It cannot find the Deal ID, Your take profit has been hit. 
+					
 				#Cannot read from API, Wait and try again
 				#Give the Internet/IG 30s to sort it's shit out and try again
 				systime.sleep(30)
-				print ("HTTP API ERROR!! Try again...")
+				print ("-----------------DEBUG-----------------")
+				print ("HTTP API ERROR!! Please check your Internet connection and Try again...")
+				print ("Check Ping and Latency between you and IG Index Servers")
+				print(auth_r.status_code)
+				print(auth_r.reason)
+				print (auth_r.text)
+				print ("-----------------DEBUG-----------------")
 				#Got some "basic" error checking after all
 				base_url = REAL_OR_NO_REAL + '/positions/'+ DEAL_ID
 				auth_r = requests.get(base_url, headers=authenticated_headers)		
@@ -816,7 +823,7 @@ for times_round_loop in range(1, 9999):
 	except Exception as e:
 		print(e) #Yeah, I know now. 
 		print ("ERROR : ORDER MIGHT NOT BE OPEN FOR WHATEVER REASON")
-		#WOAH CALM DOWN! WAIT .... STOP LOSS MIGHT HAVE BEEN HIT
+		#WOAH CALM DOWN! WAIT .... STOP LOSS MIGHT HAVE BEEN HIT (Or take Profit)
 		systime.sleep(random.randint(1, TIME_WAIT_MULTIPLIER))
 		pass
 	
