@@ -133,10 +133,10 @@ MARKET_ID = d['instrument']['marketId']
 #*******************************************************************
 #*******************************************************************
 
-TIME_WAIT_MULTIPLIER = 80
+TIME_WAIT_MULTIPLIER = 60
 #STOP_LOSS_MULTIPLIER = 4 #Not currently in use, 13th Jan
 #THIS IS STILL NOT GOOD ENOUGH TO TRADE ON, TAKE OPPOSITE TRADE?????
-predict_accuracy = 0.60
+predict_accuracy = 0.80
 profitable_trade_count = 0
 
 print ("START TIME : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
