@@ -649,16 +649,16 @@ for times_round_loop in range(1, 9999):
 		
 		if profitable_trade_count < 15:
 			if price_diff < 0 and score > predict_accuracy:
-				DIRECTION_TO_TRADE = "SELL"
-				DIRECTION_TO_CLOSE = "BUY"
-				DIRECTION_TO_COMPARE = 'offer'
+				DIRECTION_TO_TRADE = "BUY"
+				DIRECTION_TO_CLOSE = "SELL"
+				DIRECTION_TO_COMPARE = 'bid'
 				DO_A_THING = True
 			elif price_diff > 0 and score > predict_accuracy:
 				#Keep going but keep it tight??
 				limitDistance_value = "1"
-				DIRECTION_TO_TRADE = "BUY"
-				DIRECTION_TO_CLOSE = "SELL"
-				DIRECTION_TO_COMPARE = 'bid'
+				DIRECTION_TO_TRADE = "SELL"
+				DIRECTION_TO_CLOSE = "BUY"
+				DIRECTION_TO_COMPARE = 'offer'
 				DO_A_THING = True
 		elif profitable_trade_count > 15: #15, Trades ... profit. Right??? 
 			profitable_trade_count = 0
@@ -762,7 +762,7 @@ for times_round_loop in range(1, 9999):
 			d = json.loads(auth_r.text)
 			
 			while not int(auth_r.status_code) == 200:
-				if int(auth_r.status_code) == 404:
+				if int(auth_r.status_code) == 400:
 					break
 					#This is a good thing!! It means that It cannot find the Deal ID, Your take profit has been hit. 
 					
