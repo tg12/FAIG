@@ -23,13 +23,13 @@ from sklearn.linear_model import LinearRegression
 REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
 
 API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-API_KEY = '**************************************'
-data = {"identifier":"'**************************************'","password": "'**************************************'"}
+API_KEY = '*************************************'
+data = {"identifier":"*************************************","password": "*************************************"}
 
 # FOR REAL....
 #API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-#API_KEY = '**************************************'
-#data = {"identifier":'**************************************',"password": '**************************************'}
+#API_KEY = '*************************************'
+#data = {"identifier":"*************************************","password": "*************************************"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -762,7 +762,7 @@ for times_round_loop in range(1, 9999):
 			d = json.loads(auth_r.text)
 			
 			while not int(auth_r.status_code) == 200:
-				if int(auth_r.status_code) == 400:
+				if int(auth_r.status_code) == 400 or int(auth_r.status_code) == 404:
 					break
 					#This is a good thing!! It means that It cannot find the Deal ID, Your take profit has been hit. 
 					
