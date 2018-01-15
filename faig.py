@@ -23,13 +23,13 @@ from sklearn.linear_model import LinearRegression
 REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
 
 API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-API_KEY = '*************************************'
-data = {"identifier":"*************************************","password": "*************************************"}
+API_KEY = '*********************************'
+data = {"identifier":"*********************************","password": "*********************************"}
 
 # FOR REAL....
 #API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-#API_KEY = '*************************************'
-#data = {"identifier":"*************************************","password": "*************************************"}
+#API_KEY = '*********************************'
+#data = {"identifier":"*********************************","password": "*********************************"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -135,7 +135,6 @@ MARKET_ID = d['instrument']['marketId']
 
 TIME_WAIT_MULTIPLIER = 60
 #STOP_LOSS_MULTIPLIER = 4 #Not currently in use, 13th Jan
-#THIS IS STILL NOT GOOD ENOUGH TO TRADE ON, TAKE OPPOSITE TRADE?????
 predict_accuracy = 0.80
 profitable_trade_count = 0
 
@@ -149,9 +148,7 @@ for times_round_loop in range(1, 9999):
 #*******************************************************************
 	DO_A_THING = False
 	while not DO_A_THING:
-		#BUG HERE???
-		#TIME_WAIT_MULTIPLIER = int(TIME_WAIT_MULTIPLIER) * int(times_round_loop)
-		print ("!!DEBUG TIME Top of Loop!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+		print ("!!Internal Notes only - Top of Loop!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
 		systime.sleep(random.randint(1, TIME_WAIT_MULTIPLIER))
 		low_price_list = []
 		high_price_list = []
@@ -649,12 +646,13 @@ for times_round_loop in range(1, 9999):
 		
 		if profitable_trade_count < 15:
 			if price_diff < 0 and score > predict_accuracy:
+				limitDistance_value = "4"
 				DIRECTION_TO_TRADE = "BUY"
 				DIRECTION_TO_CLOSE = "SELL"
 				DIRECTION_TO_COMPARE = 'bid'
 				DO_A_THING = True
 			elif price_diff > 0 and score > predict_accuracy:
-				#Keep going but keep it tight??
+				#It's OVER the predicted price, Keep going but keep it tight?? Tight limit!! Take small profits
 				limitDistance_value = "1"
 				DIRECTION_TO_TRADE = "SELL"
 				DIRECTION_TO_CLOSE = "BUY"
@@ -665,15 +663,22 @@ for times_round_loop in range(1, 9999):
 			if price_diff < 0 and score > predict_accuracy:
 				#Be Extra Sure, Set stop loss very tight???
 				limitDistance_value = "1"
-				DIRECTION_TO_TRADE = "BUY"
-				DIRECTION_TO_CLOSE = "SELL"
-				DIRECTION_TO_COMPARE = 'bid'
+				DIRECTION_TO_TRADE = "SELL"
+				DIRECTION_TO_CLOSE = "BUY"
+				DIRECTION_TO_COMPARE = 'offer'
 				DO_A_THING = True
 			elif price_diff > 0 and score > predict_accuracy:
+				#Be Extra Sure, Set stop loss very tight???
 				limitDistance_value = "1"
 				DIRECTION_TO_TRADE = "SELL"
 				DIRECTION_TO_CLOSE = "BUY"
 				DIRECTION_TO_COMPARE = 'offer'
+				DO_A_THING = True
+				#Be Extra Sure, Set stop loss very tight???
+				limitDistance_value = "1"
+				DIRECTION_TO_TRADE = "BUY"
+				DIRECTION_TO_CLOSE = "SELL"
+				DIRECTION_TO_COMPARE = 'bid'
 				DO_A_THING = True
 		
 		print ("!!DEBUG TIME!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
@@ -691,7 +696,7 @@ for times_round_loop in range(1, 9999):
 				print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
 				systime.sleep(Prediction_Wait_Timer)
 				print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-		elif price_diff > 0 and score < predict_accuracy: #BUY
+		elif price_diff > 0 and score < predict_accuracy:
 				DO_A_THING = False
 				print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
 				systime.sleep(Prediction_Wait_Timer)
@@ -772,9 +777,9 @@ for times_round_loop in range(1, 9999):
 				print ("-----------------DEBUG-----------------")
 				print ("HTTP API ERROR!! Please check your Internet connection and Try again...")
 				print ("Check Ping and Latency between you and IG Index Servers")
-				print(auth_r.status_code)
-				print(auth_r.reason)
-				print (auth_r.text)
+				# print(auth_r.status_code)
+				# print(auth_r.reason)
+				# print (auth_r.text)
 				print ("-----------------DEBUG-----------------")
 				#Got some "basic" error checking after all
 				base_url = REAL_OR_NO_REAL + '/positions/'+ DEAL_ID
