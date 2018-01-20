@@ -4,7 +4,6 @@
 # -*- coding: utf-8 -*-
 import time
 import datetime
-from datetime import timedelta
 import requests
 import json
 import logging
@@ -23,13 +22,13 @@ from sklearn.linear_model import LinearRegression
 REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
 
 API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-API_KEY = '*****************'
-data = {"identifier":"*************","password": "*************"}
+API_KEY = '******************************************'
+data = {"identifier":"******************************************","password": "******************************************"}
 
 # FOR REAL....
 # API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-# API_KEY = '*************'
-# data = {"identifier":"*************","password": "*************"}
+# API_KEY = '******************************************'
+# data = {"identifier":"******************************************","password": "******************************************"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -142,6 +141,24 @@ profitable_trade_count = 0
 
 print ("START TIME : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
 
+def exponential_average(values, window):
+    weights = np.exp(np.linspace(-1.,0.,window))
+    weights /= weights.sum()
+
+    a = np.convolve(values, weights) [:len(values)]
+    a[:window]=a[window]
+    return a
+
+def ExpMovingAverage(values, window):
+    """ Numpy implementation of EMA
+    """
+    weights = np.exp(np.linspace(-1., 0., window))
+    weights /= weights.sum()
+    a =  np.convolve(values, weights, mode='full')[:len(values)]
+    a[:window] = a[window]
+    return a    
+    
+
 for times_round_loop in range(1, 9999):
 
 #*******************************************************************
@@ -161,7 +178,6 @@ for times_round_loop in range(1, 9999):
         x = [] #This is Low Price, Volume
         y = [] #This is High Price
         
-
         base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE/30'
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
         auth_r = requests.get(base_url, headers=authenticated_headers)
@@ -531,6 +547,9 @@ for times_round_loop in range(1, 9999):
             y.append(float(high_price))
             #y = High Prices
         
+                
+        Average_Range = [j-i for i, j in zip(y[:-1], y[1:])]
+        print (np.mean(Average_Range))
         
         #-------------------------------------------------------------------------------
         #-------------------------------------------------------------------------------
@@ -549,7 +568,7 @@ for times_round_loop in range(1, 9999):
         #-------------------------------------------------------------------------------
         #-------------------------------------------------------------------------------
         #-------------------------------------------------------------------------------
-
+        
         base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/DAY/1'
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
         auth_r = requests.get(base_url, headers=authenticated_headers)
@@ -600,6 +619,67 @@ for times_round_loop in range(1, 9999):
         print (predictions)
         print ("-----------------DEBUG-----------------")
         
+        # ema = np.mean(exponential_average(y, 30))
+        # ema = np.mean(ExpMovingAverage(y, 30))
+        # print ("ema : " + str(ema))
+        
+        
+        #base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/DAY/20'
+        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/HOUR/24'
+        # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
+        auth_r = requests.get(base_url, headers=authenticated_headers)
+        d = json.loads(auth_r.text)
+
+        # print ("-----------------DEBUG-----------------")
+        # print(auth_r.status_code)
+        # print(auth_r.reason)
+        # print (auth_r.text)
+        # print ("-----------------DEBUG-----------------")
+
+        price_compare = "bid"
+        price_ranges = []
+        closing_prices = []
+        first_time_round_loop = True
+        TR_prices = []
+
+
+        for i in d['prices']:
+            if first_time_round_loop == True:
+                #First time round loop cannot get previous
+                closePrice = i['closePrice'][price_compare]
+                closing_prices.append(closePrice)
+                high_price = i['highPrice'][price_compare]
+                low_price = i['lowPrice'][price_compare]
+                price_range = float(high_price - closePrice)
+                price_ranges.append(price_range)
+                first_time_round_loop = False
+            else:
+                prev_close = closing_prices[-1]
+                ###############################
+                closePrice = i['closePrice'][price_compare]
+                closing_prices.append(closePrice)
+                high_price = i['highPrice'][price_compare]
+                low_price = i['lowPrice'][price_compare]
+                price_range = float(high_price - closePrice)
+                price_ranges.append(price_range)
+                TR = max(high_price-low_price, abs(high_price-prev_close), abs(low_price-prev_close))
+                #print (TR)
+                TR_prices.append(TR)
+                
+             
+        print ("TR RANGE FOR " + str(epic_id) + " IS " + str(int(np.mean(TR_prices))))
+        max_range = max(TR_prices)
+        print ("MAX RANGE FOR " + str(epic_id) + " IS " + str(int(max_range)))
+        low_range = min(TR_prices)
+        print ("LOW RANGE FOR " + str(epic_id) + " IS " + str(int(low_range)))
+        
+        #*************************************************
+        #*************************************************
+        #*************************************************
+        
+        limitDistance_value = int(low_range)
+        stopDistance_value = int(max_range)
+        
         #####################################################################
         #########################PREDICTION CODE#############################
         #########################PREDICTION CODE#############################
@@ -633,6 +713,7 @@ for times_round_loop in range(1, 9999):
             
         print ("STOP LOSS DISTANCE WILL BE SET AT : " + str(stopDistance_value))
         print ("Price Difference Away (Point's) : " + str(price_diff))
+        #print ("ExpMovingAverage is  : " + str(ema))
         #MUST NOTE :- IF THIS PRICE IS - THEN BUY!! i.e NOT HIT TARGET YET, CONVERSELY IF THIS PRICE IS POSITIVE IT IS ALREADY ABOVE SO SELL!!!
         #MUST NOTE :- IF THIS PRICE IS - THEN BUY!! i.e NOT HIT TARGET YET, CONVERSELY IF THIS PRICE IS POSITIVE IT IS ALREADY ABOVE SO SELL!!!
         #MUST NOTE :- IF THIS PRICE IS - THEN BUY!! i.e NOT HIT TARGET YET, CONVERSELY IF THIS PRICE IS POSITIVE IT IS ALREADY ABOVE SO SELL!!!
@@ -647,13 +728,13 @@ for times_round_loop in range(1, 9999):
         
         
         if profitable_trade_count < 15:
-            if price_diff < 0 and score > predict_accuracy:
+            if price_diff < 0 and price_prediction < ema and score > predict_accuracy:
                 limitDistance_value = "4"
                 DIRECTION_TO_TRADE = "BUY"
                 DIRECTION_TO_CLOSE = "SELL"
                 DIRECTION_TO_COMPARE = 'bid'
                 DO_A_THING = True
-            elif price_diff > 0 and score > predict_accuracy:
+            elif price_diff > 0 and price_prediction > ema and score > predict_accuracy:
                 #It's OVER the predicted price, Keep going but keep it tight?? Tight limit!! Take small profits
                 limitDistance_value = "1"
                 DIRECTION_TO_TRADE = "SELL"
@@ -764,33 +845,6 @@ for times_round_loop in range(1, 9999):
     try:
         #while PROFIT_OR_LOSS < float(limitDistance_value): 
         while PROFIT_OR_LOSS < float(4.00): #Take something from the market, Before Take Profit.
-            
-            current_time = datetime.datetime.now()
-            formatted_time_toDate = current_time.strftime('%d-%m-%Y')
-            formatted_time_fromDate = current_time - timedelta(days=1)
-            formatted_time_fromDate = formatted_time_fromDate.strftime('%d-%m-%Y')
-                        
-            base_url = REAL_OR_NO_REAL + '/history/transactions/ALL/' + formatted_time_fromDate + '/' + formatted_time_toDate
-            # authenticated_headers = {'Content-Type':'application/json; charset=utf-8',
-            # 'Accept':'application/json; charset=utf-8',
-            # 'X-IG-API-KEY':API_KEY,
-            # 'CST':CST_token,
-            # 'X-SECURITY-TOKEN':x_sec_token}
-            auth_r = requests.get(base_url, headers=authenticated_headers)      
-            d = json.loads(auth_r.text)
-            # print(auth_r.status_code)
-            # print(auth_r.reason)
-            # print (auth_r.text)
-            
-            p_or_l = 0
-            
-            for i in d['transactions']:
-                tmp_pl = i['profitAndLoss']
-                tmp_pl.replace('£', '')
-                tmp_pl = tmp_pl.replace('£', '')
-                p_or_l = float(p_or_l) + float(tmp_pl)
-        
-                  
             base_url = REAL_OR_NO_REAL + '/positions/'+ DEAL_ID
             auth_r = requests.get(base_url, headers=authenticated_headers)      
             d = json.loads(auth_r.text)
@@ -814,26 +868,19 @@ for times_round_loop in range(1, 9999):
                 base_url = REAL_OR_NO_REAL + '/positions/'+ DEAL_ID
                 auth_r = requests.get(base_url, headers=authenticated_headers)      
                 d = json.loads(auth_r.text)
-             
-                        
+            
+            
             if DIRECTION_TO_TRADE == "SELL":
                 PROFIT_OR_LOSS = float(d['position']['openLevel']) - float(d['market'][DIRECTION_TO_COMPARE])
                 PROFIT_OR_LOSS = float(d['position']['openLevel']) - float(d['market'][DIRECTION_TO_COMPARE])
                 PROFIT_OR_LOSS = float(PROFIT_OR_LOSS * float(size_value))
                 print ("Deal Number : " + str(times_round_loop) + " Profit/Loss : " + str(PROFIT_OR_LOSS))
                 systime.sleep(2) #Don't be too keen to read price
-                overall_PROFIT_OR_LOSS = float(p_or_l + PROFIT_OR_LOSS)
-                print ("(PROFIT/LOSS SINCE YESTERDAY " + str(overall_PROFIT_OR_LOSS) + ")")
-                            
             else:
                 PROFIT_OR_LOSS = float(d['market'][DIRECTION_TO_COMPARE] - float(d['position']['openLevel']))
                 PROFIT_OR_LOSS = float(PROFIT_OR_LOSS * float(size_value))
                 print ("Deal Number : " + str(times_round_loop) + " Profit/Loss : " + str(PROFIT_OR_LOSS))
                 systime.sleep(2) #Don't be too keen to read price
-                overall_PROFIT_OR_LOSS = float(p_or_l + PROFIT_OR_LOSS)
-                print ("(PROFIT/LOSS SINCE YESTERDAY " + str(overall_PROFIT_OR_LOSS) + ")")
-               
-                
                 
             # ARTIFICIAL_STOP_LOSS = int(size_value) * STOP_LOSS_MULTIPLIER
             # ARTIFICIAL_STOP_LOSS = ARTIFICIAL_STOP_LOSS * -1 #Make Negative, DO NOT REMOVE!!
