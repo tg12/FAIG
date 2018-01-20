@@ -22,13 +22,13 @@ from sklearn.linear_model import LinearRegression
 REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
 
 API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-API_KEY = '******************************************'
-data = {"identifier":"******************************************","password": "******************************************"}
+API_KEY = '***************'
+data = {"identifier":"***************","password": "***************"}
 
 # FOR REAL....
 # API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-# API_KEY = '******************************************'
-# data = {"identifier":"******************************************","password": "******************************************"}
+# API_KEY = '***************'
+# data = {"identifier":"***************","password": "***************"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -728,13 +728,13 @@ for times_round_loop in range(1, 9999):
         
         
         if profitable_trade_count < 15:
-            if price_diff < 0 and price_prediction < ema and score > predict_accuracy:
+            if price_diff < 0 and score > predict_accuracy:
                 limitDistance_value = "4"
                 DIRECTION_TO_TRADE = "BUY"
                 DIRECTION_TO_CLOSE = "SELL"
                 DIRECTION_TO_COMPARE = 'bid'
                 DO_A_THING = True
-            elif price_diff > 0 and price_prediction > ema and score > predict_accuracy:
+            elif price_diff > 0 and score > predict_accuracy:
                 #It's OVER the predicted price, Keep going but keep it tight?? Tight limit!! Take small profits
                 limitDistance_value = "1"
                 DIRECTION_TO_TRADE = "SELL"
