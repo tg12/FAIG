@@ -729,7 +729,6 @@ for times_round_loop in range(1, 9999):
         
         if profitable_trade_count < 15:
             if price_diff < 0 and score > predict_accuracy:
-                limitDistance_value = "4"
                 DIRECTION_TO_TRADE = "BUY"
                 DIRECTION_TO_CLOSE = "SELL"
                 DIRECTION_TO_COMPARE = 'bid'
