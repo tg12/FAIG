@@ -22,13 +22,13 @@ from sklearn.linear_model import LinearRegression
 REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
 
 API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-API_KEY = '***************'
-data = {"identifier":"***************","password": "***************"}
+API_KEY = '*******************************'
+data = {"identifier":"*******************************","password": "*******************************"}
 
 # FOR REAL....
 # API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-# API_KEY = '***************'
-# data = {"identifier":"***************","password": "***************"}
+# API_KEY = '*******************************'
+# data = {"identifier":"*******************************","password": "*******************************"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -115,7 +115,7 @@ expiry_value = "DFB"
 guaranteedStop_value = True
 currencyCode_value = "GBP"
 forceOpen_value = True
-stopDistance_value = "150" #Initial Stop loss, Worked out later per trade
+stopDistance_value = "350" #Initial Stop loss, Worked out later per trade
 
 base_url = REAL_OR_NO_REAL + '/markets/' + epic_id
 auth_r = requests.get(base_url, headers=authenticated_headers)
@@ -678,7 +678,7 @@ for times_round_loop in range(1, 9999):
         #*************************************************
         
         limitDistance_value = int(low_range)
-        stopDistance_value = int(max_range)
+        #stopDistance_value = int(max_range)
         
         #####################################################################
         #########################PREDICTION CODE#############################
@@ -700,24 +700,12 @@ for times_round_loop in range(1, 9999):
         current_price = d['snapshot']['bid']
         Price_Change_Day = d['snapshot']['netChange']
         price_diff = current_price - price_prediction
-        
-            
-        #THIS IS GOOD AND ALL HOWEVER MARKET (IG) SOMETIMES REQUIRES HIGHER STOP LOSS, SEE HARD CODED VALUE
-        # if int(Price_Change_Day) < 0:
-            # stopDistance_value = int(Price_Change_Day)
-            # stopDistance_value = stopDistance_value * -1
-            # stopDistance_value = stopDistance_value - 1 #Not all the way
-        # else:
-            # stopDistance_value = int(stopDistance_value)
-            # stopDistance_value = stopDistance_value - 1 #Not all the way
-            
+   
         print ("STOP LOSS DISTANCE WILL BE SET AT : " + str(stopDistance_value))
         print ("Price Difference Away (Point's) : " + str(price_diff))
         #print ("ExpMovingAverage is  : " + str(ema))
         #MUST NOTE :- IF THIS PRICE IS - THEN BUY!! i.e NOT HIT TARGET YET, CONVERSELY IF THIS PRICE IS POSITIVE IT IS ALREADY ABOVE SO SELL!!!
-        #MUST NOTE :- IF THIS PRICE IS - THEN BUY!! i.e NOT HIT TARGET YET, CONVERSELY IF THIS PRICE IS POSITIVE IT IS ALREADY ABOVE SO SELL!!!
-        #MUST NOTE :- IF THIS PRICE IS - THEN BUY!! i.e NOT HIT TARGET YET, CONVERSELY IF THIS PRICE IS POSITIVE IT IS ALREADY ABOVE SO SELL!!!
-        
+         
         
         ################################################################
         #########################ORDER CODE#############################
@@ -881,11 +869,9 @@ for times_round_loop in range(1, 9999):
                 print ("Deal Number : " + str(times_round_loop) + " Profit/Loss : " + str(PROFIT_OR_LOSS))
                 systime.sleep(2) #Don't be too keen to read price
                 
-            # ARTIFICIAL_STOP_LOSS = int(size_value) * STOP_LOSS_MULTIPLIER
+            # ARTIFICIAL_STOP_LOSS = int(max_range)
             # ARTIFICIAL_STOP_LOSS = ARTIFICIAL_STOP_LOSS * -1 #Make Negative, DO NOT REMOVE!!
-            # print (PROFIT_OR_LOSS)
-            # print (ARTIFICIAL_STOP_LOSS)
-            
+                      
             # if PROFIT_OR_LOSS < ARTIFICIAL_STOP_LOSS:
                 # #CLOSE TRADE/GTFO
                 # print ("WARNING!! POTENTIAL DIRECTION CHANGE!!")
