@@ -831,7 +831,7 @@ for times_round_loop in range(1, 9999):
     #KEEP READING IN FOR PROFIT
     try:
         #while PROFIT_OR_LOSS < float(limitDistance_value): 
-        while PROFIT_OR_LOSS < float(4.00): #Take something from the market, Before Take Profit.
+        while PROFIT_OR_LOSS < float(limitDistance_value - 1): #Take something from the market, Before Take Profit.
             base_url = REAL_OR_NO_REAL + '/positions/'+ DEAL_ID
             auth_r = requests.get(base_url, headers=authenticated_headers)      
             d = json.loads(auth_r.text)
