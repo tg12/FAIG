@@ -115,7 +115,7 @@ expiry_value = "DFB"
 guaranteedStop_value = True
 currencyCode_value = "GBP"
 forceOpen_value = True
-stopDistance_value = "350" #Initial Stop loss, Worked out later per trade
+stopDistance_value = "250" #Initial Stop loss, Worked out later per trade
 
 base_url = REAL_OR_NO_REAL + '/markets/' + epic_id
 auth_r = requests.get(base_url, headers=authenticated_headers)
@@ -723,7 +723,7 @@ for times_round_loop in range(1, 9999):
                 DO_A_THING = True
             elif price_diff > 0 and score > predict_accuracy:
                 #It's OVER the predicted price, Keep going but keep it tight?? Tight limit!! Take small profits
-                limitDistance_value = "1"
+                limitDistance_value = "2"
                 DIRECTION_TO_TRADE = "SELL"
                 DIRECTION_TO_CLOSE = "BUY"
                 DIRECTION_TO_COMPARE = 'offer'
@@ -732,20 +732,20 @@ for times_round_loop in range(1, 9999):
             profitable_trade_count = 0
             if price_diff < 0 and score > predict_accuracy:
                 #Be Extra Sure, Set stop loss very tight???
-                limitDistance_value = "1"
+                limitDistance_value = "2"
                 DIRECTION_TO_TRADE = "SELL"
                 DIRECTION_TO_CLOSE = "BUY"
                 DIRECTION_TO_COMPARE = 'offer'
                 DO_A_THING = True
             elif price_diff > 0 and score > predict_accuracy:
                 #Be Extra Sure, Set stop loss very tight???
-                limitDistance_value = "1"
+                limitDistance_value = "2"
                 DIRECTION_TO_TRADE = "SELL"
                 DIRECTION_TO_CLOSE = "BUY"
                 DIRECTION_TO_COMPARE = 'offer'
                 DO_A_THING = True
                 #Be Extra Sure, Set stop loss very tight???
-                limitDistance_value = "1"
+                limitDistance_value = "2"
                 DIRECTION_TO_TRADE = "BUY"
                 DIRECTION_TO_CLOSE = "SELL"
                 DIRECTION_TO_COMPARE = 'bid'
