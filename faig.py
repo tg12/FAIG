@@ -22,13 +22,13 @@ from sklearn.linear_model import LinearRegression
 REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
 
 API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-API_KEY = '*******************************'
-data = {"identifier":"*******************************","password": "*******************************"}
+API_KEY = '*************************************'
+data = {"identifier":"*************************************","password": "*************************************"}
 
 # FOR REAL....
 # API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-# API_KEY = '*******************************'
-# data = {"identifier":"*******************************","password": "*******************************"}
+# API_KEY = '*************************************'
+# data = {"identifier":"*************************************","password": "*************************************"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -141,22 +141,22 @@ profitable_trade_count = 0
 
 print ("START TIME : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
 
-# def exponential_average(values, window):
-    # weights = np.exp(np.linspace(-1.,0.,window))
-    # weights /= weights.sum()
+def exponential_average(values, window):
+    weights = np.exp(np.linspace(-1.,0.,window))
+    weights /= weights.sum()
 
-    # a = np.convolve(values, weights) [:len(values)]
-    # a[:window]=a[window]
-    # return a
+    a = np.convolve(values, weights) [:len(values)]
+    a[:window]=a[window]
+    return a
 
-# def ExpMovingAverage(values, window):
-    # """ Numpy implementation of EMA
-    # """
-    # weights = np.exp(np.linspace(-1., 0., window))
-    # weights /= weights.sum()
-    # a =  np.convolve(values, weights, mode='full')[:len(values)]
-    # a[:window] = a[window]
-    # return a    
+def ExpMovingAverage(values, window):
+    """ Numpy implementation of EMA
+    """
+    weights = np.exp(np.linspace(-1., 0., window))
+    weights /= weights.sum()
+    a =  np.convolve(values, weights, mode='full')[:len(values)]
+    a[:window] = a[window]
+    return a    
     
 
 for times_round_loop in range(1, 9999):
@@ -552,24 +552,7 @@ for times_round_loop in range(1, 9999):
         Average_Range = [j-i for i, j in zip(y[:-1], y[1:])]
         print (np.mean(Average_Range))
         
-        #-------------------------------------------------------------------------------
-        #-------------------------------------------------------------------------------
-        #-------------------------------------------------------------------------------
-        #x Array is made up of pairs of Low prices and Volume, We can predict High price
-        #-------------------------------------------------------------------------------
-        #-------------------------------------------------------------------------------
-        #-------------------------------------------------------------------------------
-        #TESTING - GENERATE RANDOM NUMBER BETWEEN HIGH AND LOW VOL/PRICE FOR TESTING
-        # PREDICT_x = 0
-        # PREDICT_y = 0 
-        # PREDICT_x = random.uniform(float(low_price), float(high_price))
-        # PREDICT_y = random.uniform(min(volume_list), max(volume_list))
-        # print ("DEBUG PREDICTION FOR .... : " + str(PREDICT_x))
-        # print ("DEBUG PREDICTION FOR .... : " + str(PREDICT_y))
-        #-------------------------------------------------------------------------------
-        #-------------------------------------------------------------------------------
-        #-------------------------------------------------------------------------------
-        
+              
         base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/DAY/1'
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
         auth_r = requests.get(base_url, headers=authenticated_headers)
@@ -716,7 +699,7 @@ for times_round_loop in range(1, 9999):
         ################################################################
         
         
-        if profitable_trade_count < 20:
+        if profitable_trade_count < 6:
             if price_diff < 0 and score > predict_accuracy:
                 DIRECTION_TO_TRADE = "BUY"
                 DIRECTION_TO_CLOSE = "SELL"
@@ -729,7 +712,7 @@ for times_round_loop in range(1, 9999):
                 DIRECTION_TO_CLOSE = "BUY"
                 DIRECTION_TO_COMPARE = 'offer'
                 DO_A_THING = True
-        elif profitable_trade_count > 20: #20, Trades ... profit. Right??? 
+        elif profitable_trade_count > 6: #6, Trades ... profit. Right??? 
             profitable_trade_count = 0
             if price_diff < 0 and score > predict_accuracy:
                 #Be Extra Sure, Set stop loss very tight???
@@ -745,12 +728,7 @@ for times_round_loop in range(1, 9999):
                 DIRECTION_TO_CLOSE = "BUY"
                 DIRECTION_TO_COMPARE = 'offer'
                 DO_A_THING = True
-                #Be Extra Sure, Set stop loss very tight???
-                limitDistance_value = "2"
-                DIRECTION_TO_TRADE = "BUY"
-                DIRECTION_TO_CLOSE = "SELL"
-                DIRECTION_TO_COMPARE = 'bid'
-                DO_A_THING = True
+                
         
         print ("!!DEBUG TIME!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
         ################################################################
@@ -878,7 +856,7 @@ for times_round_loop in range(1, 9999):
                 print ("Deal Number : " + str(times_round_loop) + " Profit/Loss : " + str(PROFIT_OR_LOSS))
                 systime.sleep(2) #Don't be too keen to read price
                 
-            ARTIFICIAL_STOP_LOSS = int(max_range)
+            ARTIFICIAL_STOP_LOSS = int(max_range * size_value)
             ARTIFICIAL_STOP_LOSS = ARTIFICIAL_STOP_LOSS * -1 #Make Negative, DO NOT REMOVE!!
                       
             if PROFIT_OR_LOSS < ARTIFICIAL_STOP_LOSS:
