@@ -22,13 +22,13 @@ from sklearn.linear_model import LinearRegression
 REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
 
 API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-API_KEY = '*************************************'
-data = {"identifier":"*************************************","password": "*************************************"}
+API_KEY = '************************************'
+data = {"identifier":"************************************","password": "************************************"}
 
 # FOR REAL....
 # API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-# API_KEY = '*************************************'
-# data = {"identifier":"*************************************","password": "*************************************"}
+# API_KEY = '************************************'
+# data = {"identifier":"************************************","password": "************************************"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -108,7 +108,7 @@ epic_id = "CS.D.EURUSD.TODAY.IP" # - Very Profitable
 # stopDistance_value = "150"
 
 #UNIT TEST FOR OTHER STUFF
-limitDistance_value = "4"
+limitDistance_value = "4" #Initial Limit (Take Profit), Worked out later per trade
 orderType_value = "MARKET"
 size_value = "1"
 expiry_value = "DFB"
@@ -177,7 +177,7 @@ for times_round_loop in range(1, 9999):
         #THIS IS YOUR TRAINING DATA
         x = [] #This is Low Price, Volume
         y = [] #This is High Price
-		price_compare = "bid"
+        price_compare = "bid"
         
         base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE/30'
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
@@ -651,18 +651,22 @@ for times_round_loop in range(1, 9999):
                 TR_prices.append(TR)
                 
              
-        print ("TR RANGE FOR " + str(epic_id) + " IS " + str(int(np.mean(TR_prices))))
+        #print ("TR RANGE FOR " + str(epic_id) + " IS " + str(int(np.mean(TR_prices))))
         max_range = max(TR_prices)
-        print ("MAX RANGE FOR " + str(epic_id) + " IS " + str(int(max_range)))
         low_range = min(TR_prices)
-        print ("LOW RANGE FOR " + str(epic_id) + " IS " + str(int(low_range)))
+        print ("stopDistance_value for " + str(epic_id) + " will bet set at " + str(int(max_range)))
+        print ("limitDistance_value for " + str(epic_id) + " will bet set at " + str(int(low_range)))
+        #print ("MAX RANGE FOR " + str(epic_id) + " IS " + str(int(max_range)))
+        #print ("LOW RANGE FOR " + str(epic_id) + " IS " + str(int(low_range)))
+        
         
         #*************************************************
         #*************************************************
         #*************************************************
         
         limitDistance_value = int(low_range)
-        #stopDistance_value = int(max_range)
+        #stopDistance_value = int(max_range) 
+        #NOTE Sometimes IG Index want a massive stop loss for Guaranteed, Either don't use Guaranteed or "sell at market" with Artificial Stop loss
         
         #####################################################################
         #########################PREDICTION CODE#############################
@@ -786,9 +790,9 @@ for times_round_loop in range(1, 9999):
         
     # the trade will only break even once the price of the asset being traded has surpassed the sell price (for long trades) or buy price (for short trades). 
     
-	##########################################
-	##########READ IN INITIAL PROFIT##########
-	##########################################
+    ##########################################
+    ##########READ IN INITIAL PROFIT##########
+    ##########################################
         
     base_url = REAL_OR_NO_REAL + '/positions/'+ DEAL_ID
     auth_r = requests.get(base_url, headers=authenticated_headers)      
@@ -809,13 +813,13 @@ for times_round_loop in range(1, 9999):
         PROFIT_OR_LOSS = PROFIT_OR_LOSS * float(size_value)
         print ("Deal Number : " + str(times_round_loop) + " Profit/Loss : " + str(PROFIT_OR_LOSS))
      
-	##########################################
-	##########READ IN INITIAL PROFIT##########
-	##########################################
+    ##########################################
+    ##########READ IN INITIAL PROFIT##########
+    ##########################################
     
-	##########################################
-	#####KEEP READING IN FOR PROFIT###########
-	##########################################
+    ##########################################
+    #####KEEP READING IN FOR PROFIT###########
+    ##########################################
     try:
         #while PROFIT_OR_LOSS < float(limitDistance_value): 
         while PROFIT_OR_LOSS < float(limitDistance_value - 1): #Take something from the market, Before Take Profit.
@@ -856,8 +860,9 @@ for times_round_loop in range(1, 9999):
                 print ("Deal Number : " + str(times_round_loop) + " Profit/Loss : " + str(PROFIT_OR_LOSS))
                 systime.sleep(2) #Don't be too keen to read price
                 
-            ARTIFICIAL_STOP_LOSS = int(max_range * size_value)
+            ARTIFICIAL_STOP_LOSS = int(max_range) * int(size_value) * 2
             ARTIFICIAL_STOP_LOSS = ARTIFICIAL_STOP_LOSS * -1 #Make Negative, DO NOT REMOVE!!
+            
                       
             if PROFIT_OR_LOSS < ARTIFICIAL_STOP_LOSS:
                 #CLOSE TRADE/GTFO
@@ -881,7 +886,7 @@ for times_round_loop in range(1, 9999):
                 
                         
     except Exception as e:
-        #print(e) #Yeah, I know now. 
+        print(e) #Yeah, I know now. 
         print ("ERROR : ORDER MIGHT NOT BE OPEN FOR WHATEVER REASON")
         #WOAH CALM DOWN! WAIT .... STOP LOSS MIGHT HAVE BEEN HIT (Or take Profit)
         systime.sleep(random.randint(1, TIME_WAIT_MULTIPLIER))
