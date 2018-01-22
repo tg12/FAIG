@@ -14,7 +14,7 @@ import random
 import time as systime
 from statistics import mean, median
 import numpy as np
-# We are gonna use Scikit's LinearRegression model
+#Scikit's LinearRegression model
 from sklearn.linear_model import LinearRegression
 
 #Joke here
@@ -122,9 +122,9 @@ auth_r = requests.get(base_url, headers=authenticated_headers)
 d = json.loads(auth_r.text)
 
 # print ("-----------------DEBUG-----------------")
-# print(r.status_code)
-# print(r.reason)
-# print (r.text)
+# print(auth_r.status_code)
+# print(auth_r.reason)
+# print (auth_r.text)
 # print ("-----------------DEBUG-----------------")
 
 MARKET_ID = d['instrument']['marketId']
@@ -141,22 +141,22 @@ profitable_trade_count = 0
 
 print ("START TIME : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
 
-def exponential_average(values, window):
-    weights = np.exp(np.linspace(-1.,0.,window))
-    weights /= weights.sum()
+# def exponential_average(values, window):
+    # weights = np.exp(np.linspace(-1.,0.,window))
+    # weights /= weights.sum()
 
-    a = np.convolve(values, weights) [:len(values)]
-    a[:window]=a[window]
-    return a
+    # a = np.convolve(values, weights) [:len(values)]
+    # a[:window]=a[window]
+    # return a
 
-def ExpMovingAverage(values, window):
-    """ Numpy implementation of EMA
-    """
-    weights = np.exp(np.linspace(-1., 0., window))
-    weights /= weights.sum()
-    a =  np.convolve(values, weights, mode='full')[:len(values)]
-    a[:window] = a[window]
-    return a    
+# def ExpMovingAverage(values, window):
+    # """ Numpy implementation of EMA
+    # """
+    # weights = np.exp(np.linspace(-1., 0., window))
+    # weights /= weights.sum()
+    # a =  np.convolve(values, weights, mode='full')[:len(values)]
+    # a[:window] = a[window]
+    # return a    
     
 
 for times_round_loop in range(1, 9999):
@@ -177,6 +177,7 @@ for times_round_loop in range(1, 9999):
         #THIS IS YOUR TRAINING DATA
         x = [] #This is Low Price, Volume
         y = [] #This is High Price
+		price_compare = "bid"
         
         base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE/30'
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
@@ -189,7 +190,7 @@ for times_round_loop in range(1, 9999):
         # print (auth_r.text)
         # print ("-----------------DEBUG-----------------")
         
-        price_compare = "bid"
+        
 
         for i in d['prices']:
             tmp_list = []
@@ -220,7 +221,7 @@ for times_round_loop in range(1, 9999):
         # print (auth_r.text)
         # print ("-----------------DEBUG-----------------")
         
-        price_compare = "bid"
+        
 
         for i in d['prices']:
             tmp_list = []
@@ -251,7 +252,7 @@ for times_round_loop in range(1, 9999):
         # print (auth_r.text)
         # print ("-----------------DEBUG-----------------")
         
-        price_compare = "bid"
+        
 
         for i in d['prices']:
             tmp_list = []
@@ -283,7 +284,7 @@ for times_round_loop in range(1, 9999):
         # print (auth_r.text)
         # print ("-----------------DEBUG-----------------")
         
-        price_compare = "bid"
+        
 
         for i in d['prices']:
             tmp_list = []
@@ -314,7 +315,7 @@ for times_round_loop in range(1, 9999):
         # print (auth_r.text)
         # print ("-----------------DEBUG-----------------")
         
-        price_compare = "bid"
+        
 
         for i in d['prices']:
             tmp_list = []
@@ -345,7 +346,7 @@ for times_round_loop in range(1, 9999):
         # print (auth_r.text)
         # print ("-----------------DEBUG-----------------")
         
-        price_compare = "bid"
+        
 
         for i in d['prices']:
             tmp_list = []
@@ -376,7 +377,7 @@ for times_round_loop in range(1, 9999):
         # print (auth_r.text)
         # print ("-----------------DEBUG-----------------")
         
-        price_compare = "bid"
+        
 
         for i in d['prices']:
             tmp_list = []
@@ -407,7 +408,7 @@ for times_round_loop in range(1, 9999):
         # print (auth_r.text)
         # print ("-----------------DEBUG-----------------")
         
-        price_compare = "bid"
+        
 
         for i in d['prices']:
             tmp_list = []
@@ -439,7 +440,7 @@ for times_round_loop in range(1, 9999):
         # print (auth_r.text)
         # print ("-----------------DEBUG-----------------")
         
-        price_compare = "bid"
+        
 
         for i in d['prices']:
             tmp_list = []
@@ -470,7 +471,7 @@ for times_round_loop in range(1, 9999):
         # print (auth_r.text)
         # print ("-----------------DEBUG-----------------")
         
-        price_compare = "bid"
+        
 
         for i in d['prices']:
             tmp_list = []
@@ -501,7 +502,7 @@ for times_round_loop in range(1, 9999):
         # print (auth_r.text)
         # print ("-----------------DEBUG-----------------")
         
-        price_compare = "bid"
+        
 
         for i in d['prices']:
             tmp_list = []
@@ -532,7 +533,7 @@ for times_round_loop in range(1, 9999):
         # print (auth_r.text)
         # print ("-----------------DEBUG-----------------")
         
-        price_compare = "bid"
+        
 
         for i in d['prices']:
             tmp_list = []
@@ -636,7 +637,7 @@ for times_round_loop in range(1, 9999):
         # print (auth_r.text)
         # print ("-----------------DEBUG-----------------")
 
-        price_compare = "bid"
+        
         price_ranges = []
         closing_prices = []
         first_time_round_loop = True
@@ -715,7 +716,7 @@ for times_round_loop in range(1, 9999):
         ################################################################
         
         
-        if profitable_trade_count < 15:
+        if profitable_trade_count < 20:
             if price_diff < 0 and score > predict_accuracy:
                 DIRECTION_TO_TRADE = "BUY"
                 DIRECTION_TO_CLOSE = "SELL"
@@ -728,7 +729,7 @@ for times_round_loop in range(1, 9999):
                 DIRECTION_TO_CLOSE = "BUY"
                 DIRECTION_TO_COMPARE = 'offer'
                 DO_A_THING = True
-        elif profitable_trade_count > 15: #15, Trades ... profit. Right??? 
+        elif profitable_trade_count > 20: #20, Trades ... profit. Right??? 
             profitable_trade_count = 0
             if price_diff < 0 and score > predict_accuracy:
                 #Be Extra Sure, Set stop loss very tight???
@@ -806,7 +807,10 @@ for times_round_loop in range(1, 9999):
     print(d['reason'])
         
     # the trade will only break even once the price of the asset being traded has surpassed the sell price (for long trades) or buy price (for short trades). 
-    #READ IN INITIAL PROFIT
+    
+	##########################################
+	##########READ IN INITIAL PROFIT##########
+	##########################################
         
     base_url = REAL_OR_NO_REAL + '/positions/'+ DEAL_ID
     auth_r = requests.get(base_url, headers=authenticated_headers)      
@@ -826,9 +830,14 @@ for times_round_loop in range(1, 9999):
         PROFIT_OR_LOSS = float(d['market'][DIRECTION_TO_COMPARE] - float(d['position']['openLevel']))
         PROFIT_OR_LOSS = PROFIT_OR_LOSS * float(size_value)
         print ("Deal Number : " + str(times_round_loop) + " Profit/Loss : " + str(PROFIT_OR_LOSS))
-        
+     
+	##########################################
+	##########READ IN INITIAL PROFIT##########
+	##########################################
     
-    #KEEP READING IN FOR PROFIT
+	##########################################
+	#####KEEP READING IN FOR PROFIT###########
+	##########################################
     try:
         #while PROFIT_OR_LOSS < float(limitDistance_value): 
         while PROFIT_OR_LOSS < float(limitDistance_value - 1): #Take something from the market, Before Take Profit.
@@ -869,32 +878,32 @@ for times_round_loop in range(1, 9999):
                 print ("Deal Number : " + str(times_round_loop) + " Profit/Loss : " + str(PROFIT_OR_LOSS))
                 systime.sleep(2) #Don't be too keen to read price
                 
-            # ARTIFICIAL_STOP_LOSS = int(max_range)
-            # ARTIFICIAL_STOP_LOSS = ARTIFICIAL_STOP_LOSS * -1 #Make Negative, DO NOT REMOVE!!
+            ARTIFICIAL_STOP_LOSS = int(max_range)
+            ARTIFICIAL_STOP_LOSS = ARTIFICIAL_STOP_LOSS * -1 #Make Negative, DO NOT REMOVE!!
                       
-            # if PROFIT_OR_LOSS < ARTIFICIAL_STOP_LOSS:
-                # #CLOSE TRADE/GTFO
-                # print ("WARNING!! POTENTIAL DIRECTION CHANGE!!")
-                # SIZE = size_value
-                # ORDER_TYPE = orderType_value
-                # base_url = REAL_OR_NO_REAL + '/positions/otc'
-                # data = {"dealId":DEAL_ID,"direction":DIRECTION_TO_CLOSE,"size":SIZE,"orderType":ORDER_TYPE}
-                # #authenticated_headers_delete IS HACKY AF WORK AROUND!! AS PER .... https://labs.ig.com/node/36
-                # authenticated_headers_delete = {'Content-Type':'application/json; charset=utf-8',
-                # 'Accept':'application/json; charset=utf-8',
-                # 'X-IG-API-KEY':API_KEY,
-                # 'CST':CST_token,
-                # 'X-SECURITY-TOKEN':x_sec_token,
-                # '_method':"DELETE"}
-                # auth_r = requests.post(base_url, data=json.dumps(data), headers=authenticated_headers_delete) 
-                # #DEBUG
-                # print(r.status_code)
-                # print(r.reason)
-                # print (r.text)
-                # systime.sleep(random.randint(1, TIME_WAIT_MULTIPLIER)) #Obligatory Wait before doing next order
+            if PROFIT_OR_LOSS < ARTIFICIAL_STOP_LOSS:
+                #CLOSE TRADE/GTFO
+                print ("WARNING!! POTENTIAL DIRECTION CHANGE!!")
+                SIZE = size_value
+                ORDER_TYPE = orderType_value
+                base_url = REAL_OR_NO_REAL + '/positions/otc'
+                data = {"dealId":DEAL_ID,"direction":DIRECTION_TO_CLOSE,"size":SIZE,"orderType":ORDER_TYPE}
+                #authenticated_headers_delete IS HACKY AF WORK AROUND!! AS PER .... https://labs.ig.com/node/36
+                authenticated_headers_delete = {'Content-Type':'application/json; charset=utf-8',
+                'Accept':'application/json; charset=utf-8',
+                'X-IG-API-KEY':API_KEY,
+                'CST':CST_token,
+                'X-SECURITY-TOKEN':x_sec_token,
+                '_method':"DELETE"}
+                auth_r = requests.post(base_url, data=json.dumps(data), headers=authenticated_headers_delete) 
+                #DEBUG
+                print(auth_r.status_code)
+                print(auth_r.reason)
+                print (auth_r.text)
+                
                         
     except Exception as e:
-        print(e) #Yeah, I know now. 
+        #print(e) #Yeah, I know now. 
         print ("ERROR : ORDER MIGHT NOT BE OPEN FOR WHATEVER REASON")
         #WOAH CALM DOWN! WAIT .... STOP LOSS MIGHT HAVE BEEN HIT (Or take Profit)
         systime.sleep(random.randint(1, TIME_WAIT_MULTIPLIER))
