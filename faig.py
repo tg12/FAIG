@@ -22,13 +22,14 @@ from sklearn.linear_model import LinearRegression
 REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
 
 API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-API_KEY = '***********************************************************'
-data = {"identifier":"***********************************************************","password": "***********************************************************"}
+#API_KEY = '****************************' #<-------------Special IG Index API Key, Problem on 23rd Jan
+API_KEY = '****************************'
+data = {"identifier":"****************************","password": "****************************"}
 
 # FOR REAL....
 # API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-# API_KEY = '***********************************************************'
-# data = {"identifier":"***********************************************************","password": "***********************************************************"}
+# API_KEY = '****************************'
+# data = {"identifier":"****************************","password": "****************************"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -156,7 +157,12 @@ def ExpMovingAverage(values, window):
     weights /= weights.sum()
     a =  np.convolve(values, weights, mode='full')[:len(values)]
     a[:window] = a[window]
-    return a    
+    return a   
+
+def humanize_time(secs):
+    mins, secs = divmod(secs, 60)
+    hours, mins = divmod(mins, 60)
+    return '%02d:%02d:%02d' % (hours, mins, secs)   
     
 
 for times_round_loop in range(1, 9999):
@@ -166,6 +172,7 @@ for times_round_loop in range(1, 9999):
 #*******************************************************************
 #*******************************************************************
     DO_A_THING = False
+    Start_loop_time = time()
     while not DO_A_THING:
         print ("!!Internal Notes only - Top of Loop!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
         systime.sleep(random.randint(1, TIME_WAIT_MULTIPLIER))
@@ -716,7 +723,7 @@ for times_round_loop in range(1, 9999):
                 DIRECTION_TO_CLOSE = "BUY"
                 DIRECTION_TO_COMPARE = 'offer'
                 DO_A_THING = True
-        elif profitable_trade_count >= 20: #6, Trades ... profit. Right??? 
+        elif profitable_trade_count >= 20: #20, Trades ... profit. Right??? 
             profitable_trade_count = 0
             if price_diff < 0 and score > predict_accuracy:
                 #Be Extra Sure, Set stop loss very tight???
@@ -823,6 +830,25 @@ for times_round_loop in range(1, 9999):
     try:
         #while PROFIT_OR_LOSS < float(limitDistance_value): 
         while PROFIT_OR_LOSS < float(limitDistance_value - 1): #Take something from the market, Before Take Profit.
+            elapsed_time = round((time() - Start_loop_time), 1) 
+            print ("******************************")
+            print ("******************************")
+            print ("******************************")
+            print ("Order Time : " + str(humanize_time(elapsed_time)))
+            
+            
+            if elapsed_time > 3600:
+                print ("DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER AN HOUR")
+            if elapsed_time > 7200:
+                print ("DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 2 HOURS")
+            if elapsed_time > 10800:
+                print ("DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 3 HOURS")
+            if elapsed_time > 14400:
+                print ("DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 4 HOURS")
+            if elapsed_time > 18000:
+                print ("DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 5 HOURS")
+                
+            
             base_url = REAL_OR_NO_REAL + '/positions/'+ DEAL_ID
             auth_r = requests.get(base_url, headers=authenticated_headers)      
             d = json.loads(auth_r.text)
@@ -883,8 +909,9 @@ for times_round_loop in range(1, 9999):
                 print(auth_r.status_code)
                 print(auth_r.reason)
                 print (auth_r.text)
-				Prediction_Wait_Timer = 900 #5Mins
-				systime.sleep(Prediction_Wait_Timer)
+                print ("!!DEBUG TIME!! Direction Change Wait: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+                Prediction_Wait_Timer = 900 #5Mins
+                systime.sleep(Prediction_Wait_Timer)
                 
                         
     except Exception as e:
