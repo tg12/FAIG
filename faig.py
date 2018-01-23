@@ -22,13 +22,13 @@ from sklearn.linear_model import LinearRegression
 REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
 
 API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-API_KEY = '************************************'
-data = {"identifier":"************************************","password": "************************************"}
+API_KEY = '***********************************************************'
+data = {"identifier":"***********************************************************","password": "***********************************************************"}
 
 # FOR REAL....
 # API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-# API_KEY = '************************************'
-# data = {"identifier":"************************************","password": "************************************"}
+# API_KEY = '***********************************************************'
+# data = {"identifier":"***********************************************************","password": "***********************************************************"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -549,8 +549,8 @@ for times_round_loop in range(1, 9999):
             #y = High Prices
         
                 
-        Average_Range = [j-i for i, j in zip(y[:-1], y[1:])]
-        print (np.mean(Average_Range))
+        # Average_Range = [j-i for i, j in zip(y[:-1], y[1:])]
+        # print (np.mean(Average_Range))
         
               
         base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/DAY/1'
@@ -703,7 +703,7 @@ for times_round_loop in range(1, 9999):
         ################################################################
         
         
-        if profitable_trade_count < 6:
+        if profitable_trade_count < 20:
             if price_diff < 0 and score > predict_accuracy:
                 DIRECTION_TO_TRADE = "BUY"
                 DIRECTION_TO_CLOSE = "SELL"
@@ -716,7 +716,7 @@ for times_round_loop in range(1, 9999):
                 DIRECTION_TO_CLOSE = "BUY"
                 DIRECTION_TO_COMPARE = 'offer'
                 DO_A_THING = True
-        elif profitable_trade_count > 6: #6, Trades ... profit. Right??? 
+        elif profitable_trade_count >= 20: #6, Trades ... profit. Right??? 
             profitable_trade_count = 0
             if price_diff < 0 and score > predict_accuracy:
                 #Be Extra Sure, Set stop loss very tight???
@@ -834,7 +834,7 @@ for times_round_loop in range(1, 9999):
                     
                 #Cannot read from API, Wait and try again
                 #Give the Internet/IG 30s to sort it's shit out and try again
-                systime.sleep(30)
+                systime.sleep(random.randint(1, TIME_WAIT_MULTIPLIER))
                 print ("-----------------DEBUG-----------------")
                 print ("HTTP API ERROR!! Please check your Internet connection and Try again...")
                 print ("Check Ping and Latency between you and IG Index Servers")
@@ -860,7 +860,7 @@ for times_round_loop in range(1, 9999):
                 print ("Deal Number : " + str(times_round_loop) + " Profit/Loss : " + str(PROFIT_OR_LOSS))
                 systime.sleep(2) #Don't be too keen to read price
                 
-            ARTIFICIAL_STOP_LOSS = int(max_range) * int(size_value) * 2
+            ARTIFICIAL_STOP_LOSS = int(max_range) * int(size_value)
             ARTIFICIAL_STOP_LOSS = ARTIFICIAL_STOP_LOSS * -1 #Make Negative, DO NOT REMOVE!!
             
                       
@@ -883,6 +883,8 @@ for times_round_loop in range(1, 9999):
                 print(auth_r.status_code)
                 print(auth_r.reason)
                 print (auth_r.text)
+				Prediction_Wait_Timer = 900 #5Mins
+				systime.sleep(Prediction_Wait_Timer)
                 
                         
     except Exception as e:
