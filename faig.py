@@ -16,20 +16,22 @@ from statistics import mean, median
 import numpy as np
 #Scikit's LinearRegression model
 from sklearn.linear_model import LinearRegression
+##################################################
+import sys, os
 
 #Joke here
 #REAL_OR_NO_REAL = 'https://api.ig.com/gateway/deal'
 REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
 
 API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-API_KEY = '*********************************************' #<-------------Special IG Index API Key, Problem on 23rd Jan
-#API_KEY = '*********************************************'
-data = {"identifier":"*********************************************","password": "*********************************************"}
+API_KEY = '***************************************' #<-------------Special IG Index API Key, Problem on 23rd Jan
+#API_KEY = '***************************************'
+data = {"identifier":"***************************************","password": "******************************************************"}
 
 # FOR REAL....
 # API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-# API_KEY = '*********************************************'
-# data = {"identifier":"*********************************************","password": "*********************************************"}
+# API_KEY = '***************************************'
+# data = {"identifier":"***************************************","password": "***************************************"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -103,7 +105,6 @@ currencyCode_value = "GBP"
 forceOpen_value = True
 stopDistance_value = "250" #Initial Stop loss, Worked out later per trade
 
-
 #HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
 #HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
 #epic_id = "CS.D.BITCOIN.TODAY.IP" #Bitcoin
@@ -122,15 +123,6 @@ stopDistance_value = "250" #Initial Stop loss, Worked out later per trade
 #epic_id = "CS.D.EURUSD.TODAY.IP" # - Very Profitable 
 
 epic_ids = ["CS.D.USCGC.TODAY.IP", "CS.D.USCSI.TODAY.IP", "CS.D.GBPUSD.TODAY.IP", "CS.D.EURUSD.TODAY.IP"]
-low_price_list = []
-high_price_list = []
-close_price_list = []
-volume_list = []
-# Your input data, X and Y are lists (or Numpy Arrays)
-#THIS IS YOUR TRAINING DATA
-x = [] #This is Low Price, Volume
-y = [] #This is High Price
-price_compare = "bid"
 
 #*******************************************************************
 #*******************************************************************
@@ -174,6 +166,15 @@ for times_round_loop in range(1, 9999):
 #*******************************************************************
     DO_A_THING = False
     Start_loop_time = time()
+    low_price_list = []
+    high_price_list = []
+    close_price_list = []
+    volume_list = []
+    # Your input data, X and Y are lists (or Numpy Arrays)
+    #THIS IS YOUR TRAINING DATA
+    x = [] #This is Low Price, Volume
+    y = [] #This is High Price
+    price_compare = "bid"
     
     epic_id = random.choice(epic_ids)
     print("DEBUG : Random epic_id is : " + str(epic_id))
@@ -804,7 +805,7 @@ for times_round_loop in range(1, 9999):
     ##########################################
     try:
         #while PROFIT_OR_LOSS < float(limitDistance_value): 
-        while PROFIT_OR_LOSS < float(limitDistance_value)  - 1: #Take something from the market, Before Take Profit.
+        while PROFIT_OR_LOSS < float(limitDistance_value) - 1: #Take something from the market, Before Take Profit.
             elapsed_time = round((time() - Start_loop_time), 1) 
             print ("******************************")
             print ("******************************")
@@ -936,6 +937,9 @@ for times_round_loop in range(1, 9999):
                         
     except Exception as e:
         print(e) #Yeah, I know now. 
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
         print ("ERROR : ORDER MIGHT NOT BE OPEN FOR WHATEVER REASON")
         #WOAH CALM DOWN! WAIT .... STOP LOSS MIGHT HAVE BEEN HIT (Or take Profit)
         systime.sleep(random.randint(1, TIME_WAIT_MULTIPLIER))
