@@ -22,14 +22,14 @@ from sklearn.linear_model import LinearRegression
 REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
 
 API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-#API_KEY = '****************************' #<-------------Special IG Index API Key, Problem on 23rd Jan
-API_KEY = '****************************'
-data = {"identifier":"****************************","password": "****************************"}
+API_KEY = '*********************************************' #<-------------Special IG Index API Key, Problem on 23rd Jan
+#API_KEY = '*********************************************'
+data = {"identifier":"*********************************************","password": "*********************************************"}
 
 # FOR REAL....
 # API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-# API_KEY = '****************************'
-# data = {"identifier":"****************************","password": "****************************"}
+# API_KEY = '*********************************************'
+# data = {"identifier":"*********************************************","password": "*********************************************"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -82,21 +82,6 @@ auth_r = requests.put(base_url, data=json.dumps(data), headers=authenticated_hea
 ##########################END OF LOGIN CODE########################################
 ###################################################################################
 
-#HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
-#epic_id = "CS.D.BITCOIN.TODAY.IP" #Bitcoin
-#epic_id = "IX.D.SUNFUN.DAILY.IP" #Weekend Trading
-#epic_id = "CS.D.ETHUSD.TODAY.IP" #Ether
-#epic_id = "CS.D.BCHUSD.TODAY.IP" #Bitcoin Cash
-
-#LIVE TEST
-#epic_id = "CS.D.USCGC.TODAY.IP" #Gold - OK, Not Great
-#epic_id = "CS.D.USCSI.TODAY.IP" #Silver - NOT RECOMMENDED 
-#epic_id = "IX.D.FTSE.DAILY.IP" #FTSE 100 - Within Hours only, Profitable
-#epic_id = "IX.D.DOW.DAILY.IP" #Wall St - Definitely Profitable between half 6 and half 8 GMT
-#epic_id = "CS.D.GBPUSD.TODAY.IP" # - Very Profitable 
-epic_id = "CS.D.EURUSD.TODAY.IP" # - Very Profitable 
-
-
 # PROGRAMMABLE VALUES
 # UNIT TEST FOR CRYPTO'S
 # limitDistance_value = "1"
@@ -118,17 +103,34 @@ currencyCode_value = "GBP"
 forceOpen_value = True
 stopDistance_value = "250" #Initial Stop loss, Worked out later per trade
 
-base_url = REAL_OR_NO_REAL + '/markets/' + epic_id
-auth_r = requests.get(base_url, headers=authenticated_headers)
-d = json.loads(auth_r.text)
 
-# print ("-----------------DEBUG-----------------")
-# print(auth_r.status_code)
-# print(auth_r.reason)
-# print (auth_r.text)
-# print ("-----------------DEBUG-----------------")
+#HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
+#HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
+#epic_id = "CS.D.BITCOIN.TODAY.IP" #Bitcoin
+#epic_id = "IX.D.SUNFUN.DAILY.IP" #Weekend Trading
+#epic_id = "CS.D.ETHUSD.TODAY.IP" #Ether
+#epic_id = "CS.D.BCHUSD.TODAY.IP" #Bitcoin Cash
+#HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
+#HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
 
-MARKET_ID = d['instrument']['marketId']
+#LIVE TEST
+#epic_id = "CS.D.USCGC.TODAY.IP" #Gold - OK, Not Great
+#epic_id = "CS.D.USCSI.TODAY.IP" #Silver - NOT RECOMMENDED 
+#epic_id = "IX.D.FTSE.DAILY.IP" #FTSE 100 - Within Hours only, Profitable
+#epic_id = "IX.D.DOW.DAILY.IP" #Wall St - Definitely Profitable between half 6 and half 8 GMT
+#epic_id = "CS.D.GBPUSD.TODAY.IP" # - Very Profitable 
+#epic_id = "CS.D.EURUSD.TODAY.IP" # - Very Profitable 
+
+epic_ids = ["CS.D.USCGC.TODAY.IP", "CS.D.USCSI.TODAY.IP", "CS.D.GBPUSD.TODAY.IP", "CS.D.EURUSD.TODAY.IP"]
+low_price_list = []
+high_price_list = []
+close_price_list = []
+volume_list = []
+# Your input data, X and Y are lists (or Numpy Arrays)
+#THIS IS YOUR TRAINING DATA
+x = [] #This is Low Price, Volume
+y = [] #This is High Price
+price_compare = "bid"
 
 #*******************************************************************
 #*******************************************************************
@@ -139,7 +141,6 @@ TIME_WAIT_MULTIPLIER = 60
 #STOP_LOSS_MULTIPLIER = 4 #Not currently in use, 13th Jan
 predict_accuracy = 0.89
 profitable_trade_count = 0
-
 print ("START TIME : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
 
 def exponential_average(values, window):
@@ -173,19 +174,26 @@ for times_round_loop in range(1, 9999):
 #*******************************************************************
     DO_A_THING = False
     Start_loop_time = time()
+    
+    epic_id = random.choice(epic_ids)
+    print("DEBUG : Random epic_id is : " + str(epic_id))
+    base_url = REAL_OR_NO_REAL + '/markets/' + epic_id
+    auth_r = requests.get(base_url, headers=authenticated_headers)
+    d = json.loads(auth_r.text)
+
+    # print ("-----------------DEBUG-----------------")
+    # print(auth_r.status_code)
+    # print(auth_r.reason)
+    # print (auth_r.text)
+    # print ("-----------------DEBUG-----------------")
+
+    MARKET_ID = d['instrument']['marketId']
+    current_price = d['snapshot']['bid']
+    Price_Change_Day = d['snapshot']['netChange']
+    
     while not DO_A_THING:
         print ("!!Internal Notes only - Top of Loop!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-        systime.sleep(random.randint(1, TIME_WAIT_MULTIPLIER))
-        low_price_list = []
-        high_price_list = []
-        close_price_list = []
-        volume_list = []
-        # Your input data, X and Y are lists (or Numpy Arrays)
-        #THIS IS YOUR TRAINING DATA
-        x = [] #This is Low Price, Volume
-        y = [] #This is High Price
-        price_compare = "bid"
-        
+               
         base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE/30'
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
         auth_r = requests.get(base_url, headers=authenticated_headers)
@@ -196,9 +204,6 @@ for times_round_loop in range(1, 9999):
         # print(auth_r.reason)
         # print (auth_r.text)
         # print ("-----------------DEBUG-----------------")
-        
-        
-
         for i in d['prices']:
             tmp_list = []
             high_price = i['highPrice'][price_compare]
@@ -227,9 +232,7 @@ for times_round_loop in range(1, 9999):
         # print(auth_r.reason)
         # print (auth_r.text)
         # print ("-----------------DEBUG-----------------")
-        
-        
-
+      
         for i in d['prices']:
             tmp_list = []
             high_price = i['highPrice'][price_compare]
@@ -258,9 +261,7 @@ for times_round_loop in range(1, 9999):
         # print(auth_r.reason)
         # print (auth_r.text)
         # print ("-----------------DEBUG-----------------")
-        
-        
-
+     
         for i in d['prices']:
             tmp_list = []
             high_price = i['highPrice'][price_compare]
@@ -290,8 +291,7 @@ for times_round_loop in range(1, 9999):
         # print(auth_r.reason)
         # print (auth_r.text)
         # print ("-----------------DEBUG-----------------")
-        
-        
+  
 
         for i in d['prices']:
             tmp_list = []
@@ -321,9 +321,7 @@ for times_round_loop in range(1, 9999):
         # print(auth_r.reason)
         # print (auth_r.text)
         # print ("-----------------DEBUG-----------------")
-        
-        
-
+    
         for i in d['prices']:
             tmp_list = []
             high_price = i['highPrice'][price_compare]
@@ -415,8 +413,6 @@ for times_round_loop in range(1, 9999):
         # print (auth_r.text)
         # print ("-----------------DEBUG-----------------")
         
-        
-
         for i in d['prices']:
             tmp_list = []
             high_price = i['highPrice'][price_compare]
@@ -430,6 +426,52 @@ for times_round_loop in range(1, 9999):
             y.append(float(high_price))
             #y = High Prices
         
+        #Cut down on API Calls by using this again! 
+        #Cut down on API Calls by using this again! 
+        #Cut down on API Calls by using this again! 
+        
+        price_ranges = []
+        closing_prices = []
+        first_time_round_loop = True
+        TR_prices = []
+
+
+        for i in d['prices']:
+            if first_time_round_loop == True:
+                #First time round loop cannot get previous
+                closePrice = i['closePrice'][price_compare]
+                closing_prices.append(closePrice)
+                high_price = i['highPrice'][price_compare]
+                low_price = i['lowPrice'][price_compare]
+                price_range = float(high_price - closePrice)
+                price_ranges.append(price_range)
+                first_time_round_loop = False
+            else:
+                prev_close = closing_prices[-1]
+                ###############################
+                closePrice = i['closePrice'][price_compare]
+                closing_prices.append(closePrice)
+                high_price = i['highPrice'][price_compare]
+                low_price = i['lowPrice'][price_compare]
+                price_range = float(high_price - closePrice)
+                price_ranges.append(price_range)
+                TR = max(high_price-low_price, abs(high_price-prev_close), abs(low_price-prev_close))
+                #print (TR)
+                TR_prices.append(TR)
+                
+             
+        #print ("TR RANGE FOR " + str(epic_id) + " IS " + str(int(np.mean(TR_prices))))
+        max_range = max(TR_prices)
+        low_range = min(TR_prices)
+        print ("stopDistance_value for " + str(epic_id) + " will bet set at " + str(int(max_range)))
+        print ("limitDistance_value for " + str(epic_id) + " will bet set at " + str(int(low_range)))
+        #print ("MAX RANGE FOR " + str(epic_id) + " IS " + str(int(max_range)))
+        #print ("LOW RANGE FOR " + str(epic_id) + " IS " + str(int(low_range)))
+        
+        #Cut down on API Calls by using this again! 
+        #Cut down on API Calls by using this again! 
+        #Cut down on API Calls by using this again! 
+        #Cut down on API Calls by using this again! 
         
         ###################################################################################
         ###################################################################################
@@ -477,9 +519,7 @@ for times_round_loop in range(1, 9999):
         # print(auth_r.reason)
         # print (auth_r.text)
         # print ("-----------------DEBUG-----------------")
-        
-        
-
+  
         for i in d['prices']:
             tmp_list = []
             high_price = i['highPrice'][price_compare]
@@ -508,9 +548,7 @@ for times_round_loop in range(1, 9999):
         # print(auth_r.reason)
         # print (auth_r.text)
         # print ("-----------------DEBUG-----------------")
-        
-        
-
+    
         for i in d['prices']:
             tmp_list = []
             high_price = i['highPrice'][price_compare]
@@ -539,9 +577,7 @@ for times_round_loop in range(1, 9999):
         # print(auth_r.reason)
         # print (auth_r.text)
         # print ("-----------------DEBUG-----------------")
-        
-        
-
+     
         for i in d['prices']:
             tmp_list = []
             high_price = i['highPrice'][price_compare]
@@ -555,18 +591,21 @@ for times_round_loop in range(1, 9999):
             y.append(float(high_price))
             #y = High Prices
         
-                
-        # Average_Range = [j-i for i, j in zip(y[:-1], y[1:])]
-        # print (np.mean(Average_Range))
-        
-              
+     
         base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/DAY/1'
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
         auth_r = requests.get(base_url, headers=authenticated_headers)
         d = json.loads(auth_r.text)
+        
         #I only need this API call for real world values
         remaining_allowance = d['allowance']['remainingAllowance']
         
+        print ("-----------------DEBUG-----------------")
+        print ("Remaining API Calls left : " + str(remaining_allowance))
+        print ("-----------------DEBUG-----------------")
+        print ("-----------------DEBUG-----------------")
+        print ("Remaining API Calls left : " + str(remaining_allowance))
+        print ("-----------------DEBUG-----------------")
         print ("-----------------DEBUG-----------------")
         print ("Remaining API Calls left : " + str(remaining_allowance))
         print ("-----------------DEBUG-----------------")
@@ -609,99 +648,35 @@ for times_round_loop in range(1, 9999):
         print (score)
         print (predictions)
         print ("-----------------DEBUG-----------------")
-        
-        # ema = np.mean(exponential_average(y, 30))
-        # ema = np.mean(ExpMovingAverage(y, 30))
-        # print ("ema : " + str(ema))
-        
-        
-        #base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/DAY/20'
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/HOUR/24'
-        # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
-        auth_r = requests.get(base_url, headers=authenticated_headers)
-        d = json.loads(auth_r.text)
+       
+        #####################################################################
+        #########################PREDICTION CODE#############################
+        #########################PREDICTION CODE#############################
+        #########################PREDICTION CODE#############################
+        #########################PREDICTION CODE#############################
+        #########################PREDICTION CODE#############################
+        #####################################################################
 
+        #DO WE NEED THIS API CALL????
+        #DO WE NEED THIS API CALL????
+        #DO WE NEED THIS API CALL????
+        #DO WE NEED THIS API CALL????
+        #base_url = REAL_OR_NO_REAL + '/markets/' + epic_id
+        #auth_r = requests.get(base_url, headers=authenticated_headers)
+        #d = json.loads(auth_r.text)
         # print ("-----------------DEBUG-----------------")
         # print(auth_r.status_code)
         # print(auth_r.reason)
         # print (auth_r.text)
         # print ("-----------------DEBUG-----------------")
-
-        
-        price_ranges = []
-        closing_prices = []
-        first_time_round_loop = True
-        TR_prices = []
-
-
-        for i in d['prices']:
-            if first_time_round_loop == True:
-                #First time round loop cannot get previous
-                closePrice = i['closePrice'][price_compare]
-                closing_prices.append(closePrice)
-                high_price = i['highPrice'][price_compare]
-                low_price = i['lowPrice'][price_compare]
-                price_range = float(high_price - closePrice)
-                price_ranges.append(price_range)
-                first_time_round_loop = False
-            else:
-                prev_close = closing_prices[-1]
-                ###############################
-                closePrice = i['closePrice'][price_compare]
-                closing_prices.append(closePrice)
-                high_price = i['highPrice'][price_compare]
-                low_price = i['lowPrice'][price_compare]
-                price_range = float(high_price - closePrice)
-                price_ranges.append(price_range)
-                TR = max(high_price-low_price, abs(high_price-prev_close), abs(low_price-prev_close))
-                #print (TR)
-                TR_prices.append(TR)
-                
-             
-        #print ("TR RANGE FOR " + str(epic_id) + " IS " + str(int(np.mean(TR_prices))))
-        max_range = max(TR_prices)
-        low_range = min(TR_prices)
-        print ("stopDistance_value for " + str(epic_id) + " will bet set at " + str(int(max_range)))
-        print ("limitDistance_value for " + str(epic_id) + " will bet set at " + str(int(low_range)))
-        #print ("MAX RANGE FOR " + str(epic_id) + " IS " + str(int(max_range)))
-        #print ("LOW RANGE FOR " + str(epic_id) + " IS " + str(int(low_range)))
-        
-        
-        #*************************************************
-        #*************************************************
-        #*************************************************
-        
+            
+        price_diff = current_price - price_prediction
         limitDistance_value = int(low_range)
         #stopDistance_value = int(max_range) 
         #NOTE Sometimes IG Index want a massive stop loss for Guaranteed, Either don't use Guaranteed or "sell at market" with Artificial Stop loss
-        
-        #####################################################################
-        #########################PREDICTION CODE#############################
-        #########################PREDICTION CODE#############################
-        #########################PREDICTION CODE#############################
-        #########################PREDICTION CODE#############################
-        #########################PREDICTION CODE#############################
-        #####################################################################
-
-
-        base_url = REAL_OR_NO_REAL + '/markets/' + epic_id
-        auth_r = requests.get(base_url, headers=authenticated_headers)
-        d = json.loads(auth_r.text)
-        # print ("-----------------DEBUG-----------------")
-        # print(auth_r.status_code)
-        # print(auth_r.reason)
-        # print (auth_r.text)
-        # print ("-----------------DEBUG-----------------")
-        current_price = d['snapshot']['bid']
-        Price_Change_Day = d['snapshot']['netChange']
-        price_diff = current_price - price_prediction
-   
-        print ("STOP LOSS DISTANCE WILL BE SET AT : " + str(stopDistance_value))
-        print ("Price Difference Away (Point's) : " + str(price_diff))
-        #print ("ExpMovingAverage is  : " + str(ema))
         #MUST NOTE :- IF THIS PRICE IS - THEN BUY!! i.e NOT HIT TARGET YET, CONVERSELY IF THIS PRICE IS POSITIVE IT IS ALREADY ABOVE SO SELL!!!
-         
-        
+        print ("STOP LOSS DISTANCE WILL BE SET AT : " + str(stopDistance_value))
+        print ("Price Difference Away (Point's) : " + str(price_diff))        
         ################################################################
         #########################ORDER CODE#############################
         #########################ORDER CODE#############################
@@ -835,20 +810,7 @@ for times_round_loop in range(1, 9999):
             print ("******************************")
             print ("******************************")
             print ("Order Time : " + str(humanize_time(elapsed_time)))
-            
-            
-            if elapsed_time > 3600:
-                print ("DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER AN HOUR")
-            if elapsed_time > 7200:
-                print ("DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 2 HOURS")
-            if elapsed_time > 10800:
-                print ("DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 3 HOURS")
-            if elapsed_time > 14400:
-                print ("DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 4 HOURS")
-            if elapsed_time > 18000:
-                print ("DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 5 HOURS")
-                
-            
+      
             base_url = REAL_OR_NO_REAL + '/positions/'+ DEAL_ID
             auth_r = requests.get(base_url, headers=authenticated_headers)      
             d = json.loads(auth_r.text)
@@ -888,8 +850,7 @@ for times_round_loop in range(1, 9999):
                 
             ARTIFICIAL_STOP_LOSS = int(max_range) * int(size_value)
             ARTIFICIAL_STOP_LOSS = ARTIFICIAL_STOP_LOSS * -1 #Make Negative, DO NOT REMOVE!!
-            
-                      
+               
             if PROFIT_OR_LOSS < ARTIFICIAL_STOP_LOSS:
                 #CLOSE TRADE/GTFO
                 print ("WARNING!! POTENTIAL DIRECTION CHANGE!!")
@@ -912,6 +873,65 @@ for times_round_loop in range(1, 9999):
                 print ("!!DEBUG TIME!! Direction Change Wait: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
                 Prediction_Wait_Timer = 900 #5Mins
                 systime.sleep(Prediction_Wait_Timer)
+                
+            if elapsed_time > 3600:
+                print ("DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER AN HOUR")
+                if float (PROFIT_OR_LOSS) > 0:
+                    print ("TRADE OPEN OVER AN HOUR AND IN PROFIT")
+                    SIZE = size_value
+                    ORDER_TYPE = orderType_value
+                    base_url = REAL_OR_NO_REAL + '/positions/otc'
+                    data = {"dealId":DEAL_ID,"direction":DIRECTION_TO_CLOSE,"size":SIZE,"orderType":ORDER_TYPE}
+                    #authenticated_headers_delete IS HACKY AF WORK AROUND!! AS PER .... https://labs.ig.com/node/36
+                    authenticated_headers_delete = {'Content-Type':'application/json; charset=utf-8',
+                    'Accept':'application/json; charset=utf-8',
+                    'X-IG-API-KEY':API_KEY,
+                    'CST':CST_token,
+                    'X-SECURITY-TOKEN':x_sec_token,
+                    '_method':"DELETE"}
+                    auth_r = requests.post(base_url, data=json.dumps(data), headers=authenticated_headers_delete) 
+                    #DEBUG
+                    print(auth_r.status_code)
+                    print(auth_r.reason)
+                    print (auth_r.text)
+                    print ("DEBUG : OVER AN HOUR AND IN PROFIT :- CLOSED")
+                    
+            elif elapsed_time > 7200:
+                print ("DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 2 HOURS")
+                if float (PROFIT_OR_LOSS) > 0:
+                    print ("DEBUG : TRADE OPEN OVER TWO HOURS AND IN PROFIT")
+                    SIZE = size_value
+                    ORDER_TYPE = orderType_value
+                    base_url = REAL_OR_NO_REAL + '/positions/otc'
+                    data = {"dealId":DEAL_ID,"direction":DIRECTION_TO_CLOSE,"size":SIZE,"orderType":ORDER_TYPE}
+                    #authenticated_headers_delete IS HACKY AF WORK AROUND!! AS PER .... https://labs.ig.com/node/36
+                    authenticated_headers_delete = {'Content-Type':'application/json; charset=utf-8',
+                    'Accept':'application/json; charset=utf-8',
+                    'X-IG-API-KEY':API_KEY,
+                    'CST':CST_token,
+                    'X-SECURITY-TOKEN':x_sec_token,
+                    '_method':"DELETE"}
+                    auth_r = requests.post(base_url, data=json.dumps(data), headers=authenticated_headers_delete) 
+                    #DEBUG
+                    print(auth_r.status_code)
+                    print(auth_r.reason)
+                    print (auth_r.text)
+                    print ("DEBUG : TWO HOURS IN PROFIT :- CLOSED")
+                    
+            elif elapsed_time > 10800:
+                print ("DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 3 HOURS")
+                if float (PROFIT_OR_LOSS) > 0:
+                    print ("DEBUG : TRADE OPEN OVER THREE HOURS AND IN PROFIT")
+                    
+            elif elapsed_time > 14400:
+                print ("DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 4 HOURS")
+                if float (PROFIT_OR_LOSS) > 0:
+                    print ("DEBUG : TRADE OPEN OVER FOUR HOURS AND IN PROFIT")
+                    
+            elif elapsed_time > 18000:
+                print ("DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 5 HOURS")
+                if float (PROFIT_OR_LOSS) > 0:
+                    print ("DEBUG : TRADE OPEN OVER FIVE HOURS AND IN PROFIT")
                 
                         
     except Exception as e:
