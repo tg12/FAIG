@@ -24,14 +24,14 @@ import sys, os
 REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
 
 API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-API_KEY = '***************************************' #<-------------Special IG Index API Key, Problem on 23rd Jan
-#API_KEY = '***************************************'
-data = {"identifier":"***************************************","password": "******************************************************"}
+API_KEY = '******************' #<-------------Special IG Index API Key, Problem on 23rd Jan
+#API_KEY = '******************'
+data = {"identifier":"******************","password": "******************"}
 
 # FOR REAL....
 # API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-# API_KEY = '***************************************'
-# data = {"identifier":"***************************************","password": "***************************************"}
+# API_KEY = '******************'
+# data = {"identifier":"******************","password": "******************"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -122,7 +122,7 @@ stopDistance_value = "250" #Initial Stop loss, Worked out later per trade
 #epic_id = "CS.D.GBPUSD.TODAY.IP" # - Very Profitable 
 #epic_id = "CS.D.EURUSD.TODAY.IP" # - Very Profitable 
 
-epic_ids = ["CS.D.USCGC.TODAY.IP", "CS.D.USCSI.TODAY.IP", "CS.D.GBPUSD.TODAY.IP", "CS.D.EURUSD.TODAY.IP"]
+epic_ids = ["CS.D.GBPUSD.TODAY.IP", "CS.D.EURUSD.TODAY.IP"]
 
 #*******************************************************************
 #*******************************************************************
@@ -875,10 +875,10 @@ for times_round_loop in range(1, 9999):
                 Prediction_Wait_Timer = 900 #5Mins
                 systime.sleep(Prediction_Wait_Timer)
                 
-            if elapsed_time > 3600:
-                print ("DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER AN HOUR")
+            if elapsed_time > 7200:
+                print ("DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 2 HOURS")
                 if float (PROFIT_OR_LOSS) > 0:
-                    print ("TRADE OPEN OVER AN HOUR AND IN PROFIT")
+                    print ("TRADE OPEN OVER 2 HOURS AND IN PROFIT")
                     SIZE = size_value
                     ORDER_TYPE = orderType_value
                     base_url = REAL_OR_NO_REAL + '/positions/otc'
@@ -895,9 +895,9 @@ for times_round_loop in range(1, 9999):
                     print(auth_r.status_code)
                     print(auth_r.reason)
                     print (auth_r.text)
-                    print ("DEBUG : OVER AN HOUR AND IN PROFIT :- CLOSED")
+                    print ("DEBUG : 2 HOURS AND IN PROFIT :- CLOSED")
                     
-            elif elapsed_time > 7200:
+            elif elapsed_time > 7201:
                 print ("DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 2 HOURS")
                 if float (PROFIT_OR_LOSS) > 0:
                     print ("DEBUG : TRADE OPEN OVER TWO HOURS AND IN PROFIT")
