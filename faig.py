@@ -804,7 +804,7 @@ for times_round_loop in range(1, 9999):
     ##########################################
     try:
         #while PROFIT_OR_LOSS < float(limitDistance_value): 
-        while PROFIT_OR_LOSS < float(limitDistance_value - 1): #Take something from the market, Before Take Profit.
+        while PROFIT_OR_LOSS < float(limitDistance_value)  - 1: #Take something from the market, Before Take Profit.
             elapsed_time = round((time() - Start_loop_time), 1) 
             print ("******************************")
             print ("******************************")
