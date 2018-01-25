@@ -24,14 +24,14 @@ import sys, os
 REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
 
 API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-API_KEY = '******************' #<-------------Special IG Index API Key, Problem on 23rd Jan
-#API_KEY = '******************'
-data = {"identifier":"******************","password": "******************"}
+API_KEY = '*********************************' #<-------------Special IG Index API Key, Problem on 23rd Jan
+#API_KEY = '*********************************'
+data = {"identifier":"*********************************","password": "*********************************"}
 
 # FOR REAL....
 # API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-# API_KEY = '******************'
-# data = {"identifier":"******************","password": "******************"}
+# API_KEY = '*********************************'
+# data = {"identifier":"*********************************","password": "*********************************"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -122,7 +122,7 @@ stopDistance_value = "250" #Initial Stop loss, Worked out later per trade
 #epic_id = "CS.D.GBPUSD.TODAY.IP" # - Very Profitable 
 #epic_id = "CS.D.EURUSD.TODAY.IP" # - Very Profitable 
 
-epic_ids = ["CS.D.GBPUSD.TODAY.IP", "CS.D.EURUSD.TODAY.IP"]
+epic_ids = ["CS.D.GBPUSD.TODAY.IP", "CS.D.EURUSD.TODAY.IP", "IX.D.FTSE.DAILY.IP", "CS.D.USCGC.TODAY.IP", "CS.D.USCSI.TODAY.IP"]
 
 #*******************************************************************
 #*******************************************************************
@@ -175,27 +175,83 @@ for times_round_loop in range(1, 9999):
     x = [] #This is Low Price, Volume
     y = [] #This is High Price
     price_compare = "bid"
-    
-    epic_id = random.choice(epic_ids)
-    print("DEBUG : Random epic_id is : " + str(epic_id))
-    base_url = REAL_OR_NO_REAL + '/markets/' + epic_id
-    auth_r = requests.get(base_url, headers=authenticated_headers)
-    d = json.loads(auth_r.text)
+    Price_Change_Day_percent = 0
+    Price_Change_OK = False
+      
+       
+    while not Price_Change_OK:
+    #If "big" percent increase, I'm not interested today. Thanks
+        epic_id = random.choice(epic_ids)
+        print("DEBUG : Random epic_id is : " + str(epic_id))
+        base_url = REAL_OR_NO_REAL + '/markets/' + epic_id
+        auth_r = requests.get(base_url, headers=authenticated_headers)
+        d = json.loads(auth_r.text)
 
-    # print ("-----------------DEBUG-----------------")
-    # print(auth_r.status_code)
-    # print(auth_r.reason)
-    # print (auth_r.text)
-    # print ("-----------------DEBUG-----------------")
+        # print ("-----------------DEBUG-----------------")
+        # print(auth_r.status_code)
+        # print(auth_r.reason)
+        # print (auth_r.text)
+        # print ("-----------------DEBUG-----------------")
 
-    MARKET_ID = d['instrument']['marketId']
-    current_price = d['snapshot']['bid']
-    Price_Change_Day = d['snapshot']['netChange']
+        MARKET_ID = d['instrument']['marketId']
+        current_price = d['snapshot']['bid']
+        Price_Change_Day = d['snapshot']['netChange']
+        Price_Change_Day_percent = d['snapshot']['percentageChange'] 
+        if Price_Change_Day_percent < 0.5 and Price_Change_Day_percent > -0.5:
+            print ("Price Change Percentage on day is " + str(Price_Change_Day_percent))
+            Price_Change_OK = True
     
+
     while not DO_A_THING:
         print ("!!Internal Notes only - Top of Loop!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+        
+        ############################################################
+        ############################################################
+        ############################################################
+        ############################################################
                
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE/30'
+        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/DAY/30'
+        # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
+        auth_r = requests.get(base_url, headers=authenticated_headers)
+        d = json.loads(auth_r.text)
+        
+        # print ("-----------------DEBUG-----------------")
+        # print(auth_r.status_code)
+        # print(auth_r.reason)
+        # print (auth_r.text)
+        # print ("-----------------DEBUG-----------------")
+        day_moving_avg_30 = []
+        
+     
+        for i in d['prices']:
+            tmp_list = []
+            high_price = i['highPrice'][price_compare]
+            low_price = i['lowPrice'][price_compare]
+            open_price = i['openPrice'][price_compare]
+            close_price = i['closePrice'][price_compare]
+            volume = i['lastTradedVolume']
+            #---------------------------------
+            tmp_list.append(float(low_price))
+            tmp_list.append(float(volume))
+            x.append(tmp_list)
+            #x is Low Price and Volume
+            y.append(float(high_price))
+            #y = High Prices
+            price_change_on_day = close_price - open_price
+            #print ("DEBUG price_change_day : " + str(price_change_on_day))
+            day_moving_avg_30.append(float(price_change_on_day))
+            
+        avg_price_movement_day = np.mean(day_moving_avg_30)
+        # print ("-----------------DEBUG-----------------")
+        # print ("DEBUG average movement over last 30 days : " + str(avg_price_movement_day)) 
+        # print ("-----------------DEBUG-----------------")
+        
+        ############################################################
+        ############################################################
+        ############################################################
+        ############################################################
+        
+        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/HOUR_4/30'
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
         auth_r = requests.get(base_url, headers=authenticated_headers)
         d = json.loads(auth_r.text)
@@ -223,7 +279,7 @@ for times_round_loop in range(1, 9999):
         ###################################################################################
         ###################################################################################
         
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE_2/30'
+        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/HOUR_3/30'
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
         auth_r = requests.get(base_url, headers=authenticated_headers)
         d = json.loads(auth_r.text)
@@ -252,7 +308,7 @@ for times_round_loop in range(1, 9999):
         ###################################################################################
         ###################################################################################
         
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE_3/30'
+        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/HOUR_2/30'
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
         auth_r = requests.get(base_url, headers=authenticated_headers)
         d = json.loads(auth_r.text)
@@ -276,127 +332,6 @@ for times_round_loop in range(1, 9999):
             y.append(float(high_price))
             #y = High Prices
         
-
-        ###################################################################################
-        ###################################################################################
-        ###################################################################################
-        ###################################################################################
-        
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE_5/30'
-        # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
-        auth_r = requests.get(base_url, headers=authenticated_headers)
-        d = json.loads(auth_r.text)
-        
-        # print ("-----------------DEBUG-----------------")
-        # print(auth_r.status_code)
-        # print(auth_r.reason)
-        # print (auth_r.text)
-        # print ("-----------------DEBUG-----------------")
-  
-
-        for i in d['prices']:
-            tmp_list = []
-            high_price = i['highPrice'][price_compare]
-            low_price = i['lowPrice'][price_compare]
-            volume = i['lastTradedVolume']
-            #---------------------------------
-            tmp_list.append(float(low_price))
-            tmp_list.append(float(volume))
-            x.append(tmp_list)
-            #x is Low Price and Volume
-            y.append(float(high_price))
-            #y = High Prices
-
-        ###################################################################################
-        ###################################################################################
-        ###################################################################################
-        ###################################################################################
-        
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE_10/30'
-        # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
-        auth_r = requests.get(base_url, headers=authenticated_headers)
-        d = json.loads(auth_r.text)
-        
-        # print ("-----------------DEBUG-----------------")
-        # print(auth_r.status_code)
-        # print(auth_r.reason)
-        # print (auth_r.text)
-        # print ("-----------------DEBUG-----------------")
-    
-        for i in d['prices']:
-            tmp_list = []
-            high_price = i['highPrice'][price_compare]
-            low_price = i['lowPrice'][price_compare]
-            volume = i['lastTradedVolume']
-            #---------------------------------
-            tmp_list.append(float(low_price))
-            tmp_list.append(float(volume))
-            x.append(tmp_list)
-            #x is Low Price and Volume
-            y.append(float(high_price))
-            #y = High Prices
-        
-        ###################################################################################
-        ###################################################################################
-        ###################################################################################
-        ###################################################################################
-        
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE_15/30'
-        # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
-        auth_r = requests.get(base_url, headers=authenticated_headers)
-        d = json.loads(auth_r.text)
-        
-        # print ("-----------------DEBUG-----------------")
-        # print(auth_r.status_code)
-        # print(auth_r.reason)
-        # print (auth_r.text)
-        # print ("-----------------DEBUG-----------------")
-        
-        
-
-        for i in d['prices']:
-            tmp_list = []
-            high_price = i['highPrice'][price_compare]
-            low_price = i['lowPrice'][price_compare]
-            volume = i['lastTradedVolume']
-            #---------------------------------
-            tmp_list.append(float(low_price))
-            tmp_list.append(float(volume))
-            x.append(tmp_list)
-            #x is Low Price and Volume
-            y.append(float(high_price))
-            #y = High Prices
-        
-        ###################################################################################
-        ###################################################################################
-        ###################################################################################
-        ###################################################################################
-        
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE_30/30'
-        # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
-        auth_r = requests.get(base_url, headers=authenticated_headers)
-        d = json.loads(auth_r.text)
-        
-        # print ("-----------------DEBUG-----------------")
-        # print(auth_r.status_code)
-        # print(auth_r.reason)
-        # print (auth_r.text)
-        # print ("-----------------DEBUG-----------------")
-        
-        
-
-        for i in d['prices']:
-            tmp_list = []
-            high_price = i['highPrice'][price_compare]
-            low_price = i['lowPrice'][price_compare]
-            volume = i['lastTradedVolume']
-            #---------------------------------
-            tmp_list.append(float(low_price))
-            tmp_list.append(float(volume))
-            x.append(tmp_list)
-            #x is Low Price and Volume
-            y.append(float(high_price))
-            #y = High Prices
 
         ###################################################################################
         ###################################################################################
@@ -479,7 +414,123 @@ for times_round_loop in range(1, 9999):
         ###################################################################################
         ###################################################################################
         
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/HOUR_2/30'
+        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE_30/30'
+        # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
+        auth_r = requests.get(base_url, headers=authenticated_headers)
+        d = json.loads(auth_r.text)
+        
+        # print ("-----------------DEBUG-----------------")
+        # print(auth_r.status_code)
+        # print(auth_r.reason)
+        # print (auth_r.text)
+        # print ("-----------------DEBUG-----------------")
+  
+
+        for i in d['prices']:
+            tmp_list = []
+            high_price = i['highPrice'][price_compare]
+            low_price = i['lowPrice'][price_compare]
+            volume = i['lastTradedVolume']
+            #---------------------------------
+            tmp_list.append(float(low_price))
+            tmp_list.append(float(volume))
+            x.append(tmp_list)
+            #x is Low Price and Volume
+            y.append(float(high_price))
+            #y = High Prices
+
+        ###################################################################################
+        ###################################################################################
+        ###################################################################################
+        ###################################################################################
+        
+        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE_15/30'
+        # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
+        auth_r = requests.get(base_url, headers=authenticated_headers)
+        d = json.loads(auth_r.text)
+        
+        # print ("-----------------DEBUG-----------------")
+        # print(auth_r.status_code)
+        # print(auth_r.reason)
+        # print (auth_r.text)
+        # print ("-----------------DEBUG-----------------")
+    
+        for i in d['prices']:
+            tmp_list = []
+            high_price = i['highPrice'][price_compare]
+            low_price = i['lowPrice'][price_compare]
+            volume = i['lastTradedVolume']
+            #---------------------------------
+            tmp_list.append(float(low_price))
+            tmp_list.append(float(volume))
+            x.append(tmp_list)
+            #x is Low Price and Volume
+            y.append(float(high_price))
+            #y = High Prices
+        
+        ###################################################################################
+        ###################################################################################
+        ###################################################################################
+        ###################################################################################
+        
+        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE_10/30'
+        # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
+        auth_r = requests.get(base_url, headers=authenticated_headers)
+        d = json.loads(auth_r.text)
+        
+        # print ("-----------------DEBUG-----------------")
+        # print(auth_r.status_code)
+        # print(auth_r.reason)
+        # print (auth_r.text)
+        # print ("-----------------DEBUG-----------------")
+     
+        for i in d['prices']:
+            tmp_list = []
+            high_price = i['highPrice'][price_compare]
+            low_price = i['lowPrice'][price_compare]
+            volume = i['lastTradedVolume']
+            #---------------------------------
+            tmp_list.append(float(low_price))
+            tmp_list.append(float(volume))
+            x.append(tmp_list)
+            #x is Low Price and Volume
+            y.append(float(high_price))
+            #y = High Prices
+        
+        ###################################################################################
+        ###################################################################################
+        ###################################################################################
+        ###################################################################################
+        
+        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE_5/30'
+        # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
+        auth_r = requests.get(base_url, headers=authenticated_headers)
+        d = json.loads(auth_r.text)
+        
+        # print ("-----------------DEBUG-----------------")
+        # print(auth_r.status_code)
+        # print(auth_r.reason)
+        # print (auth_r.text)
+        # print ("-----------------DEBUG-----------------")
+        
+        
+
+        for i in d['prices']:
+            tmp_list = []
+            high_price = i['highPrice'][price_compare]
+            low_price = i['lowPrice'][price_compare]
+            volume = i['lastTradedVolume']
+            #---------------------------------
+            tmp_list.append(float(low_price))
+            tmp_list.append(float(volume))
+            x.append(tmp_list)
+            #x is Low Price and Volume
+            y.append(float(high_price))
+            #y = High Prices
+
+        
+        
+        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE_3/30'
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
         auth_r = requests.get(base_url, headers=authenticated_headers)
         d = json.loads(auth_r.text)
@@ -510,7 +561,7 @@ for times_round_loop in range(1, 9999):
         ###################################################################################
         ###################################################################################
         
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/HOUR_3/30'
+        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE_2/30'
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
         auth_r = requests.get(base_url, headers=authenticated_headers)
         d = json.loads(auth_r.text)
@@ -539,7 +590,7 @@ for times_round_loop in range(1, 9999):
         ###################################################################################
         ###################################################################################
         
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/HOUR_4/30'
+        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE/30'
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
         auth_r = requests.get(base_url, headers=authenticated_headers)
         d = json.loads(auth_r.text)
@@ -568,29 +619,6 @@ for times_round_loop in range(1, 9999):
         ###################################################################################
         ###################################################################################
         
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/DAY/30'
-        # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
-        auth_r = requests.get(base_url, headers=authenticated_headers)
-        d = json.loads(auth_r.text)
-        
-        # print ("-----------------DEBUG-----------------")
-        # print(auth_r.status_code)
-        # print(auth_r.reason)
-        # print (auth_r.text)
-        # print ("-----------------DEBUG-----------------")
-     
-        for i in d['prices']:
-            tmp_list = []
-            high_price = i['highPrice'][price_compare]
-            low_price = i['lowPrice'][price_compare]
-            volume = i['lastTradedVolume']
-            #---------------------------------
-            tmp_list.append(float(low_price))
-            tmp_list.append(float(volume))
-            x.append(tmp_list)
-            #x is Low Price and Volume
-            y.append(float(high_price))
-            #y = High Prices
         
      
         base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/DAY/1'
@@ -600,15 +628,18 @@ for times_round_loop in range(1, 9999):
         
         #I only need this API call for real world values
         remaining_allowance = d['allowance']['remainingAllowance']
+        reset_time = humanize_time(int(d['allowance']['allowanceExpiry']))
+        total_allowance = humanize_time(int(d['allowance']['totalAllowance']))
+                
+        print ("-----------------DEBUG-----------------")
+        print ("Remaining API Calls left : " + str(remaining_allowance))
+        print ("Time to API Key reset : " + str(reset_time))
+        print ("-----------------DEBUG-----------------")
         
         print ("-----------------DEBUG-----------------")
         print ("Remaining API Calls left : " + str(remaining_allowance))
+        print ("Time to API Key reset : " + str(reset_time))
         print ("-----------------DEBUG-----------------")
-        print ("-----------------DEBUG-----------------")
-        print ("Remaining API Calls left : " + str(remaining_allowance))
-        print ("-----------------DEBUG-----------------")
-        print ("-----------------DEBUG-----------------")
-        print ("Remaining API Calls left : " + str(remaining_allowance))
         print ("-----------------DEBUG-----------------")
         
         # print ("-----------------DEBUG-----------------")
@@ -621,7 +652,12 @@ for times_round_loop in range(1, 9999):
             low_price = i['lowPrice'][price_compare]
             volume = i['lastTradedVolume']
         
+        # print ("DEBUG : avg_price_movement_day : " + str(avg_price_movement_day))
+        # print ("DEBUG : Price_Change_Day : " + str(Price_Change_Day))
         
+        # if float(avg_price_movement_day) < float(Price_Change_Day):
+            # break
+            
         #####################################################################
         #########################PREDICTION CODE#############################
         #########################PREDICTION CODE#############################
@@ -632,6 +668,9 @@ for times_round_loop in range(1, 9999):
         
         x = np.asarray(x)
         y = np.asarray(y)
+        #DO NOT USE
+        #np.random.shuffle(x)
+        #np.random.shuffle(y)
         # Initialize the model then train it on the data
         genius_regression_model = LinearRegression()
         genius_regression_model.fit(x,y)
@@ -872,13 +911,13 @@ for times_round_loop in range(1, 9999):
                 print(auth_r.reason)
                 print (auth_r.text)
                 print ("!!DEBUG TIME!! Direction Change Wait: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-                Prediction_Wait_Timer = 900 #5Mins
+                Prediction_Wait_Timer = 900 #15Mins
                 systime.sleep(Prediction_Wait_Timer)
                 
-            if elapsed_time > 7200:
-                print ("DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 2 HOURS")
+            if elapsed_time > 4800:
+                print ("DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER TIME")
                 if float (PROFIT_OR_LOSS) > 0:
-                    print ("TRADE OPEN OVER 2 HOURS AND IN PROFIT")
+                    print ("TRADE OPEN OVER TIME AND IN PROFIT")
                     SIZE = size_value
                     ORDER_TYPE = orderType_value
                     base_url = REAL_OR_NO_REAL + '/positions/otc'
@@ -895,7 +934,7 @@ for times_round_loop in range(1, 9999):
                     print(auth_r.status_code)
                     print(auth_r.reason)
                     print (auth_r.text)
-                    print ("DEBUG : 2 HOURS AND IN PROFIT :- CLOSED")
+                    print ("DEBUG : TIME AND IN PROFIT :- CLOSED")
                     
             elif elapsed_time > 7201:
                 print ("DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 2 HOURS")
