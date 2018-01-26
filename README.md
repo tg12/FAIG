@@ -12,5 +12,10 @@ Requires you to install the packages listed in the requirements.txt file
 More information/discussions and questions here
 https://www.reddit.com/r/UKInvesting/comments/7q67cw/faig_fully_automated_ig_trading_a_python_script/
 
+EDIT 26th JAN - Further Discussion here as it has moved on significantly from the original itteration.
+
+https://www.reddit.com/r/UKInvesting/comments/7sr88q/update_on_the_faig_development/
+
+
 Donations help me keep work on this program, Send them here
 1B8rcU4A31LVso1imcrZqRTvPoRfhdhFea
