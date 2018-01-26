@@ -24,14 +24,14 @@ import sys, os
 REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
 
 API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-API_KEY = '*********************************' #<-------------Special IG Index API Key, Problem on 23rd Jan
-#API_KEY = '*********************************'
-data = {"identifier":"*********************************","password": "*********************************"}
+API_KEY = '******************************************' #<-------------Special IG Index API Key, Problem on 23rd Jan
+#API_KEY = '******************************************'
+data = {"identifier":"******************************************","password": "******************************************"}
 
 # FOR REAL....
 # API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-# API_KEY = '*********************************'
-# data = {"identifier":"*********************************","password": "*********************************"}
+# API_KEY = '******************************************'
+# data = {"identifier":"******************************************","password": "******************************************"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -122,7 +122,7 @@ stopDistance_value = "250" #Initial Stop loss, Worked out later per trade
 #epic_id = "CS.D.GBPUSD.TODAY.IP" # - Very Profitable 
 #epic_id = "CS.D.EURUSD.TODAY.IP" # - Very Profitable 
 
-epic_ids = ["CS.D.GBPUSD.TODAY.IP", "CS.D.EURUSD.TODAY.IP", "IX.D.FTSE.DAILY.IP", "CS.D.USCGC.TODAY.IP", "CS.D.USCSI.TODAY.IP"]
+epic_ids = ["CS.D.GBPUSD.TODAY.IP", "CS.D.EURUSD.TODAY.IP", "CS.D.EURGBP.TODAY.IP", "CS.D.GBPEUR.TODAY.IP", "CS.D.USDJPY.TODAY.IP" ]
 
 #*******************************************************************
 #*******************************************************************
@@ -197,9 +197,16 @@ for times_round_loop in range(1, 9999):
         current_price = d['snapshot']['bid']
         Price_Change_Day = d['snapshot']['netChange']
         Price_Change_Day_percent = d['snapshot']['percentageChange'] 
-        if Price_Change_Day_percent < 0.5 and Price_Change_Day_percent > -0.5:
+        if Price_Change_Day_percent < 0.57 and Price_Change_Day_percent > -0.57:
             print ("Price Change Percentage on day is " + str(Price_Change_Day_percent))
             Price_Change_OK = True
+			
+		#######################BUG#####################################
+		#######################BUG#####################################
+		#######################BUG#####################################
+		#Fix issue here where this could get into a tireless loop if both currency's don't meet this criteria
+		#Either by a)adding more currency's to epic_ids? or b)time wait loop function??? Why wait when we could be trading on something else?
+		#Someone care to offer a suggestion??
     
 
     while not DO_A_THING:
