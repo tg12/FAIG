@@ -24,14 +24,14 @@ import sys, os
 REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
 
 API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-API_KEY = '******************************************' #<-------------Special IG Index API Key, Problem on 23rd Jan
-#API_KEY = '******************************************'
-data = {"identifier":"******************************************","password": "******************************************"}
+API_KEY = '****************************' #<-------------Special IG Index API Key, Problem on 23rd Jan
+#API_KEY = '****************************'
+data = {"identifier":"****************************","password": "****************************"}
 
 # FOR REAL....
 # API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-# API_KEY = '******************************************'
-# data = {"identifier":"******************************************","password": "******************************************"}
+# API_KEY = '****************************'
+# data = {"identifier":"****************************","password": "****************************"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -197,16 +197,16 @@ for times_round_loop in range(1, 9999):
         current_price = d['snapshot']['bid']
         Price_Change_Day = d['snapshot']['netChange']
         Price_Change_Day_percent = d['snapshot']['percentageChange'] 
-        if Price_Change_Day_percent < 0.57 and Price_Change_Day_percent > -0.57:
+        if Price_Change_Day_percent < 0.39 and Price_Change_Day_percent > -0.39:
             print ("Price Change Percentage on day is " + str(Price_Change_Day_percent))
             Price_Change_OK = True
-			
-		#######################BUG#####################################
-		#######################BUG#####################################
-		#######################BUG#####################################
-		#Fix issue here where this could get into a tireless loop if both currency's don't meet this criteria
-		#Either by a)adding more currency's to epic_ids? or b)time wait loop function??? Why wait when we could be trading on something else?
-		#Someone care to offer a suggestion??
+            
+        #######################BUG#####################################
+        #######################BUG#####################################
+        #######################BUG#####################################
+        #Fix issue here where this could get into a tireless loop if both currency's don't meet this criteria
+        #Either by a)adding more currency's to epic_ids? or b)time wait loop function??? Why wait when we could be trading on something else?
+        #Someone care to offer a suggestion??
     
 
     while not DO_A_THING:
@@ -722,7 +722,7 @@ for times_round_loop in range(1, 9999):
         #stopDistance_value = int(max_range) 
         #NOTE Sometimes IG Index want a massive stop loss for Guaranteed, Either don't use Guaranteed or "sell at market" with Artificial Stop loss
         #MUST NOTE :- IF THIS PRICE IS - THEN BUY!! i.e NOT HIT TARGET YET, CONVERSELY IF THIS PRICE IS POSITIVE IT IS ALREADY ABOVE SO SELL!!!
-        print ("STOP LOSS DISTANCE WILL BE SET AT : " + str(stopDistance_value))
+        print ("TRUE GUARANTEED STOP LOSS DISTANCE WILL BE SET AT : " + str(stopDistance_value))
         print ("Price Difference Away (Point's) : " + str(price_diff))        
         ################################################################
         #########################ORDER CODE#############################
@@ -896,11 +896,13 @@ for times_round_loop in range(1, 9999):
                 systime.sleep(2) #Don't be too keen to read price
                 
             ARTIFICIAL_STOP_LOSS = int(max_range) * int(size_value)
+            if ARTIFICIAL_STOP_LOSS > 100:
+                print ("!!!!WARNING!!!! STOP LOSS MIGHT BE TOO HIGH :- Current Value is " + str(ARTIFICIAL_STOP_LOSS))
             ARTIFICIAL_STOP_LOSS = ARTIFICIAL_STOP_LOSS * -1 #Make Negative, DO NOT REMOVE!!
                
             if PROFIT_OR_LOSS < ARTIFICIAL_STOP_LOSS:
                 #CLOSE TRADE/GTFO
-                print ("WARNING!! POTENTIAL DIRECTION CHANGE!!")
+                print ("!!!WARNING!!! POTENTIAL DIRECTION CHANGE!!")
                 SIZE = size_value
                 ORDER_TYPE = orderType_value
                 base_url = REAL_OR_NO_REAL + '/positions/otc'
@@ -922,7 +924,7 @@ for times_round_loop in range(1, 9999):
                 systime.sleep(Prediction_Wait_Timer)
                 
             if elapsed_time > 4800:
-                print ("DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER TIME")
+                print ("!!DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER TIME")
                 if float (PROFIT_OR_LOSS) > 0:
                     print ("TRADE OPEN OVER TIME AND IN PROFIT")
                     SIZE = size_value
@@ -944,7 +946,7 @@ for times_round_loop in range(1, 9999):
                     print ("DEBUG : TIME AND IN PROFIT :- CLOSED")
                     
             elif elapsed_time > 7201:
-                print ("DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 2 HOURS")
+                print ("!!DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 2 HOURS")
                 if float (PROFIT_OR_LOSS) > 0:
                     print ("DEBUG : TRADE OPEN OVER TWO HOURS AND IN PROFIT")
                     SIZE = size_value
@@ -964,21 +966,30 @@ for times_round_loop in range(1, 9999):
                     print(auth_r.reason)
                     print (auth_r.text)
                     print ("DEBUG : TWO HOURS IN PROFIT :- CLOSED")
-                    
-            elif elapsed_time > 10800:
-                print ("DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 3 HOURS")
-                if float (PROFIT_OR_LOSS) > 0:
-                    print ("DEBUG : TRADE OPEN OVER THREE HOURS AND IN PROFIT")
-                    
-            elif elapsed_time > 14400:
-                print ("DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 4 HOURS")
-                if float (PROFIT_OR_LOSS) > 0:
-                    print ("DEBUG : TRADE OPEN OVER FOUR HOURS AND IN PROFIT")
-                    
-            elif elapsed_time > 18000:
+            
+            if elapsed_time > 18000:
                 print ("DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 5 HOURS")
-                if float (PROFIT_OR_LOSS) > 0:
-                    print ("DEBUG : TRADE OPEN OVER FIVE HOURS AND IN PROFIT")
+                if -10 <= float (PROFIT_OR_LOSS) <= 0:
+                    print ("TRADE OPEN OVER 5 HOURS, CUT LOSSES")
+                    #ENABLE THIS CODE WHEN HAPPY WITH VALUES
+                    ########################################
+                    # SIZE = size_value
+                    # ORDER_TYPE = orderType_value
+                    # base_url = REAL_OR_NO_REAL + '/positions/otc'
+                    # data = {"dealId":DEAL_ID,"direction":DIRECTION_TO_CLOSE,"size":SIZE,"orderType":ORDER_TYPE}
+                    # #authenticated_headers_delete IS HACKY AF WORK AROUND!! AS PER .... https://labs.ig.com/node/36
+                    # authenticated_headers_delete = {'Content-Type':'application/json; charset=utf-8',
+                    # 'Accept':'application/json; charset=utf-8',
+                    # 'X-IG-API-KEY':API_KEY,
+                    # 'CST':CST_token,
+                    # 'X-SECURITY-TOKEN':x_sec_token,
+                    # '_method':"DELETE"}
+                    # auth_r = requests.post(base_url, data=json.dumps(data), headers=authenticated_headers_delete) 
+                    # #DEBUG
+                    # print(auth_r.status_code)
+                    # print(auth_r.reason)
+                    # print (auth_r.text)
+                    # print ("DEBUG : TIME AND IN PROFIT :- CLOSED")
                 
                         
     except Exception as e:
