@@ -1,16 +1,4 @@
-asn1crypto==0.22.0
-certifi==2017.4.17
-chardet==3.0.4
-command-not-found==0.3
-cryptography==1.9
-distro-info==0.17
-idna==2.5
-iotop==0.6
-keyring==10.4.0
-keyrings.alt==2.2
-language-selector==0.1
 numpy==1.14.0
-pycrypto==2.6.1
 pygobject==3.24.1
 python-apt==1.4.0b3
 pyxdg==0.25
@@ -18,9 +6,5 @@ PyYAML==3.12
 requests==2.18.1
 scikit-learn==0.19.1
 scipy==1.0.0
-SecretStorage==2.3.1
-six==1.10.0
 sklearn==0.0
-ssh-import-id==5.7
-ufw==0.35
 urllib3==1.21.1
