@@ -24,14 +24,14 @@ import sys, os
 REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
 
 API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-API_KEY = '****************************' #<-------------Special IG Index API Key, Problem on 23rd Jan
-#API_KEY = '****************************'
-data = {"identifier":"****************************","password": "****************************"}
+API_KEY = '**********************************' #<-------------Special IG Index API Key, Problem on 23rd Jan
+#API_KEY = '**********************************'
+data = {"identifier":"**********************************","password": "**********************************"}
 
 # FOR REAL....
 # API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-# API_KEY = '****************************'
-# data = {"identifier":"****************************","password": "****************************"}
+# API_KEY = '**********************************'
+# data = {"identifier":"**********************************","password": "**********************************"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -117,12 +117,8 @@ stopDistance_value = "250" #Initial Stop loss, Worked out later per trade
 #LIVE TEST
 #epic_id = "CS.D.USCGC.TODAY.IP" #Gold - OK, Not Great
 #epic_id = "CS.D.USCSI.TODAY.IP" #Silver - NOT RECOMMENDED 
-#epic_id = "IX.D.FTSE.DAILY.IP" #FTSE 100 - Within Hours only, Profitable
-#epic_id = "IX.D.DOW.DAILY.IP" #Wall St - Definitely Profitable between half 6 and half 8 GMT
-#epic_id = "CS.D.GBPUSD.TODAY.IP" # - Very Profitable 
-#epic_id = "CS.D.EURUSD.TODAY.IP" # - Very Profitable 
 
-epic_ids = ["CS.D.GBPUSD.TODAY.IP", "CS.D.EURUSD.TODAY.IP", "CS.D.EURGBP.TODAY.IP", "CS.D.GBPEUR.TODAY.IP", "CS.D.USDJPY.TODAY.IP" ]
+epic_ids = ["CS.D.AUDUSD.TODAY.IP", "CS.D.EURCHF.TODAY.IP", "CS.D.EURGBP.TODAY.IP", "CS.D.EURJPY.TODAY.IP", "CS.D.EURUSD.TODAY.IP", "CS.D.GBPEUR.TODAY.IP", "CS.D.GBPUSD.TODAY.IP", "CS.D.USDCAD.TODAY.IP", "CS.D.USDCHF.TODAY.IP", "CS.D.USDJPY.TODAY.IP", "CS.D.CADCHF.TODAY.IP", "CS.D.CADJPY.TODAY.IP", "CS.D.CHFJPY.TODAY.IP", "CS.D.EURCAD.TODAY.IP", "CS.D.EURSGD.TODAY.IP", "CS.D.EURZAR.TODAY.IP", "CS.D.GBPCAD.TODAY.IP", "CS.D.GBPCHF.TODAY.IP", "CS.D.GBPJPY.TODAY.IP", "CS.D.GBPSGD.TODAY.IP", "CS.D.GBPZAR.TODAY.IP", "CS.D.MXNJPY.TODAY.IP", "CS.D.NOKJPY.TODAY.IP", "CS.D.PLNJPY.TODAY.IP", "CS.D.SEKJPY.TODAY.IP", "CS.D.SGDJPY.TODAY.IP", "CS.D.USDSGD.TODAY.IP", "CS.D.USDZAR.TODAY.IP", "CS.D.AUDCAD.TODAY.IP", "CS.D.AUDCHF.TODAY.IP", "CS.D.AUDEUR.TODAY.IP", "CS.D.AUDGBP.TODAY.IP", "CS.D.AUDJPY.TODAY.IP", "CS.D.AUDNZD.TODAY.IP", "CS.D.AUDSGD.TODAY.IP", "CS.D.EURAUD.TODAY.IP", "CS.D.EURNZD.TODAY.IP", "CS.D.GBPAUD.TODAY.IP", "CS.D.GBPNZD.TODAY.IP", "CS.D.NZDAUD.TODAY.IP", "CS.D.NZDCAD.TODAY.IP", "CS.D.NZDCHF.TODAY.IP", "CS.D.NZDEUR.TODAY.IP", "CS.D.NZDGBP.TODAY.IP", "CS.D.NZDJPY.TODAY.IP", "CS.D.NZDUSD.TODAY.IP", "CS.D.CHFHUF.TODAY.IP", "CS.D.EURCZK.TODAY.IP", "CS.D.EURHUF.TODAY.IP", "CS.D.EURILS.TODAY.IP", "CS.D.EURMXN.TODAY.IP", "CS.D.EURPLN.TODAY.IP", "CS.D.EURTRY.TODAY.IP", "CS.D.GBPCZK.TODAY.IP", "CS.D.GBPHUF.TODAY.IP", "CS.D.GBPILS.TODAY.IP", "CS.D.GBPMXN.TODAY.IP", "CS.D.GBPPLN.TODAY.IP", "CS.D.GBPTRY.TODAY.IP", "CS.D.TRYJPY.TODAY.IP", "CS.D.USDCZK.TODAY.IP", "CS.D.USDHUF.TODAY.IP", "CS.D.USDILS.TODAY.IP", "CS.D.USDMXN.TODAY.IP", "CS.D.USDPLN.TODAY.IP", "CS.D.USDTRY.TODAY.IP", "CS.D.CADNOK.TODAY.IP", "CS.D.CHFNOK.TODAY.IP", "CS.D.EURDKK.TODAY.IP", "CS.D.EURNOK.TODAY.IP", "CS.D.EURSEK.TODAY.IP", "CS.D.GBPDKK.TODAY.IP", "CS.D.GBPNOK.TODAY.IP", "CS.D.GBPSEK.TODAY.IP", "CS.D.NOKSEK.TODAY.IP", "CS.D.USDDKK.TODAY.IP", "CS.D.USDNOK.TODAY.IP", "CS.D.USDSEK.TODAY.IP", "CS.D.AUDCNH.TODAY.IP", "CS.D.CADCNH.TODAY.IP", "CS.D.CNHJPY.TODAY.IP", "CS.D.BRLJPY.TODAY.IP", "CS.D.GBPINR.TODAY.IP", "CS.D.USDBRL.TODAY.IP", "CS.D.USDIDR.TODAY.IP", "CS.D.USDINR.TODAY.IP", "CS.D.USDKRW.TODAY.IP", "CS.D.USDMYR.TODAY.IP", "CS.D.USDPHP.TODAY.IP", "CS.D.USDTWD.TODAY.IP", "CS.D.EURCNH.TODAY.IP", "CS.D.sp_EURRUB.TODAY.IP", "CS.D.GBPCNH.TODAY.IP", "CS.D.NZDCNH.TODAY.IP", "CS.D.USDCNH.TODAY.IP", "CS.D.sp_USDRUB.TODAY.IP"]
 
 #*******************************************************************
 #*******************************************************************
@@ -165,6 +161,7 @@ for times_round_loop in range(1, 9999):
 #*******************************************************************
 #*******************************************************************
     DO_A_THING = False
+    Price_Change_OK = False
     Start_loop_time = time()
     low_price_list = []
     high_price_list = []
@@ -176,11 +173,10 @@ for times_round_loop in range(1, 9999):
     y = [] #This is High Price
     price_compare = "bid"
     Price_Change_Day_percent = 0
-    Price_Change_OK = False
-      
-       
+ 
     while not Price_Change_OK:
     #If "big" percent increase, I'm not interested today. Thanks
+        random.shuffle(epic_ids)
         epic_id = random.choice(epic_ids)
         print("DEBUG : Random epic_id is : " + str(epic_id))
         base_url = REAL_OR_NO_REAL + '/markets/' + epic_id
@@ -197,26 +193,12 @@ for times_round_loop in range(1, 9999):
         current_price = d['snapshot']['bid']
         Price_Change_Day = d['snapshot']['netChange']
         Price_Change_Day_percent = d['snapshot']['percentageChange'] 
-        if Price_Change_Day_percent < 0.39 and Price_Change_Day_percent > -0.39:
+        if Price_Change_Day_percent < 0.31 and Price_Change_Day_percent > -0.31:
             print ("Price Change Percentage on day is " + str(Price_Change_Day_percent))
             Price_Change_OK = True
-            
-        #######################BUG#####################################
-        #######################BUG#####################################
-        #######################BUG#####################################
-        #Fix issue here where this could get into a tireless loop if both currency's don't meet this criteria
-        #Either by a)adding more currency's to epic_ids? or b)time wait loop function??? Why wait when we could be trading on something else?
-        #Someone care to offer a suggestion??
-    
-
+ 
     while not DO_A_THING:
         print ("!!Internal Notes only - Top of Loop!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-        
-        ############################################################
-        ############################################################
-        ############################################################
-        ############################################################
-               
         base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/DAY/30'
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
         auth_r = requests.get(base_url, headers=authenticated_headers)
@@ -370,8 +352,6 @@ for times_round_loop in range(1, 9999):
             #y = High Prices
         
         #Cut down on API Calls by using this again! 
-        #Cut down on API Calls by using this again! 
-        #Cut down on API Calls by using this again! 
         
         price_ranges = []
         closing_prices = []
@@ -403,18 +383,17 @@ for times_round_loop in range(1, 9999):
                 TR_prices.append(TR)
                 
              
-        #print ("TR RANGE FOR " + str(epic_id) + " IS " + str(int(np.mean(TR_prices))))
         max_range = max(TR_prices)
         low_range = min(TR_prices)
         print ("stopDistance_value for " + str(epic_id) + " will bet set at " + str(int(max_range)))
         print ("limitDistance_value for " + str(epic_id) + " will bet set at " + str(int(low_range)))
+        if low_range > 10:
+            print ("!!DEBUG!! WARNING - Take Profit over high value, Might take a while for this trade!!")
+            
         #print ("MAX RANGE FOR " + str(epic_id) + " IS " + str(int(max_range)))
         #print ("LOW RANGE FOR " + str(epic_id) + " IS " + str(int(low_range)))
-        
         #Cut down on API Calls by using this again! 
-        #Cut down on API Calls by using this again! 
-        #Cut down on API Calls by using this again! 
-        #Cut down on API Calls by using this again! 
+       
         
         ###################################################################################
         ###################################################################################
@@ -642,13 +621,7 @@ for times_round_loop in range(1, 9999):
         print ("Remaining API Calls left : " + str(remaining_allowance))
         print ("Time to API Key reset : " + str(reset_time))
         print ("-----------------DEBUG-----------------")
-        
-        print ("-----------------DEBUG-----------------")
-        print ("Remaining API Calls left : " + str(remaining_allowance))
-        print ("Time to API Key reset : " + str(reset_time))
-        print ("-----------------DEBUG-----------------")
-        print ("-----------------DEBUG-----------------")
-        
+   
         # print ("-----------------DEBUG-----------------")
         # print(auth_r.status_code)
         # print(auth_r.reason)
@@ -675,9 +648,6 @@ for times_round_loop in range(1, 9999):
         
         x = np.asarray(x)
         y = np.asarray(y)
-        #DO NOT USE
-        #np.random.shuffle(x)
-        #np.random.shuffle(y)
         # Initialize the model then train it on the data
         genius_regression_model = LinearRegression()
         genius_regression_model.fit(x,y)
@@ -695,7 +665,9 @@ for times_round_loop in range(1, 9999):
         print (score)
         print (predictions)
         print ("-----------------DEBUG-----------------")
-       
+        
+        print ("!!DEBUG TIME!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+               
         #####################################################################
         #########################PREDICTION CODE#############################
         #########################PREDICTION CODE#############################
@@ -703,11 +675,7 @@ for times_round_loop in range(1, 9999):
         #########################PREDICTION CODE#############################
         #########################PREDICTION CODE#############################
         #####################################################################
-
-        #DO WE NEED THIS API CALL????
-        #DO WE NEED THIS API CALL????
-        #DO WE NEED THIS API CALL????
-        #DO WE NEED THIS API CALL????
+        #DO WE NEED THIS API CALL???? TODO :- REMOVE
         #base_url = REAL_OR_NO_REAL + '/markets/' + epic_id
         #auth_r = requests.get(base_url, headers=authenticated_headers)
         #d = json.loads(auth_r.text)
@@ -721,7 +689,8 @@ for times_round_loop in range(1, 9999):
         limitDistance_value = int(low_range)
         #stopDistance_value = int(max_range) 
         #NOTE Sometimes IG Index want a massive stop loss for Guaranteed, Either don't use Guaranteed or "sell at market" with Artificial Stop loss
-        #MUST NOTE :- IF THIS PRICE IS - THEN BUY!! i.e NOT HIT TARGET YET, CONVERSELY IF THIS PRICE IS POSITIVE IT IS ALREADY ABOVE SO SELL!!!
+        #MUST NOTE :- IF THIS PRICE IS - i.e NOT HIT TARGET YET, CONVERSELY IF THIS PRICE IS POSITIVE IT IS ALREADY ABOVE PREDICTION!!!
+        
         print ("TRUE GUARANTEED STOP LOSS DISTANCE WILL BE SET AT : " + str(stopDistance_value))
         print ("Price Difference Away (Point's) : " + str(price_diff))        
         ################################################################
@@ -731,8 +700,29 @@ for times_round_loop in range(1, 9999):
         #########################ORDER CODE#############################
         ################################################################
         
+        ################################################################
+        #############Predict Accuracy isn't that great. ################
+        #############Predict Accuracy isn't that great. ################
+        #############Predict Accuracy isn't that great. ################
+        #############Predict Accuracy isn't that great. ################
+        ################################################################
+        Prediction_Wait_Timer = int(TIME_WAIT_MULTIPLIER) #Wait
+        print ("!!DEBUG TIME!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+        if price_diff < 0 and score < predict_accuracy: 
+                DO_A_THING = False
+                print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+                systime.sleep(Prediction_Wait_Timer)
+                print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+                break
+        elif price_diff > 0 and score < predict_accuracy:
+                DO_A_THING = False
+                print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+                systime.sleep(Prediction_Wait_Timer)
+                print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+                break
         
-        if profitable_trade_count < 20:
+        
+        if profitable_trade_count < 6:
             if price_diff < 0 and score > predict_accuracy:
                 DIRECTION_TO_TRADE = "BUY"
                 DIRECTION_TO_CLOSE = "SELL"
@@ -745,7 +735,7 @@ for times_round_loop in range(1, 9999):
                 DIRECTION_TO_CLOSE = "BUY"
                 DIRECTION_TO_COMPARE = 'offer'
                 DO_A_THING = True
-        elif profitable_trade_count >= 20: #20, Trades ... profit. Right??? 
+        elif profitable_trade_count >= 6: #20, Trades ... profit. Right??? 
             profitable_trade_count = 0
             if price_diff < 0 and score > predict_accuracy:
                 #Be Extra Sure, Set stop loss very tight???
@@ -763,28 +753,12 @@ for times_round_loop in range(1, 9999):
                 DO_A_THING = True
                 
         
-        print ("!!DEBUG TIME!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-        ################################################################
-        #############Predict Accuracy isn't that great. ################
-        #############Predict Accuracy isn't that great. ################
-        #############Predict Accuracy isn't that great. ################
-        #############Predict Accuracy isn't that great. ################
-        ################################################################
-        Prediction_Wait_Timer = int(1800) #Wait 30 mins and Try again, Enough data should have changed to make a suitable prediction by then.
-        #Be-careful after hours, After 5PM and 9PM GMT, Volumes are low yada yada yada. Less likely to get a decent prediction
-        print ("!!DEBUG TIME!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-        if price_diff < 0 and score < predict_accuracy: 
-                DO_A_THING = False
-                print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-                systime.sleep(Prediction_Wait_Timer)
-                print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-        elif price_diff > 0 and score < predict_accuracy:
-                DO_A_THING = False
-                print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-                systime.sleep(Prediction_Wait_Timer)
-                print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-            
         
+    if not DO_A_THING:
+        #DO_A_THING NOT SET FOR WHATEVER REASON, GO BACK TO MAIN PROGRAM LOOP
+        print ("!!DEBUG!! AN ERROR OCCURED")
+        print ("!!DEBUG!! Reminder, Check what the f*** is going on here")
+        continue
         
     base_url = REAL_OR_NO_REAL + '/positions/otc'
     authenticated_headers = {'Content-Type':'application/json; charset=utf-8',
@@ -816,9 +790,16 @@ for times_round_loop in range(1, 9999):
     print("DEAL ID : " + str(d['dealId']))
     print(d['dealStatus'])
     print(d['reason'])
+    #######################################################################################
+    #This gets triggered if IG want a daft amount in your account, More than you specified. 
+    #This is fine, Whilst it is a bit hacky basically start over again.
+    #######################################################################################
+    if str(d['reason']) == "ATTACHED_ORDER_LEVEL_ERROR":
+        print ("!!DEBUG!! Not enough wonga in your account for this type of trade!!, Try again!!")
+        continue
+        
         
     # the trade will only break even once the price of the asset being traded has surpassed the sell price (for long trades) or buy price (for short trades). 
-    
     ##########################################
     ##########READ IN INITIAL PROFIT##########
     ##########################################
@@ -851,10 +832,8 @@ for times_round_loop in range(1, 9999):
     ##########################################
     try:
         #while PROFIT_OR_LOSS < float(limitDistance_value): 
-        while PROFIT_OR_LOSS < float(limitDistance_value) - 1: #Take something from the market, Before Take Profit.
+        while PROFIT_OR_LOSS < float(limitDistance_value * int(size_value)) - 1: #Take something from the market, Before Take Profit.
             elapsed_time = round((time() - Start_loop_time), 1) 
-            print ("******************************")
-            print ("******************************")
             print ("******************************")
             print ("Order Time : " + str(humanize_time(elapsed_time)))
       
@@ -923,7 +902,7 @@ for times_round_loop in range(1, 9999):
                 Prediction_Wait_Timer = 900 #15Mins
                 systime.sleep(Prediction_Wait_Timer)
                 
-            if elapsed_time > 4800:
+            if elapsed_time > 5400:
                 print ("!!DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER TIME")
                 if float (PROFIT_OR_LOSS) > 0:
                     print ("TRADE OPEN OVER TIME AND IN PROFIT")
@@ -943,32 +922,11 @@ for times_round_loop in range(1, 9999):
                     print(auth_r.status_code)
                     print(auth_r.reason)
                     print (auth_r.text)
-                    print ("DEBUG : TIME AND IN PROFIT :- CLOSED")
+                    print ("!!DEBUG!! : TIME AND IN PROFIT :- CLOSED")
                     
-            elif elapsed_time > 7201:
-                print ("!!DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 2 HOURS")
-                if float (PROFIT_OR_LOSS) > 0:
-                    print ("DEBUG : TRADE OPEN OVER TWO HOURS AND IN PROFIT")
-                    SIZE = size_value
-                    ORDER_TYPE = orderType_value
-                    base_url = REAL_OR_NO_REAL + '/positions/otc'
-                    data = {"dealId":DEAL_ID,"direction":DIRECTION_TO_CLOSE,"size":SIZE,"orderType":ORDER_TYPE}
-                    #authenticated_headers_delete IS HACKY AF WORK AROUND!! AS PER .... https://labs.ig.com/node/36
-                    authenticated_headers_delete = {'Content-Type':'application/json; charset=utf-8',
-                    'Accept':'application/json; charset=utf-8',
-                    'X-IG-API-KEY':API_KEY,
-                    'CST':CST_token,
-                    'X-SECURITY-TOKEN':x_sec_token,
-                    '_method':"DELETE"}
-                    auth_r = requests.post(base_url, data=json.dumps(data), headers=authenticated_headers_delete) 
-                    #DEBUG
-                    print(auth_r.status_code)
-                    print(auth_r.reason)
-                    print (auth_r.text)
-                    print ("DEBUG : TWO HOURS IN PROFIT :- CLOSED")
-            
-            if elapsed_time > 18000:
-                print ("DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 5 HOURS")
+          
+            if elapsed_time > 7200:
+                print ("DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 2 HOURS")
                 if -10 <= float (PROFIT_OR_LOSS) <= 0:
                     print ("TRADE OPEN OVER 5 HOURS, CUT LOSSES")
                     #ENABLE THIS CODE WHEN HAPPY WITH VALUES
