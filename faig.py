@@ -24,14 +24,14 @@ import sys, os
 REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
 
 API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-API_KEY = '******************' #<-------------Special IG Index API Key, Problem on 23rd Jan
-#API_KEY = '******************'
-data = {"identifier":"******************","password": "******************"}
+API_KEY = '*******************************' #<-------------Special IG Index API Key, Reused Wed 30th Jan
+#API_KEY = '*******************************'
+data = {"identifier":"*******************************","password": "*******************************"}
 
 # FOR REAL....
 # API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-# API_KEY = '******************'
-# data = {"identifier":"******************","password": "******************"}
+# API_KEY = '*******************************'
+# data = {"identifier":"*******************************","password": "*******************************"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -122,7 +122,7 @@ stopDistance_value = "250" #Initial Stop loss, Worked out later per trade
 #ALL EPICS
 #ALL EPICS
 #ALL EPICS
-#epic_ids = ["CS.D.AUDUSD.TODAY.IP", "CS.D.EURCHF.TODAY.IP", "CS.D.EURGBP.TODAY.IP", "CS.D.EURJPY.TODAY.IP", "CS.D.EURUSD.TODAY.IP", "CS.D.GBPEUR.TODAY.IP", "CS.D.GBPUSD.TODAY.IP", "CS.D.USDCAD.TODAY.IP", "CS.D.USDCHF.TODAY.IP", "CS.D.USDJPY.TODAY.IP", "CS.D.CADCHF.TODAY.IP", "CS.D.CADJPY.TODAY.IP", "CS.D.CHFJPY.TODAY.IP", "CS.D.EURCAD.TODAY.IP", "CS.D.EURSGD.TODAY.IP", "CS.D.EURZAR.TODAY.IP", "CS.D.GBPCAD.TODAY.IP", "CS.D.GBPCHF.TODAY.IP", "CS.D.GBPJPY.TODAY.IP", "CS.D.GBPSGD.TODAY.IP", "CS.D.GBPZAR.TODAY.IP", "CS.D.MXNJPY.TODAY.IP", "CS.D.NOKJPY.TODAY.IP", "CS.D.PLNJPY.TODAY.IP", "CS.D.SEKJPY.TODAY.IP", "CS.D.SGDJPY.TODAY.IP", "CS.D.USDSGD.TODAY.IP", "CS.D.USDZAR.TODAY.IP", "CS.D.AUDCAD.TODAY.IP", "CS.D.AUDCHF.TODAY.IP", "CS.D.AUDEUR.TODAY.IP", "CS.D.AUDGBP.TODAY.IP", "CS.D.AUDJPY.TODAY.IP", "CS.D.AUDNZD.TODAY.IP", "CS.D.AUDSGD.TODAY.IP", "CS.D.EURAUD.TODAY.IP", "CS.D.EURNZD.TODAY.IP", "CS.D.GBPAUD.TODAY.IP", "CS.D.GBPNZD.TODAY.IP", "CS.D.NZDAUD.TODAY.IP", "CS.D.NZDCAD.TODAY.IP", "CS.D.NZDCHF.TODAY.IP", "CS.D.NZDEUR.TODAY.IP", "CS.D.NZDGBP.TODAY.IP", "CS.D.NZDJPY.TODAY.IP", "CS.D.NZDUSD.TODAY.IP", "CS.D.CHFHUF.TODAY.IP", "CS.D.EURCZK.TODAY.IP", "CS.D.EURHUF.TODAY.IP", "CS.D.EURILS.TODAY.IP", "CS.D.EURMXN.TODAY.IP", "CS.D.EURPLN.TODAY.IP", "CS.D.EURTRY.TODAY.IP", "CS.D.GBPCZK.TODAY.IP", "CS.D.GBPHUF.TODAY.IP", "CS.D.GBPILS.TODAY.IP", "CS.D.GBPMXN.TODAY.IP", "CS.D.GBPPLN.TODAY.IP", "CS.D.GBPTRY.TODAY.IP", "CS.D.TRYJPY.TODAY.IP", "CS.D.USDCZK.TODAY.IP", "CS.D.USDHUF.TODAY.IP", "CS.D.USDILS.TODAY.IP", "CS.D.USDMXN.TODAY.IP", "CS.D.USDPLN.TODAY.IP", "CS.D.USDTRY.TODAY.IP", "CS.D.CADNOK.TODAY.IP", "CS.D.CHFNOK.TODAY.IP", "CS.D.EURDKK.TODAY.IP", "CS.D.EURNOK.TODAY.IP", "CS.D.EURSEK.TODAY.IP", "CS.D.GBPDKK.TODAY.IP", "CS.D.GBPNOK.TODAY.IP", "CS.D.GBPSEK.TODAY.IP", "CS.D.NOKSEK.TODAY.IP", "CS.D.USDDKK.TODAY.IP", "CS.D.USDNOK.TODAY.IP", "CS.D.USDSEK.TODAY.IP", "CS.D.AUDCNH.TODAY.IP", "CS.D.CADCNH.TODAY.IP", "CS.D.CNHJPY.TODAY.IP", "CS.D.BRLJPY.TODAY.IP", "CS.D.GBPINR.TODAY.IP", "CS.D.USDBRL.TODAY.IP", "CS.D.USDIDR.TODAY.IP", "CS.D.USDINR.TODAY.IP", "CS.D.USDKRW.TODAY.IP", "CS.D.USDMYR.TODAY.IP", "CS.D.USDPHP.TODAY.IP", "CS.D.USDTWD.TODAY.IP", "CS.D.EURCNH.TODAY.IP", "CS.D.sp_EURRUB.TODAY.IP", "CS.D.GBPCNH.TODAY.IP", "CS.D.NZDCNH.TODAY.IP", "CS.D.USDCNH.TODAY.IP", "CS.D.sp_USDRUB.TODAY.IP"]
+epic_ids = ["CS.D.AUDUSD.TODAY.IP", "CS.D.EURCHF.TODAY.IP", "CS.D.EURGBP.TODAY.IP", "CS.D.EURJPY.TODAY.IP", "CS.D.EURUSD.TODAY.IP", "CS.D.GBPEUR.TODAY.IP", "CS.D.GBPUSD.TODAY.IP", "CS.D.USDCAD.TODAY.IP", "CS.D.USDCHF.TODAY.IP", "CS.D.USDJPY.TODAY.IP", "CS.D.CADCHF.TODAY.IP", "CS.D.CADJPY.TODAY.IP", "CS.D.CHFJPY.TODAY.IP", "CS.D.EURCAD.TODAY.IP", "CS.D.EURSGD.TODAY.IP", "CS.D.EURZAR.TODAY.IP", "CS.D.GBPCAD.TODAY.IP", "CS.D.GBPCHF.TODAY.IP", "CS.D.GBPJPY.TODAY.IP", "CS.D.GBPSGD.TODAY.IP", "CS.D.GBPZAR.TODAY.IP", "CS.D.MXNJPY.TODAY.IP", "CS.D.NOKJPY.TODAY.IP", "CS.D.PLNJPY.TODAY.IP", "CS.D.SEKJPY.TODAY.IP", "CS.D.SGDJPY.TODAY.IP", "CS.D.USDSGD.TODAY.IP", "CS.D.USDZAR.TODAY.IP", "CS.D.AUDCAD.TODAY.IP", "CS.D.AUDCHF.TODAY.IP", "CS.D.AUDEUR.TODAY.IP", "CS.D.AUDGBP.TODAY.IP", "CS.D.AUDJPY.TODAY.IP", "CS.D.AUDNZD.TODAY.IP", "CS.D.AUDSGD.TODAY.IP", "CS.D.EURAUD.TODAY.IP", "CS.D.EURNZD.TODAY.IP", "CS.D.GBPAUD.TODAY.IP", "CS.D.GBPNZD.TODAY.IP", "CS.D.NZDAUD.TODAY.IP", "CS.D.NZDCAD.TODAY.IP", "CS.D.NZDCHF.TODAY.IP", "CS.D.NZDEUR.TODAY.IP", "CS.D.NZDGBP.TODAY.IP", "CS.D.NZDJPY.TODAY.IP", "CS.D.NZDUSD.TODAY.IP", "CS.D.CHFHUF.TODAY.IP", "CS.D.EURCZK.TODAY.IP", "CS.D.EURHUF.TODAY.IP", "CS.D.EURILS.TODAY.IP", "CS.D.EURMXN.TODAY.IP", "CS.D.EURPLN.TODAY.IP", "CS.D.EURTRY.TODAY.IP", "CS.D.GBPCZK.TODAY.IP", "CS.D.GBPHUF.TODAY.IP", "CS.D.GBPILS.TODAY.IP", "CS.D.GBPMXN.TODAY.IP", "CS.D.GBPPLN.TODAY.IP", "CS.D.GBPTRY.TODAY.IP", "CS.D.TRYJPY.TODAY.IP", "CS.D.USDCZK.TODAY.IP", "CS.D.USDHUF.TODAY.IP", "CS.D.USDILS.TODAY.IP", "CS.D.USDMXN.TODAY.IP", "CS.D.USDPLN.TODAY.IP", "CS.D.USDTRY.TODAY.IP", "CS.D.CADNOK.TODAY.IP", "CS.D.CHFNOK.TODAY.IP", "CS.D.EURDKK.TODAY.IP", "CS.D.EURNOK.TODAY.IP", "CS.D.EURSEK.TODAY.IP", "CS.D.GBPDKK.TODAY.IP", "CS.D.GBPNOK.TODAY.IP", "CS.D.GBPSEK.TODAY.IP", "CS.D.NOKSEK.TODAY.IP", "CS.D.USDDKK.TODAY.IP", "CS.D.USDNOK.TODAY.IP", "CS.D.USDSEK.TODAY.IP", "CS.D.AUDCNH.TODAY.IP", "CS.D.CADCNH.TODAY.IP", "CS.D.CNHJPY.TODAY.IP", "CS.D.BRLJPY.TODAY.IP", "CS.D.GBPINR.TODAY.IP", "CS.D.USDBRL.TODAY.IP", "CS.D.USDIDR.TODAY.IP", "CS.D.USDINR.TODAY.IP", "CS.D.USDKRW.TODAY.IP", "CS.D.USDMYR.TODAY.IP", "CS.D.USDPHP.TODAY.IP", "CS.D.USDTWD.TODAY.IP", "CS.D.EURCNH.TODAY.IP", "CS.D.sp_EURRUB.TODAY.IP", "CS.D.GBPCNH.TODAY.IP", "CS.D.NZDCNH.TODAY.IP", "CS.D.USDCNH.TODAY.IP", "CS.D.sp_USDRUB.TODAY.IP"]
 #ALL EPICS
 #ALL EPICS
 #ALL EPICS
@@ -134,7 +134,7 @@ stopDistance_value = "250" #Initial Stop loss, Worked out later per trade
 #SENSIBLE EPIC LIST
 #SENSIBLE EPIC LIST
 #SENSIBLE EPIC LIST
-epic_ids = ["CS.D.GBPUSD.TODAY.IP","CS.D.EURUSD.TODAY.IP","CS.D.USDJPY.TODAY.IP","CS.D.AUDUSD.TODAY.IP","CS.D.EURGBP.TODAY.IP","CS.D.EURJPY.TODAY.IP", "CS.D.USDCAD.TODAY.IP","CS.D.GBPEUR.TODAY.IP", "CS.D.USDCHF.TODAY.IP","CS.D.EURCHF.TODAY.IP"]
+#epic_ids = ["CS.D.GBPUSD.TODAY.IP","CS.D.EURUSD.TODAY.IP","CS.D.USDJPY.TODAY.IP","CS.D.AUDUSD.TODAY.IP","CS.D.EURGBP.TODAY.IP","CS.D.EURJPY.TODAY.IP", "CS.D.USDCAD.TODAY.IP","CS.D.GBPEUR.TODAY.IP", "CS.D.USDCHF.TODAY.IP","CS.D.EURCHF.TODAY.IP"]
 #SENSIBLE EPIC LIST
 #SENSIBLE EPIC LIST
 #SENSIBLE EPIC LIST
@@ -172,6 +172,7 @@ def humanize_time(secs):
     hours, mins = divmod(mins, 60)
     return '%02d:%02d:%02d' % (hours, mins, secs)   
     
+previous_traded_epic_id = "None"
 
 for times_round_loop in range(1, 9999):
 
@@ -197,6 +198,11 @@ for times_round_loop in range(1, 9999):
     #If "big" percent increase, I'm not interested today. Thanks
         random.shuffle(epic_ids)
         epic_id = random.choice(epic_ids)
+        #Don't Trade on the same epic twice in a row
+        if previous_traded_epic_id == epic_id:
+            Price_Change_OK = False
+            print ("!!DEBUG!! : Don't Trade on the same epic twice in a row")
+            
         print("DEBUG : Random epic_id is : " + str(epic_id))
         base_url = REAL_OR_NO_REAL + '/markets/' + epic_id
         auth_r = requests.get(base_url, headers=authenticated_headers)
@@ -215,6 +221,22 @@ for times_round_loop in range(1, 9999):
         if Price_Change_Day_percent < 0.41 and Price_Change_Day_percent > -0.41:
             print ("Price Change Percentage on day is " + str(Price_Change_Day_percent))
             Price_Change_OK = True
+            previous_traded_epic_id = epic_id
+            
+        bid_price = d['snapshot']['bid']
+        ask_price = d['snapshot']['offer']
+        spread = float(bid_price) - float(ask_price)
+        print ("bid : " + str(bid_price))
+        print ("ask : " + str(ask_price))
+        print ("-------------------------")
+        print ("spread : " + str(spread))
+        print ("-------------------------")
+                
+        if float(spread) < -1:
+            Price_Change_OK = False
+            systime.sleep(2)
+
+        
  
     while not DO_A_THING:
         print ("!!Internal Notes only - Top of Loop!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
@@ -706,6 +728,10 @@ for times_round_loop in range(1, 9999):
             
         price_diff = current_price - price_prediction
         limitDistance_value = int(low_range)
+        #Fixing a weird bug with some exotic fx
+        if limitDistance_value == 0:
+            limitDistance_value = 1
+            
         #stopDistance_value = int(max_range) 
         #NOTE Sometimes IG Index want a massive stop loss for Guaranteed, Either don't use Guaranteed or "sell at market" with Artificial Stop loss
         #MUST NOTE :- IF THIS PRICE IS - i.e NOT HIT TARGET YET, CONVERSELY IF THIS PRICE IS POSITIVE IT IS ALREADY ABOVE PREDICTION!!!
@@ -754,7 +780,7 @@ for times_round_loop in range(1, 9999):
                 DIRECTION_TO_CLOSE = "BUY"
                 DIRECTION_TO_COMPARE = 'offer'
                 DO_A_THING = True
-        elif profitable_trade_count >= 6: #20, Trades ... profit. Right??? 
+        elif profitable_trade_count >= 6: #6, Trades ... profit. Right??? 
             profitable_trade_count = 0
             if price_diff < 0 and score > predict_accuracy:
                 #Be Extra Sure, Set stop loss very tight???
@@ -775,8 +801,11 @@ for times_round_loop in range(1, 9999):
         
     if not DO_A_THING:
         #DO_A_THING NOT SET FOR WHATEVER REASON, GO BACK TO MAIN PROGRAM LOOP
+        print ("-----------------DEBUG-----------------")
         print ("!!DEBUG!! AN ERROR OCCURED")
         print ("!!DEBUG!! Reminder, Check what the f*** is going on here")
+        print ("!!DEBUG!! Most likely DO_A_THING Not Set!!")
+        print ("-----------------DEBUG-----------------")
         continue
         
     base_url = REAL_OR_NO_REAL + '/positions/otc'
@@ -810,7 +839,7 @@ for times_round_loop in range(1, 9999):
     print(d['dealStatus'])
     print(d['reason'])
     #######################################################################################
-    #This gets triggered if IG want a daft amount in your account, More than you specified. 
+    #This gets triggered if IG want a daft amount in your account for the margin, More than you specified initially. 
     #This is fine, Whilst it is a bit hacky basically start over again.
     #######################################################################################
     if str(d['reason']) == "ATTACHED_ORDER_LEVEL_ERROR":
@@ -921,7 +950,7 @@ for times_round_loop in range(1, 9999):
                 Prediction_Wait_Timer = 900 #15Mins
                 systime.sleep(Prediction_Wait_Timer)
                 
-            if elapsed_time > 5400:
+            if elapsed_time > 5220:
                 print ("!!DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER TIME")
                 if float (PROFIT_OR_LOSS) > 0:
                     print ("!!DEBUG!! TRADE OPEN OVER TIME AND IN PROFIT")
@@ -944,33 +973,33 @@ for times_round_loop in range(1, 9999):
                     print ("!!DEBUG!! : TIME AND IN PROFIT :- CLOSED")
                     
           
-            if elapsed_time > 7200:
-                print ("!!DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 2 HOURS")
+            if elapsed_time > 9000:
+                print ("!!DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 2 (and half) HOURS")
                 if -10 <= float (PROFIT_OR_LOSS) <= 0:
                     print ("!!DEBUG!! TRADE OPEN OVER 2 HOURS, CUT LOSSES")
                     #ENABLE THIS CODE WHEN HAPPY WITH VALUES
                     ########################################
-                    # SIZE = size_value
-                    # ORDER_TYPE = orderType_value
-                    # base_url = REAL_OR_NO_REAL + '/positions/otc'
-                    # data = {"dealId":DEAL_ID,"direction":DIRECTION_TO_CLOSE,"size":SIZE,"orderType":ORDER_TYPE}
-                    # #authenticated_headers_delete IS HACKY AF WORK AROUND!! AS PER .... https://labs.ig.com/node/36
-                    # authenticated_headers_delete = {'Content-Type':'application/json; charset=utf-8',
-                    # 'Accept':'application/json; charset=utf-8',
-                    # 'X-IG-API-KEY':API_KEY,
-                    # 'CST':CST_token,
-                    # 'X-SECURITY-TOKEN':x_sec_token,
-                    # '_method':"DELETE"}
-                    # auth_r = requests.post(base_url, data=json.dumps(data), headers=authenticated_headers_delete) 
-                    # #DEBUG
-                    # print(auth_r.status_code)
-                    # print(auth_r.reason)
-                    # print (auth_r.text)
-                    # print ("DEBUG : TIME AND IN PROFIT :- CLOSED")
+                    SIZE = size_value
+                    ORDER_TYPE = orderType_value
+                    base_url = REAL_OR_NO_REAL + '/positions/otc'
+                    data = {"dealId":DEAL_ID,"direction":DIRECTION_TO_CLOSE,"size":SIZE,"orderType":ORDER_TYPE}
+                    #authenticated_headers_delete IS HACKY AF WORK AROUND!! AS PER .... https://labs.ig.com/node/36
+                    authenticated_headers_delete = {'Content-Type':'application/json; charset=utf-8',
+                    'Accept':'application/json; charset=utf-8',
+                    'X-IG-API-KEY':API_KEY,
+                    'CST':CST_token,
+                    'X-SECURITY-TOKEN':x_sec_token,
+                    '_method':"DELETE"}
+                    auth_r = requests.post(base_url, data=json.dumps(data), headers=authenticated_headers_delete) 
+                    #DEBUG
+                    print(auth_r.status_code)
+                    print(auth_r.reason)
+                    print (auth_r.text)
+                    print ("DEBUG : TIME AND IN PROFIT :- CLOSED")
                 
                         
     except Exception as e:
-        print(e) #Yeah, I know now. 
+        #print(e) #Yeah, I know now. 
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print(exc_type, fname, exc_tb.tb_lineno)
