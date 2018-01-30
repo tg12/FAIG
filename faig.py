@@ -24,14 +24,14 @@ import sys, os
 REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
 
 API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-#API_KEY = '****************************' #<-------------Special IG Index API Key, Reused Wed 30th Jan
-API_KEY = '****************************'
-data = {"identifier":"****************************","password": "****************************"}
+#API_KEY = '*********************' #<-------------Special IG Index API Key, Reused Wed 31th Jan
+API_KEY = '*********************'
+data = {"identifier":"*********************","password": "*********************"}
 
 # FOR REAL....
 # API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-# API_KEY = '****************************'
-# data = {"identifier":"****************************","password": "****************************"}
+# API_KEY = '*********************'
+# data = {"identifier":"*********************","password": "*********************"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -198,11 +198,7 @@ for times_round_loop in range(1, 9999):
     #If "big" percent increase, I'm not interested today. Thanks
         random.shuffle(epic_ids)
         epic_id = random.choice(epic_ids)
-        #Don't Trade on the same epic twice in a row
-        if previous_traded_epic_id == epic_id:
-            Price_Change_OK = False
-            print ("!!DEBUG!! : Don't Trade on the same epic twice in a row")
-            
+ 
         print("DEBUG : Random epic_id is : " + str(epic_id))
         base_url = REAL_OR_NO_REAL + '/markets/' + epic_id
         auth_r = requests.get(base_url, headers=authenticated_headers)
@@ -221,7 +217,6 @@ for times_round_loop in range(1, 9999):
         if Price_Change_Day_percent < 0.41 and Price_Change_Day_percent > -0.41:
             print ("Price Change Percentage on day is " + str(Price_Change_Day_percent))
             Price_Change_OK = True
-            previous_traded_epic_id = epic_id
             
         bid_price = d['snapshot']['bid']
         ask_price = d['snapshot']['offer']
@@ -235,7 +230,11 @@ for times_round_loop in range(1, 9999):
         if float(spread) < -1:
             Price_Change_OK = False
             systime.sleep(2)
-
+			
+        #Don't Trade on the same epic twice in a row
+        if previous_traded_epic_id == epic_id:
+            Price_Change_OK = False
+            print ("!!DEBUG!! : Don't Trade on the same epic twice in a row")
         
  
     while not DO_A_THING:
@@ -807,7 +806,9 @@ for times_round_loop in range(1, 9999):
         print ("!!DEBUG!! Most likely DO_A_THING Not Set!!")
         print ("-----------------DEBUG-----------------")
         continue
-        
+    
+    previous_traded_epic_id = epic_id
+    
     base_url = REAL_OR_NO_REAL + '/positions/otc'
     authenticated_headers = {'Content-Type':'application/json; charset=utf-8',
             'Accept':'application/json; charset=utf-8',
@@ -950,9 +951,9 @@ for times_round_loop in range(1, 9999):
                 Prediction_Wait_Timer = 900 #15Mins
                 systime.sleep(Prediction_Wait_Timer)
                 
-            if elapsed_time > 5220:
+            if elapsed_time > 6300:
                 print ("!!DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER TIME")
-                if float (PROFIT_OR_LOSS) > 0:
+                if float (PROFIT_OR_LOSS) > 0.50: #50p
                     print ("!!DEBUG!! TRADE OPEN OVER TIME AND IN PROFIT")
                     SIZE = size_value
                     ORDER_TYPE = orderType_value
@@ -975,7 +976,7 @@ for times_round_loop in range(1, 9999):
           
             if elapsed_time > 9000:
                 print ("!!DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 2 (and half) HOURS")
-                if -10 <= float (PROFIT_OR_LOSS) <= 0:
+                if -10 <= float (PROFIT_OR_LOSS) <= 0.50:
                     print ("!!DEBUG!! TRADE OPEN OVER 2 HOURS, CUT LOSSES")
                     #ENABLE THIS CODE WHEN HAPPY WITH VALUES
                     ########################################
