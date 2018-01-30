@@ -24,14 +24,14 @@ import sys, os
 REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
 
 API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-API_KEY = '*******************************' #<-------------Special IG Index API Key, Reused Wed 30th Jan
-#API_KEY = '*******************************'
-data = {"identifier":"*******************************","password": "*******************************"}
+#API_KEY = '****************************' #<-------------Special IG Index API Key, Reused Wed 30th Jan
+API_KEY = '****************************'
+data = {"identifier":"****************************","password": "****************************"}
 
 # FOR REAL....
 # API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-# API_KEY = '*******************************'
-# data = {"identifier":"*******************************","password": "*******************************"}
+# API_KEY = '****************************'
+# data = {"identifier":"****************************","password": "****************************"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
