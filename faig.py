@@ -19,19 +19,25 @@ from sklearn.linear_model import LinearRegression
 ##################################################
 import sys, os
 
+########################################################################################################################
 #Joke here
-#REAL_OR_NO_REAL = 'https://api.ig.com/gateway/deal'
-REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
-
-API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-#API_KEY = '*********************' #<-------------Special IG Index API Key, Reused Wed 31th Jan
-API_KEY = '*********************'
-data = {"identifier":"*********************","password": "*********************"}
-
+########################################################################################################################
+# REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
+# API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
+# API_KEY = '********************' #<-------------Special IG Index API Key, Problem on 23rd Jan
+# #API_KEY = '********************'
+# data = {"identifier":"********************","password": "********************"}
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
 # FOR REAL....
-# API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-# API_KEY = '*********************'
-# data = {"identifier":"*********************","password": "*********************"}
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+REAL_OR_NO_REAL = 'https://api.ig.com/gateway/deal'
+API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
+API_KEY = '********************'
+data = {"identifier":"********************","password": "********************"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -103,7 +109,7 @@ expiry_value = "DFB"
 guaranteedStop_value = True
 currencyCode_value = "GBP"
 forceOpen_value = True
-stopDistance_value = "250" #Initial Stop loss, Worked out later per trade
+stopDistance_value = "100" #Initial Stop loss, Worked out later per trade
 
 #HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
 #HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
@@ -214,7 +220,10 @@ for times_round_loop in range(1, 9999):
         current_price = d['snapshot']['bid']
         Price_Change_Day = d['snapshot']['netChange']
         Price_Change_Day_percent = d['snapshot']['percentageChange'] 
-        if Price_Change_Day_percent < 0.41 and Price_Change_Day_percent > -0.41:
+        #Bit o' movement .... Not alot!
+        #Bit o' movement .... Not alot!
+        if Price_Change_Day_percent < 0.45 and Price_Change_Day_percent > -0.45:
+        #if Price_Change_Day_percent > 0.20 and Price_Change_Day_percent < -0.20:
             print ("Price Change Percentage on day is " + str(Price_Change_Day_percent))
             Price_Change_OK = True
             
@@ -230,7 +239,7 @@ for times_round_loop in range(1, 9999):
         if float(spread) < -1:
             Price_Change_OK = False
             systime.sleep(2)
-			
+            
         #Don't Trade on the same epic twice in a row
         if previous_traded_epic_id == epic_id:
             Price_Change_OK = False
@@ -736,7 +745,15 @@ for times_round_loop in range(1, 9999):
         #MUST NOTE :- IF THIS PRICE IS - i.e NOT HIT TARGET YET, CONVERSELY IF THIS PRICE IS POSITIVE IT IS ALREADY ABOVE PREDICTION!!!
         
         print ("TRUE GUARANTEED STOP LOSS DISTANCE WILL BE SET AT : " + str(stopDistance_value))
-        print ("Price Difference Away (Point's) : " + str(price_diff))        
+        print ("Price Difference Away (Point's) : " + str(price_diff))
+        #Price_diff should be minus if we are buying towards
+        if float(price_diff) > float(limitDistance_value):
+            print ("-----------------DEBUG-----------------")
+            print ("-----------------DEBUG-----------------")
+            print ("WARNING :- PRICE ALREADY OVER TARGET")
+            print ("-----------------DEBUG-----------------")
+            print ("-----------------DEBUG-----------------")
+            
         ################################################################
         #########################ORDER CODE#############################
         #########################ORDER CODE#############################
@@ -843,7 +860,7 @@ for times_round_loop in range(1, 9999):
     #This gets triggered if IG want a daft amount in your account for the margin, More than you specified initially. 
     #This is fine, Whilst it is a bit hacky basically start over again.
     #######################################################################################
-    if str(d['reason']) == "ATTACHED_ORDER_LEVEL_ERROR":
+    if str(d['reason']) == "ATTACHED_ORDER_LEVEL_ERROR" or str(d['reason']) == "MINIMUM_ORDER_SIZE_ERROR" or str(d['reason']) == "INSUFFICIENT_FUNDS":
         print ("!!DEBUG!! Not enough wonga in your account for this type of trade!!, Try again!!")
         continue
         
