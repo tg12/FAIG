@@ -20,13 +20,11 @@ from sklearn.linear_model import LinearRegression
 import sys, os
 
 ########################################################################################################################
-#Joke here
-########################################################################################################################
-# REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
-# API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-# API_KEY = '********************' #<-------------Special IG Index API Key, Problem on 23rd Jan
-# #API_KEY = '********************'
-# data = {"identifier":"********************","password": "********************"}
+REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
+API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
+API_KEY = '*******************************************' #<-------------Special IG Index API Key, Problem on 23rd Jan
+#API_KEY = '*******************************************'
+data = {"identifier":"*******************************************","password": "*******************************************"}
 ########################################################################################################################
 ########################################################################################################################
 ########################################################################################################################
@@ -34,10 +32,10 @@ import sys, os
 ########################################################################################################################
 ########################################################################################################################
 ########################################################################################################################
-REAL_OR_NO_REAL = 'https://api.ig.com/gateway/deal'
-API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-API_KEY = '********************'
-data = {"identifier":"********************","password": "********************"}
+# REAL_OR_NO_REAL = 'https://api.ig.com/gateway/deal'
+# API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
+# API_KEY = '*******************************************'
+# data = {"identifier":"*******************************************","password": "*******************************************"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -109,7 +107,7 @@ expiry_value = "DFB"
 guaranteedStop_value = True
 currencyCode_value = "GBP"
 forceOpen_value = True
-stopDistance_value = "100" #Initial Stop loss, Worked out later per trade
+stopDistance_value = "110" #Initial Stop loss, Worked out later per trade
 
 #HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
 #HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
@@ -179,6 +177,7 @@ def humanize_time(secs):
     return '%02d:%02d:%02d' % (hours, mins, secs)   
     
 previous_traded_epic_id = "None"
+Tight_Spread = False
 
 for times_round_loop in range(1, 9999):
 
@@ -188,7 +187,10 @@ for times_round_loop in range(1, 9999):
 #*******************************************************************
     DO_A_THING = False
     Price_Change_OK = False
+    Tight_Spread = False
     Start_loop_time = time()
+    price_compare = "bid"
+    Price_Change_Day_percent = 0
     low_price_list = []
     high_price_list = []
     close_price_list = []
@@ -197,8 +199,7 @@ for times_round_loop in range(1, 9999):
     #THIS IS YOUR TRAINING DATA
     x = [] #This is Low Price, Volume
     y = [] #This is High Price
-    price_compare = "bid"
-    Price_Change_Day_percent = 0
+    
  
     while not Price_Change_OK:
     #If "big" percent increase, I'm not interested today. Thanks
@@ -230,15 +231,28 @@ for times_round_loop in range(1, 9999):
         bid_price = d['snapshot']['bid']
         ask_price = d['snapshot']['offer']
         spread = float(bid_price) - float(ask_price)
-        print ("bid : " + str(bid_price))
-        print ("ask : " + str(ask_price))
-        print ("-------------------------")
+        # print ("bid : " + str(bid_price))
+        # print ("ask : " + str(ask_price))
+        # print ("-------------------------")
         print ("spread : " + str(spread))
-        print ("-------------------------")
-                
-        if float(spread) < -1:
-            Price_Change_OK = False
-            systime.sleep(2)
+        ##################################################################################################################
+        ##################################################################################################################
+        #e.g Spread is -30, That is too big, In-fact way too big. Spread is -1.7, This is not too bad, We can trade on this reasonably well.
+        #Spread is 0.8. This is considered a tight spread, Set the limit as 1 as it bounces around too much (Quick in and out trade). 
+        ##################################################################################################################
+        ##################################################################################################################
+        #if spread is less than -2, It's too big
+        if float(spread) < -2:
+         print ("!!DEBUG!! :- SPREAD NOT OK")
+         Price_Change_OK = False
+         systime.sleep(2)
+        elif float(spread) > -2:
+         Price_Change_OK = True
+        #If spread is better than -2 i.e 1.9,1.8 etc etc etc    
+        if float(spread) > -1:
+            print ("-------------------------")
+            print ("!!DEBUG!! :- !!!WARNING!!! Tight Spread Detected")
+            Tight_Spread = True
             
         #Don't Trade on the same epic twice in a row
         if previous_traded_epic_id == epic_id:
@@ -826,6 +840,9 @@ for times_round_loop in range(1, 9999):
     
     previous_traded_epic_id = epic_id
     
+    if Tight_Spread == True:
+        imitDistance_value = "1"
+    
     base_url = REAL_OR_NO_REAL + '/positions/otc'
     authenticated_headers = {'Content-Type':'application/json; charset=utf-8',
             'Accept':'application/json; charset=utf-8',
@@ -968,7 +985,7 @@ for times_round_loop in range(1, 9999):
                 Prediction_Wait_Timer = 900 #15Mins
                 systime.sleep(Prediction_Wait_Timer)
                 
-            if elapsed_time > 6300:
+            if elapsed_time > 10800:
                 print ("!!DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER TIME")
                 if float (PROFIT_OR_LOSS) > 0.50: #50p
                     print ("!!DEBUG!! TRADE OPEN OVER TIME AND IN PROFIT")
@@ -991,10 +1008,10 @@ for times_round_loop in range(1, 9999):
                     print ("!!DEBUG!! : TIME AND IN PROFIT :- CLOSED")
                     
           
-            if elapsed_time > 9000:
-                print ("!!DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 2 (and half) HOURS")
+            if elapsed_time > 18000:
+                print ("!!DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 4 HOURS")
                 if -10 <= float (PROFIT_OR_LOSS) <= 0.50:
-                    print ("!!DEBUG!! TRADE OPEN OVER 2 HOURS, CUT LOSSES")
+                    print ("!!DEBUG!! TRADE OPEN OVER 4 HOURS, CUT LOSSES")
                     #ENABLE THIS CODE WHEN HAPPY WITH VALUES
                     ########################################
                     SIZE = size_value
