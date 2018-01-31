@@ -22,9 +22,9 @@ import sys, os
 ########################################################################################################################
 REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
 API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-API_KEY = '*******************************************' #<-------------Special IG Index API Key, Problem on 23rd Jan
-#API_KEY = '*******************************************'
-data = {"identifier":"*******************************************","password": "*******************************************"}
+API_KEY = '***' #<-------------Special IG Index API Key, Problem on 23rd Jan
+#API_KEY = '***'
+data = {"identifier":"***","password": "***"}
 ########################################################################################################################
 ########################################################################################################################
 ########################################################################################################################
@@ -34,8 +34,8 @@ data = {"identifier":"*******************************************","password": "
 ########################################################################################################################
 # REAL_OR_NO_REAL = 'https://api.ig.com/gateway/deal'
 # API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-# API_KEY = '*******************************************'
-# data = {"identifier":"*******************************************","password": "*******************************************"}
+# API_KEY = '***'
+# data = {"identifier":"***","password": "***"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -107,7 +107,7 @@ expiry_value = "DFB"
 guaranteedStop_value = True
 currencyCode_value = "GBP"
 forceOpen_value = True
-stopDistance_value = "110" #Initial Stop loss, Worked out later per trade
+stopDistance_value = "250" #Initial Stop loss, Worked out later per trade
 
 #HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
 #HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
@@ -205,8 +205,8 @@ for times_round_loop in range(1, 9999):
     #If "big" percent increase, I'm not interested today. Thanks
         random.shuffle(epic_ids)
         epic_id = random.choice(epic_ids)
- 
-        print("DEBUG : Random epic_id is : " + str(epic_id))
+        print ("-----------------------------------------")
+        print("!!DEBUG : Random epic_id is : " + str(epic_id))
         base_url = REAL_OR_NO_REAL + '/markets/' + epic_id
         auth_r = requests.get(base_url, headers=authenticated_headers)
         d = json.loads(auth_r.text)
@@ -724,12 +724,12 @@ for times_round_loop in range(1, 9999):
 
         score = genius_regression_model.score(x,y)
         predictions = {'intercept': genius_regression_model.intercept_, 'coefficient': genius_regression_model.coef_,   'predicted_value': price_prediction, 'accuracy' : score}
-        print ("-----------------DEBUG-----------------")
-        print (score)
-        print (predictions)
-        print ("-----------------DEBUG-----------------")
+        # print ("-----------------DEBUG-----------------")
+        # print (score)
+        # print (predictions)
+        # print ("-----------------DEBUG-----------------")
         
-        print ("!!DEBUG TIME!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+        # print ("!!DEBUG TIME!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
                
         #####################################################################
         #########################PREDICTION CODE#############################
@@ -750,9 +750,9 @@ for times_round_loop in range(1, 9999):
             
         price_diff = current_price - price_prediction
         limitDistance_value = int(low_range)
-        #Fixing a weird bug with some exotic fx
+        #Fixing a weird bug with some exotic fx, Where the prediction is 0. 
         if limitDistance_value == 0:
-            limitDistance_value = 1
+            limitDistance_value = "1"
             
         #stopDistance_value = int(max_range) 
         #NOTE Sometimes IG Index want a massive stop loss for Guaranteed, Either don't use Guaranteed or "sell at market" with Artificial Stop loss
@@ -841,7 +841,7 @@ for times_round_loop in range(1, 9999):
     previous_traded_epic_id = epic_id
     
     if Tight_Spread == True:
-        imitDistance_value = "1"
+        limitDistance_value = "2"
     
     base_url = REAL_OR_NO_REAL + '/positions/otc'
     authenticated_headers = {'Content-Type':'application/json; charset=utf-8',
