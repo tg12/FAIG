@@ -20,11 +20,10 @@ from sklearn.linear_model import LinearRegression
 import sys, os
 
 ########################################################################################################################
-REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
-API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-API_KEY = '***' #<-------------Special IG Index API Key, Problem on 23rd Jan
-#API_KEY = '***'
-data = {"identifier":"***","password": "***"}
+# REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
+# API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
+# #API_KEY = '**********************'
+# data = {"identifier":"**********************","password": "**********************"}
 ########################################################################################################################
 ########################################################################################################################
 ########################################################################################################################
@@ -32,10 +31,10 @@ data = {"identifier":"***","password": "***"}
 ########################################################################################################################
 ########################################################################################################################
 ########################################################################################################################
-# REAL_OR_NO_REAL = 'https://api.ig.com/gateway/deal'
-# API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-# API_KEY = '***'
-# data = {"identifier":"***","password": "***"}
+REAL_OR_NO_REAL = 'https://api.ig.com/gateway/deal'
+API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
+API_KEY = '**********************'
+data = {"identifier":"**********************","password": "**********************"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -107,7 +106,7 @@ expiry_value = "DFB"
 guaranteedStop_value = True
 currencyCode_value = "GBP"
 forceOpen_value = True
-stopDistance_value = "250" #Initial Stop loss, Worked out later per trade
+stopDistance_value = "90" #Initial Stop loss, Worked out later per trade
 
 #HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
 #HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
@@ -205,11 +204,20 @@ for times_round_loop in range(1, 9999):
     #If "big" percent increase, I'm not interested today. Thanks
         random.shuffle(epic_ids)
         epic_id = random.choice(epic_ids)
+        #Don't Trade on the same epic twice in a row
+        if previous_traded_epic_id == epic_id:
+            Price_Change_OK = False
+            print ("!!DEBUG!! : Don't Trade on the same epic twice in a row")
+            continue
+            
+        
         print ("-----------------------------------------")
         print("!!DEBUG : Random epic_id is : " + str(epic_id))
         base_url = REAL_OR_NO_REAL + '/markets/' + epic_id
         auth_r = requests.get(base_url, headers=authenticated_headers)
         d = json.loads(auth_r.text)
+        
+        
 
         # print ("-----------------DEBUG-----------------")
         # print(auth_r.status_code)
@@ -223,7 +231,7 @@ for times_round_loop in range(1, 9999):
         Price_Change_Day_percent = d['snapshot']['percentageChange'] 
         #Bit o' movement .... Not alot!
         #Bit o' movement .... Not alot!
-        if Price_Change_Day_percent < 0.45 and Price_Change_Day_percent > -0.45:
+        if Price_Change_Day_percent < 0.49 and Price_Change_Day_percent > -0.49:
         #if Price_Change_Day_percent > 0.20 and Price_Change_Day_percent < -0.20:
             print ("Price Change Percentage on day is " + str(Price_Change_Day_percent))
             Price_Change_OK = True
@@ -254,10 +262,7 @@ for times_round_loop in range(1, 9999):
             print ("!!DEBUG!! :- !!!WARNING!!! Tight Spread Detected")
             Tight_Spread = True
             
-        #Don't Trade on the same epic twice in a row
-        if previous_traded_epic_id == epic_id:
-            Price_Change_OK = False
-            print ("!!DEBUG!! : Don't Trade on the same epic twice in a row")
+        
         
  
     while not DO_A_THING:
@@ -795,40 +800,20 @@ for times_round_loop in range(1, 9999):
                 systime.sleep(Prediction_Wait_Timer)
                 print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
                 break
-        
-        
-        if profitable_trade_count < 6:
-            if price_diff < 0 and score > predict_accuracy:
-                DIRECTION_TO_TRADE = "BUY"
-                DIRECTION_TO_CLOSE = "SELL"
-                DIRECTION_TO_COMPARE = 'bid'
-                DO_A_THING = True
-            elif price_diff > 0 and score > predict_accuracy:
-                #It's OVER the predicted price, Keep going but keep it tight?? Tight limit!! Take small profits
-                limitDistance_value = "2"
-                DIRECTION_TO_TRADE = "SELL"
-                DIRECTION_TO_CLOSE = "BUY"
-                DIRECTION_TO_COMPARE = 'offer'
-                DO_A_THING = True
-        elif profitable_trade_count >= 6: #6, Trades ... profit. Right??? 
-            profitable_trade_count = 0
-            if price_diff < 0 and score > predict_accuracy:
-                #Be Extra Sure, Set stop loss very tight???
-                limitDistance_value = "2"
-                DIRECTION_TO_TRADE = "SELL"
-                DIRECTION_TO_CLOSE = "BUY"
-                DIRECTION_TO_COMPARE = 'offer'
-                DO_A_THING = True
-            elif price_diff > 0 and score > predict_accuracy:
-                #Be Extra Sure, Set stop loss very tight???
-                limitDistance_value = "2"
-                DIRECTION_TO_TRADE = "SELL"
-                DIRECTION_TO_CLOSE = "BUY"
-                DIRECTION_TO_COMPARE = 'offer'
-                DO_A_THING = True
-                
-        
-        
+
+        if price_diff < 0 and score > predict_accuracy:
+            DIRECTION_TO_TRADE = "BUY"
+            DIRECTION_TO_CLOSE = "SELL"
+            DIRECTION_TO_COMPARE = 'bid'
+            DO_A_THING = True
+        elif price_diff > 0 and score > predict_accuracy:
+            #It's OVER the predicted price, Keep going but keep it tight?? Tight limit!! Take small profits
+            limitDistance_value = "2"
+            DIRECTION_TO_TRADE = "BUY"
+            DIRECTION_TO_CLOSE = "SELL"
+            DIRECTION_TO_COMPARE = 'bid'
+            DO_A_THING = True
+
     if not DO_A_THING:
         #DO_A_THING NOT SET FOR WHATEVER REASON, GO BACK TO MAIN PROGRAM LOOP
         print ("-----------------DEBUG-----------------")
@@ -841,7 +826,7 @@ for times_round_loop in range(1, 9999):
     previous_traded_epic_id = epic_id
     
     if Tight_Spread == True:
-        limitDistance_value = "2"
+        limitDistance_value = "3"
     
     base_url = REAL_OR_NO_REAL + '/positions/otc'
     authenticated_headers = {'Content-Type':'application/json; charset=utf-8',
@@ -874,7 +859,7 @@ for times_round_loop in range(1, 9999):
     print(d['dealStatus'])
     print(d['reason'])
     #######################################################################################
-    #This gets triggered if IG want a daft amount in your account for the margin, More than you specified initially. 
+    #This gets triggered if IG want a daft amount in your account for the margin, More than you specified initially. This happens sometimes... deal with it! 
     #This is fine, Whilst it is a bit hacky basically start over again.
     #######################################################################################
     if str(d['reason']) == "ATTACHED_ORDER_LEVEL_ERROR" or str(d['reason']) == "MINIMUM_ORDER_SIZE_ERROR" or str(d['reason']) == "INSUFFICIENT_FUNDS":
@@ -1009,9 +994,9 @@ for times_round_loop in range(1, 9999):
                     
           
             if elapsed_time > 18000:
-                print ("!!DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 4 HOURS")
+                print ("!!DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 5 HOURS")
                 if -10 <= float (PROFIT_OR_LOSS) <= 0.50:
-                    print ("!!DEBUG!! TRADE OPEN OVER 4 HOURS, CUT LOSSES")
+                    print ("!!DEBUG!! TRADE OPEN OVER 5 HOURS, CUT LOSSES")
                     #ENABLE THIS CODE WHEN HAPPY WITH VALUES
                     ########################################
                     SIZE = size_value
