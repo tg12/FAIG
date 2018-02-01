@@ -22,8 +22,8 @@ import sys, os
 ########################################################################################################################
 # REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
 # API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-# #API_KEY = '**********************'
-# data = {"identifier":"**********************","password": "**********************"}
+# #API_KEY = '***********************'
+# data = {"identifier":"***********************","password": "***********************"}
 ########################################################################################################################
 ########################################################################################################################
 ########################################################################################################################
@@ -33,8 +33,8 @@ import sys, os
 ########################################################################################################################
 REAL_OR_NO_REAL = 'https://api.ig.com/gateway/deal'
 API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-API_KEY = '**********************'
-data = {"identifier":"**********************","password": "**********************"}
+API_KEY = '***********************'
+data = {"identifier":"***********************","password": "***********************"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -106,7 +106,7 @@ expiry_value = "DFB"
 guaranteedStop_value = True
 currencyCode_value = "GBP"
 forceOpen_value = True
-stopDistance_value = "90" #Initial Stop loss, Worked out later per trade
+stopDistance_value = "100" #Initial Stop loss, Worked out later per trade
 
 #HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
 #HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
@@ -116,10 +116,6 @@ stopDistance_value = "90" #Initial Stop loss, Worked out later per trade
 #epic_id = "CS.D.BCHUSD.TODAY.IP" #Bitcoin Cash
 #HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
 #HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
-
-#LIVE TEST
-#epic_id = "CS.D.USCGC.TODAY.IP" #Gold - OK, Not Great
-#epic_id = "CS.D.USCSI.TODAY.IP" #Silver - NOT RECOMMENDED 
 
 #ALL EPICS
 #ALL EPICS
@@ -216,7 +212,7 @@ for times_round_loop in range(1, 9999):
         base_url = REAL_OR_NO_REAL + '/markets/' + epic_id
         auth_r = requests.get(base_url, headers=authenticated_headers)
         d = json.loads(auth_r.text)
-        
+        systime.sleep(2)
         
 
         # print ("-----------------DEBUG-----------------")
@@ -229,42 +225,40 @@ for times_round_loop in range(1, 9999):
         current_price = d['snapshot']['bid']
         Price_Change_Day = d['snapshot']['netChange']
         Price_Change_Day_percent = d['snapshot']['percentageChange'] 
-        #Bit o' movement .... Not alot!
-        #Bit o' movement .... Not alot!
-        if Price_Change_Day_percent < 0.49 and Price_Change_Day_percent > -0.49:
-        #if Price_Change_Day_percent > 0.20 and Price_Change_Day_percent < -0.20:
+    
+        if Price_Change_Day_percent < 0.3 and Price_Change_Day_percent < 0.9 and Price_Change_Day_percent < -0.3 and Price_Change_Day_percent > -0.9: 
             print ("Price Change Percentage on day is " + str(Price_Change_Day_percent))
             Price_Change_OK = True
+            bid_price = d['snapshot']['bid']
+            ask_price = d['snapshot']['offer']
+            spread = float(bid_price) - float(ask_price)
+            #PUT SOME DEBUGGING HERE NEXT TIME IT FAILS
             
-        bid_price = d['snapshot']['bid']
-        ask_price = d['snapshot']['offer']
-        spread = float(bid_price) - float(ask_price)
-        # print ("bid : " + str(bid_price))
-        # print ("ask : " + str(ask_price))
-        # print ("-------------------------")
-        print ("spread : " + str(spread))
-        ##################################################################################################################
-        ##################################################################################################################
-        #e.g Spread is -30, That is too big, In-fact way too big. Spread is -1.7, This is not too bad, We can trade on this reasonably well.
-        #Spread is 0.8. This is considered a tight spread, Set the limit as 1 as it bounces around too much (Quick in and out trade). 
-        ##################################################################################################################
-        ##################################################################################################################
-        #if spread is less than -2, It's too big
-        if float(spread) < -2:
-         print ("!!DEBUG!! :- SPREAD NOT OK")
-         Price_Change_OK = False
-         systime.sleep(2)
-        elif float(spread) > -2:
-         Price_Change_OK = True
-        #If spread is better than -2 i.e 1.9,1.8 etc etc etc    
-        if float(spread) > -1:
-            print ("-------------------------")
-            print ("!!DEBUG!! :- !!!WARNING!!! Tight Spread Detected")
-            Tight_Spread = True
-            
+            # print ("bid : " + str(bid_price))
+            # print ("ask : " + str(ask_price))
+            # print ("-------------------------")
+            print ("spread : " + str(spread))
+            ##################################################################################################################
+            ##################################################################################################################
+            #e.g Spread is -30, That is too big, In-fact way too big. Spread is -1.7, This is not too bad, We can trade on this reasonably well.
+            #Spread is 0.8. This is considered a tight spread, Set the limit as 1/2 as it bounces around too much (Quick in and out trade). 
+            ##################################################################################################################
+            ##################################################################################################################
+            #if spread is less than -2, It's too big
+            if float(spread) < -2:
+             print ("!!DEBUG!! :- SPREAD NOT OK")
+             Price_Change_OK = False
+             systime.sleep(2)
+            elif float(spread) > -2:
+             Price_Change_OK = True
+            #If spread is better than -2 i.e 1.9,1.8 etc etc etc    
+            if float(spread) > -1:
+                print ("-------------------------")
+                print ("!!DEBUG!! :- !!!WARNING!!! Tight Spread Detected")
+                Tight_Spread = True
         
         
- 
+
     while not DO_A_THING:
         print ("!!Internal Notes only - Top of Loop!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
         base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/DAY/30'
