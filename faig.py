@@ -22,8 +22,8 @@ import sys, os
 ########################################################################################################################
 # REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
 # API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-# #API_KEY = '***********************'
-# data = {"identifier":"***********************","password": "***********************"}
+# API_KEY = '*************************'
+# data = {"identifier":"*************************","password": "*************************"}
 ########################################################################################################################
 ########################################################################################################################
 ########################################################################################################################
@@ -33,8 +33,8 @@ import sys, os
 ########################################################################################################################
 REAL_OR_NO_REAL = 'https://api.ig.com/gateway/deal'
 API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-API_KEY = '***********************'
-data = {"identifier":"***********************","password": "***********************"}
+API_KEY = '*************************'
+data = {"identifier":"*************************","password": "*************************"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -106,7 +106,7 @@ expiry_value = "DFB"
 guaranteedStop_value = True
 currencyCode_value = "GBP"
 forceOpen_value = True
-stopDistance_value = "100" #Initial Stop loss, Worked out later per trade
+stopDistance_value = "250" #Initial Stop loss, Worked out later per trade
 
 #HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
 #HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
@@ -226,7 +226,7 @@ for times_round_loop in range(1, 9999):
         Price_Change_Day = d['snapshot']['netChange']
         Price_Change_Day_percent = d['snapshot']['percentageChange'] 
     
-        if Price_Change_Day_percent < 0.3 and Price_Change_Day_percent < 0.9 and Price_Change_Day_percent < -0.3 and Price_Change_Day_percent > -0.9: 
+        if Price_Change_Day_percent < 0.49 and Price_Change_Day_percent < 0.9 and Price_Change_Day_percent < -0.49 and Price_Change_Day_percent > -0.9: 
             print ("Price Change Percentage on day is " + str(Price_Change_Day_percent))
             Price_Change_OK = True
             bid_price = d['snapshot']['bid']
@@ -783,30 +783,43 @@ for times_round_loop in range(1, 9999):
         Prediction_Wait_Timer = int(TIME_WAIT_MULTIPLIER) #Wait
         print ("!!DEBUG TIME!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
         if price_diff < 0 and score < predict_accuracy: 
-                DO_A_THING = False
-                print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-                systime.sleep(Prediction_Wait_Timer)
-                print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-                break
+            DO_A_THING = False
+            print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+            systime.sleep(Prediction_Wait_Timer)
+            print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+            break
         elif price_diff > 0 and score < predict_accuracy:
-                DO_A_THING = False
-                print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-                systime.sleep(Prediction_Wait_Timer)
-                print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-                break
+            DO_A_THING = False
+            print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+            systime.sleep(Prediction_Wait_Timer)
+            print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+            break
 
-        if price_diff < 0 and score > predict_accuracy:
+        if price_diff < 0 and score > predict_accuracy and Price_Change_Day_percent > 0:
             DIRECTION_TO_TRADE = "BUY"
             DIRECTION_TO_CLOSE = "SELL"
             DIRECTION_TO_COMPARE = 'bid'
             DO_A_THING = True
-        elif price_diff > 0 and score > predict_accuracy:
-            #It's OVER the predicted price, Keep going but keep it tight?? Tight limit!! Take small profits
+        elif price_diff > 0 and score > predict_accuracy and Price_Change_Day_percent < 0:
+            #Above Target
             limitDistance_value = "2"
-            DIRECTION_TO_TRADE = "BUY"
-            DIRECTION_TO_CLOSE = "SELL"
-            DIRECTION_TO_COMPARE = 'bid'
+            DIRECTION_TO_TRADE = "SELL"
+            DIRECTION_TO_CLOSE = "BUY"
+            DIRECTION_TO_COMPARE = 'offer'
             DO_A_THING = True
+        elif price_diff < 0 and score > predict_accuracy and Price_Change_Day_percent < 0:
+            #Normal Trade
+            DIRECTION_TO_TRADE = "SELL"
+            DIRECTION_TO_CLOSE = "BUY"
+            DIRECTION_TO_COMPARE = 'offer'
+            DO_A_THING = True
+        else:
+            DO_A_THING = False
+            print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+            systime.sleep(Prediction_Wait_Timer)
+            print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+            break
+        
 
     if not DO_A_THING:
         #DO_A_THING NOT SET FOR WHATEVER REASON, GO BACK TO MAIN PROGRAM LOOP
