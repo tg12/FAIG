@@ -22,8 +22,9 @@ import sys, os
 ########################################################################################################################
 # REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
 # API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-# API_KEY = '*************************'
-# data = {"identifier":"*************************","password": "*************************"}
+# #API_KEY = '*********************' 
+# API_KEY = '*********************'
+# data = {"identifier":"*********************","password": "*********************"}
 ########################################################################################################################
 ########################################################################################################################
 ########################################################################################################################
@@ -33,8 +34,8 @@ import sys, os
 ########################################################################################################################
 REAL_OR_NO_REAL = 'https://api.ig.com/gateway/deal'
 API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-API_KEY = '*************************'
-data = {"identifier":"*************************","password": "*************************"}
+API_KEY = '*********************'
+data = {"identifier":"*********************","password": "*********************"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -118,13 +119,9 @@ stopDistance_value = "250" #Initial Stop loss, Worked out later per trade
 #HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
 
 #ALL EPICS
-#ALL EPICS
-#ALL EPICS
-#ALL EPICS
 epic_ids = ["CS.D.AUDUSD.TODAY.IP", "CS.D.EURCHF.TODAY.IP", "CS.D.EURGBP.TODAY.IP", "CS.D.EURJPY.TODAY.IP", "CS.D.EURUSD.TODAY.IP", "CS.D.GBPEUR.TODAY.IP", "CS.D.GBPUSD.TODAY.IP", "CS.D.USDCAD.TODAY.IP", "CS.D.USDCHF.TODAY.IP", "CS.D.USDJPY.TODAY.IP", "CS.D.CADCHF.TODAY.IP", "CS.D.CADJPY.TODAY.IP", "CS.D.CHFJPY.TODAY.IP", "CS.D.EURCAD.TODAY.IP", "CS.D.EURSGD.TODAY.IP", "CS.D.EURZAR.TODAY.IP", "CS.D.GBPCAD.TODAY.IP", "CS.D.GBPCHF.TODAY.IP", "CS.D.GBPJPY.TODAY.IP", "CS.D.GBPSGD.TODAY.IP", "CS.D.GBPZAR.TODAY.IP", "CS.D.MXNJPY.TODAY.IP", "CS.D.NOKJPY.TODAY.IP", "CS.D.PLNJPY.TODAY.IP", "CS.D.SEKJPY.TODAY.IP", "CS.D.SGDJPY.TODAY.IP", "CS.D.USDSGD.TODAY.IP", "CS.D.USDZAR.TODAY.IP", "CS.D.AUDCAD.TODAY.IP", "CS.D.AUDCHF.TODAY.IP", "CS.D.AUDEUR.TODAY.IP", "CS.D.AUDGBP.TODAY.IP", "CS.D.AUDJPY.TODAY.IP", "CS.D.AUDNZD.TODAY.IP", "CS.D.AUDSGD.TODAY.IP", "CS.D.EURAUD.TODAY.IP", "CS.D.EURNZD.TODAY.IP", "CS.D.GBPAUD.TODAY.IP", "CS.D.GBPNZD.TODAY.IP", "CS.D.NZDAUD.TODAY.IP", "CS.D.NZDCAD.TODAY.IP", "CS.D.NZDCHF.TODAY.IP", "CS.D.NZDEUR.TODAY.IP", "CS.D.NZDGBP.TODAY.IP", "CS.D.NZDJPY.TODAY.IP", "CS.D.NZDUSD.TODAY.IP", "CS.D.CHFHUF.TODAY.IP", "CS.D.EURCZK.TODAY.IP", "CS.D.EURHUF.TODAY.IP", "CS.D.EURILS.TODAY.IP", "CS.D.EURMXN.TODAY.IP", "CS.D.EURPLN.TODAY.IP", "CS.D.EURTRY.TODAY.IP", "CS.D.GBPCZK.TODAY.IP", "CS.D.GBPHUF.TODAY.IP", "CS.D.GBPILS.TODAY.IP", "CS.D.GBPMXN.TODAY.IP", "CS.D.GBPPLN.TODAY.IP", "CS.D.GBPTRY.TODAY.IP", "CS.D.TRYJPY.TODAY.IP", "CS.D.USDCZK.TODAY.IP", "CS.D.USDHUF.TODAY.IP", "CS.D.USDILS.TODAY.IP", "CS.D.USDMXN.TODAY.IP", "CS.D.USDPLN.TODAY.IP", "CS.D.USDTRY.TODAY.IP", "CS.D.CADNOK.TODAY.IP", "CS.D.CHFNOK.TODAY.IP", "CS.D.EURDKK.TODAY.IP", "CS.D.EURNOK.TODAY.IP", "CS.D.EURSEK.TODAY.IP", "CS.D.GBPDKK.TODAY.IP", "CS.D.GBPNOK.TODAY.IP", "CS.D.GBPSEK.TODAY.IP", "CS.D.NOKSEK.TODAY.IP", "CS.D.USDDKK.TODAY.IP", "CS.D.USDNOK.TODAY.IP", "CS.D.USDSEK.TODAY.IP", "CS.D.AUDCNH.TODAY.IP", "CS.D.CADCNH.TODAY.IP", "CS.D.CNHJPY.TODAY.IP", "CS.D.BRLJPY.TODAY.IP", "CS.D.GBPINR.TODAY.IP", "CS.D.USDBRL.TODAY.IP", "CS.D.USDIDR.TODAY.IP", "CS.D.USDINR.TODAY.IP", "CS.D.USDKRW.TODAY.IP", "CS.D.USDMYR.TODAY.IP", "CS.D.USDPHP.TODAY.IP", "CS.D.USDTWD.TODAY.IP", "CS.D.EURCNH.TODAY.IP", "CS.D.sp_EURRUB.TODAY.IP", "CS.D.GBPCNH.TODAY.IP", "CS.D.NZDCNH.TODAY.IP", "CS.D.USDCNH.TODAY.IP", "CS.D.sp_USDRUB.TODAY.IP"]
 #ALL EPICS
-#ALL EPICS
-#ALL EPICS
+
 ##############################################################################################################################################################################
 ##############################################################################################################################################################################
 ##############################################################################################################################################################################
@@ -197,7 +194,6 @@ for times_round_loop in range(1, 9999):
     
  
     while not Price_Change_OK:
-    #If "big" percent increase, I'm not interested today. Thanks
         random.shuffle(epic_ids)
         epic_id = random.choice(epic_ids)
         #Don't Trade on the same epic twice in a row
@@ -252,10 +248,10 @@ for times_round_loop in range(1, 9999):
             elif float(spread) > -2:
              Price_Change_OK = True
             #If spread is better than -2 i.e 1.9,1.8 etc etc etc    
-            if float(spread) > -1:
-                print ("-------------------------")
-                print ("!!DEBUG!! :- !!!WARNING!!! Tight Spread Detected")
-                Tight_Spread = True
+            # if float(spread) > -1.5:
+                # print ("-------------------------")
+                # print ("!!DEBUG!! :- !!!WARNING!!! Tight Spread Detected")
+                # Tight_Spread = True
         
         
 
@@ -693,13 +689,7 @@ for times_round_loop in range(1, 9999):
         for i in d['prices']:
             low_price = i['lowPrice'][price_compare]
             volume = i['lastTradedVolume']
-        
-        # print ("DEBUG : avg_price_movement_day : " + str(avg_price_movement_day))
-        # print ("DEBUG : Price_Change_Day : " + str(Price_Change_Day))
-        
-        # if float(avg_price_movement_day) < float(Price_Change_Day):
-            # break
-            
+
         #####################################################################
         #########################PREDICTION CODE#############################
         #########################PREDICTION CODE#############################
@@ -727,29 +717,11 @@ for times_round_loop in range(1, 9999):
         # print (score)
         # print (predictions)
         # print ("-----------------DEBUG-----------------")
-        
-        # print ("!!DEBUG TIME!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-               
-        #####################################################################
-        #########################PREDICTION CODE#############################
-        #########################PREDICTION CODE#############################
-        #########################PREDICTION CODE#############################
-        #########################PREDICTION CODE#############################
-        #########################PREDICTION CODE#############################
-        #####################################################################
-        #DO WE NEED THIS API CALL???? TODO :- REMOVE
-        #base_url = REAL_OR_NO_REAL + '/markets/' + epic_id
-        #auth_r = requests.get(base_url, headers=authenticated_headers)
-        #d = json.loads(auth_r.text)
-        # print ("-----------------DEBUG-----------------")
-        # print(auth_r.status_code)
-        # print(auth_r.reason)
-        # print (auth_r.text)
-        # print ("-----------------DEBUG-----------------")
             
         price_diff = current_price - price_prediction
         limitDistance_value = int(low_range)
         #Fixing a weird bug with some exotic fx, Where the prediction is 0. 
+		#Fixing a weird bug with some exotic fx, Where the prediction is 0.
         if limitDistance_value == 0:
             limitDistance_value = "1"
             
@@ -781,34 +753,41 @@ for times_round_loop in range(1, 9999):
         #############Predict Accuracy isn't that great. ################
         ################################################################
         Prediction_Wait_Timer = int(TIME_WAIT_MULTIPLIER) #Wait
-        print ("!!DEBUG TIME!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-        if price_diff < 0 and score < predict_accuracy: 
-            DO_A_THING = False
-            print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-            systime.sleep(Prediction_Wait_Timer)
-            print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-            break
-        elif price_diff > 0 and score < predict_accuracy:
+        
+        # if price_diff < 0 and score < predict_accuracy: 
+            # DO_A_THING = False
+            # print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+            # systime.sleep(Prediction_Wait_Timer)
+            # print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+            # break
+        # elif price_diff > 0 and score < predict_accuracy:
+            # DO_A_THING = False
+            # print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+            # systime.sleep(Prediction_Wait_Timer)
+            # print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+            # break
+            
+        if score < predict_accuracy:
+            print ("!!DEBUG TIME!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
             DO_A_THING = False
             print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
             systime.sleep(Prediction_Wait_Timer)
             print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
             break
 
-        if price_diff < 0 and score > predict_accuracy and Price_Change_Day_percent > 0:
+        if price_diff < float(limitDistance_value) and score > predict_accuracy and Price_Change_Day_percent > 0:
             DIRECTION_TO_TRADE = "BUY"
             DIRECTION_TO_CLOSE = "SELL"
             DIRECTION_TO_COMPARE = 'bid'
             DO_A_THING = True
         elif price_diff > 0 and score > predict_accuracy and Price_Change_Day_percent < 0:
-            #Above Target
+            #!!!!Above Predicted Target!!!!
             limitDistance_value = "2"
             DIRECTION_TO_TRADE = "SELL"
             DIRECTION_TO_CLOSE = "BUY"
             DIRECTION_TO_COMPARE = 'offer'
             DO_A_THING = True
-        elif price_diff < 0 and score > predict_accuracy and Price_Change_Day_percent < 0:
-            #Normal Trade
+        elif price_diff < float(limitDistance_value) and score > predict_accuracy and Price_Change_Day_percent < 0:
             DIRECTION_TO_TRADE = "SELL"
             DIRECTION_TO_CLOSE = "BUY"
             DIRECTION_TO_COMPARE = 'offer'
@@ -830,10 +809,8 @@ for times_round_loop in range(1, 9999):
         print ("-----------------DEBUG-----------------")
         continue
     
-    previous_traded_epic_id = epic_id
-    
-    if Tight_Spread == True:
-        limitDistance_value = "3"
+    # if Tight_Spread == True:
+        # limitDistance_value = "3"
     
     base_url = REAL_OR_NO_REAL + '/positions/otc'
     authenticated_headers = {'Content-Type':'application/json; charset=utf-8',
@@ -850,13 +827,12 @@ for times_round_loop in range(1, 9999):
     print(r.reason)
     print (r.text)
     print ("-----------------DEBUG-----------------")
-        
-        
-    
+
     d = json.loads(r.text)
     deal_ref = d['dealReference']
     systime.sleep(2)
     # MAKE AN ORDER
+    
     #CONFIRM MARKET ORDER
     base_url = REAL_OR_NO_REAL + '/confirms/'+ deal_ref
     auth_r = requests.get(base_url, headers=authenticated_headers)
@@ -865,6 +841,7 @@ for times_round_loop in range(1, 9999):
     print("DEAL ID : " + str(d['dealId']))
     print(d['dealStatus'])
     print(d['reason'])
+    
     #######################################################################################
     #This gets triggered if IG want a daft amount in your account for the margin, More than you specified initially. This happens sometimes... deal with it! 
     #This is fine, Whilst it is a bit hacky basically start over again.
@@ -873,7 +850,7 @@ for times_round_loop in range(1, 9999):
         print ("!!DEBUG!! Not enough wonga in your account for this type of trade!!, Try again!!")
         continue
         
-        
+    previous_traded_epic_id = epic_id    
     # the trade will only break even once the price of the asset being traded has surpassed the sell price (for long trades) or buy price (for short trades). 
     ##########################################
     ##########READ IN INITIAL PROFIT##########
@@ -888,6 +865,10 @@ for times_round_loop in range(1, 9999):
     print(r.reason)
     print (r.text)
     print ("-----------------DEBUG-----------------")
+    
+    ##########################################
+    ##########READ IN INITIAL PROFIT##########
+    ##########################################
     
     if DIRECTION_TO_TRADE == "SELL":
         PROFIT_OR_LOSS = float(d['position']['openLevel']) - float(d['market'][DIRECTION_TO_COMPARE])
@@ -1006,23 +987,23 @@ for times_round_loop in range(1, 9999):
                     print ("!!DEBUG!! TRADE OPEN OVER 5 HOURS, CUT LOSSES")
                     #ENABLE THIS CODE WHEN HAPPY WITH VALUES
                     ########################################
-                    SIZE = size_value
-                    ORDER_TYPE = orderType_value
-                    base_url = REAL_OR_NO_REAL + '/positions/otc'
-                    data = {"dealId":DEAL_ID,"direction":DIRECTION_TO_CLOSE,"size":SIZE,"orderType":ORDER_TYPE}
-                    #authenticated_headers_delete IS HACKY AF WORK AROUND!! AS PER .... https://labs.ig.com/node/36
-                    authenticated_headers_delete = {'Content-Type':'application/json; charset=utf-8',
-                    'Accept':'application/json; charset=utf-8',
-                    'X-IG-API-KEY':API_KEY,
-                    'CST':CST_token,
-                    'X-SECURITY-TOKEN':x_sec_token,
-                    '_method':"DELETE"}
-                    auth_r = requests.post(base_url, data=json.dumps(data), headers=authenticated_headers_delete) 
-                    #DEBUG
-                    print(auth_r.status_code)
-                    print(auth_r.reason)
-                    print (auth_r.text)
-                    print ("DEBUG : TIME AND IN PROFIT :- CLOSED")
+                    # SIZE = size_value
+                    # ORDER_TYPE = orderType_value
+                    # base_url = REAL_OR_NO_REAL + '/positions/otc'
+                    # data = {"dealId":DEAL_ID,"direction":DIRECTION_TO_CLOSE,"size":SIZE,"orderType":ORDER_TYPE}
+                    # #authenticated_headers_delete IS HACKY AF WORK AROUND!! AS PER .... https://labs.ig.com/node/36
+                    # authenticated_headers_delete = {'Content-Type':'application/json; charset=utf-8',
+                    # 'Accept':'application/json; charset=utf-8',
+                    # 'X-IG-API-KEY':API_KEY,
+                    # 'CST':CST_token,
+                    # 'X-SECURITY-TOKEN':x_sec_token,
+                    # '_method':"DELETE"}
+                    # auth_r = requests.post(base_url, data=json.dumps(data), headers=authenticated_headers_delete) 
+                    # #DEBUG
+                    # print(auth_r.status_code)
+                    # print(auth_r.reason)
+                    # print (auth_r.text)
+                    # print ("DEBUG : TIME AND IN PROFIT :- CLOSED")
                 
                         
     except Exception as e:
