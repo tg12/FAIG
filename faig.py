@@ -22,9 +22,8 @@ import sys, os
 ########################################################################################################################
 # REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
 # API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-# #API_KEY = '*********************' 
-# API_KEY = '*********************'
-# data = {"identifier":"*********************","password": "*********************"}
+# API_KEY = '*********************************'
+# data = {"identifier":"*********************************","password": "*********************************"}
 ########################################################################################################################
 ########################################################################################################################
 ########################################################################################################################
@@ -34,8 +33,8 @@ import sys, os
 ########################################################################################################################
 REAL_OR_NO_REAL = 'https://api.ig.com/gateway/deal'
 API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-API_KEY = '*********************'
-data = {"identifier":"*********************","password": "*********************"}
+API_KEY = '*********************************'
+data = {"identifier":"*********************************","password": "*********************************"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -144,6 +143,9 @@ TIME_WAIT_MULTIPLIER = 60
 #STOP_LOSS_MULTIPLIER = 4 #Not currently in use, 13th Jan
 predict_accuracy = 0.89
 profitable_trade_count = 0
+previous_traded_epic_id = "None"
+Tight_Spread = False
+
 print ("START TIME : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
 
 def exponential_average(values, window):
@@ -168,9 +170,6 @@ def humanize_time(secs):
     hours, mins = divmod(mins, 60)
     return '%02d:%02d:%02d' % (hours, mins, secs)   
     
-previous_traded_epic_id = "None"
-Tight_Spread = False
-
 for times_round_loop in range(1, 9999):
 
 #*******************************************************************
@@ -209,7 +208,6 @@ for times_round_loop in range(1, 9999):
         auth_r = requests.get(base_url, headers=authenticated_headers)
         d = json.loads(auth_r.text)
         systime.sleep(2)
-        
 
         # print ("-----------------DEBUG-----------------")
         # print(auth_r.status_code)
@@ -221,8 +219,8 @@ for times_round_loop in range(1, 9999):
         current_price = d['snapshot']['bid']
         Price_Change_Day = d['snapshot']['netChange']
         Price_Change_Day_percent = d['snapshot']['percentageChange'] 
-    
-        if Price_Change_Day_percent < 0.49 and Price_Change_Day_percent < 0.9 and Price_Change_Day_percent < -0.49 and Price_Change_Day_percent > -0.9: 
+
+        if Price_Change_Day_percent < 0.49 and Price_Change_Day_percent < 1.1 and Price_Change_Day_percent < -0.49 and Price_Change_Day_percent > -1.1: 
             print ("Price Change Percentage on day is " + str(Price_Change_Day_percent))
             Price_Change_OK = True
             bid_price = d['snapshot']['bid']
@@ -237,7 +235,7 @@ for times_round_loop in range(1, 9999):
             ##################################################################################################################
             ##################################################################################################################
             #e.g Spread is -30, That is too big, In-fact way too big. Spread is -1.7, This is not too bad, We can trade on this reasonably well.
-            #Spread is 0.8. This is considered a tight spread, Set the limit as 1/2 as it bounces around too much (Quick in and out trade). 
+            #Spread is 0.8. This is considered a tight spread
             ##################################################################################################################
             ##################################################################################################################
             #if spread is less than -2, It's too big
@@ -252,8 +250,6 @@ for times_round_loop in range(1, 9999):
                 # print ("-------------------------")
                 # print ("!!DEBUG!! :- !!!WARNING!!! Tight Spread Detected")
                 # Tight_Spread = True
-        
-        
 
     while not DO_A_THING:
         print ("!!Internal Notes only - Top of Loop!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
@@ -721,7 +717,7 @@ for times_round_loop in range(1, 9999):
         price_diff = current_price - price_prediction
         limitDistance_value = int(low_range)
         #Fixing a weird bug with some exotic fx, Where the prediction is 0. 
-		#Fixing a weird bug with some exotic fx, Where the prediction is 0.
+        #Fixing a weird bug with some exotic fx, Where the prediction is 0.
         if limitDistance_value == 0:
             limitDistance_value = "1"
             
@@ -731,14 +727,7 @@ for times_round_loop in range(1, 9999):
         
         print ("TRUE GUARANTEED STOP LOSS DISTANCE WILL BE SET AT : " + str(stopDistance_value))
         print ("Price Difference Away (Point's) : " + str(price_diff))
-        #Price_diff should be minus if we are buying towards
-        if float(price_diff) > float(limitDistance_value):
-            print ("-----------------DEBUG-----------------")
-            print ("-----------------DEBUG-----------------")
-            print ("WARNING :- PRICE ALREADY OVER TARGET")
-            print ("-----------------DEBUG-----------------")
-            print ("-----------------DEBUG-----------------")
-            
+                   
         ################################################################
         #########################ORDER CODE#############################
         #########################ORDER CODE#############################
@@ -766,7 +755,14 @@ for times_round_loop in range(1, 9999):
             # systime.sleep(Prediction_Wait_Timer)
             # print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
             # break
-            
+        
+        if float(current_price) >= price_prediction:
+            print ("!!DEBUG!! Current Price is OVER prediction")
+            #limitDistance_value = "2"
+        elif float(current_price) <= price_prediction:
+            print ("!!DEBUG!! Current Price is UNDER prediction")
+
+        
         if score < predict_accuracy:
             print ("!!DEBUG TIME!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
             DO_A_THING = False
