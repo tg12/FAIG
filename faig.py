@@ -20,10 +20,11 @@ from sklearn.linear_model import LinearRegression
 import sys, os
 
 ########################################################################################################################
-# REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
-# API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-# API_KEY = '*********************************'
-# data = {"identifier":"*********************************","password": "*********************************"}
+REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
+API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
+API_KEY = '*******************' 
+API_KEY = '*******************'
+data = {"identifier":"*******************","password": "*******************"}
 ########################################################################################################################
 ########################################################################################################################
 ########################################################################################################################
@@ -31,10 +32,10 @@ import sys, os
 ########################################################################################################################
 ########################################################################################################################
 ########################################################################################################################
-REAL_OR_NO_REAL = 'https://api.ig.com/gateway/deal'
-API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-API_KEY = '*********************************'
-data = {"identifier":"*********************************","password": "*********************************"}
+# REAL_OR_NO_REAL = 'https://api.ig.com/gateway/deal'
+# API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
+# API_KEY = '*******************'
+# data = {"identifier":"*******************","password": "*******************"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -218,9 +219,9 @@ for times_round_loop in range(1, 9999):
         MARKET_ID = d['instrument']['marketId']
         current_price = d['snapshot']['bid']
         Price_Change_Day = d['snapshot']['netChange']
-        Price_Change_Day_percent = d['snapshot']['percentageChange'] 
+        Price_Change_Day_percent = float(d['snapshot']['percentageChange'])
 
-        if Price_Change_Day_percent < 0.49 and Price_Change_Day_percent < 1.1 and Price_Change_Day_percent < -0.49 and Price_Change_Day_percent > -1.1: 
+        if Price_Change_Day_percent < 0.49 and Price_Change_Day_percent < 1.9 and Price_Change_Day_percent < -0.49 and Price_Change_Day_percent > -1.9: 
             print ("Price Change Percentage on day is " + str(Price_Change_Day_percent))
             Price_Change_OK = True
             bid_price = d['snapshot']['bid']
@@ -709,16 +710,16 @@ for times_round_loop in range(1, 9999):
 
         score = genius_regression_model.score(x,y)
         predictions = {'intercept': genius_regression_model.intercept_, 'coefficient': genius_regression_model.coef_,   'predicted_value': price_prediction, 'accuracy' : score}
-        # print ("-----------------DEBUG-----------------")
-        # print (score)
-        # print (predictions)
-        # print ("-----------------DEBUG-----------------")
+        print ("-----------------DEBUG-----------------")
+        print (score)
+        print (predictions)
+        print ("-----------------DEBUG-----------------")
             
         price_diff = current_price - price_prediction
         limitDistance_value = int(low_range)
         #Fixing a weird bug with some exotic fx, Where the prediction is 0. 
         #Fixing a weird bug with some exotic fx, Where the prediction is 0.
-        if limitDistance_value == 0:
+        if int(limitDistance_value) == 0:
             limitDistance_value = "1"
             
         #stopDistance_value = int(max_range) 
@@ -743,56 +744,42 @@ for times_round_loop in range(1, 9999):
         ################################################################
         Prediction_Wait_Timer = int(TIME_WAIT_MULTIPLIER) #Wait
         
-        # if price_diff < 0 and score < predict_accuracy: 
-            # DO_A_THING = False
-            # print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-            # systime.sleep(Prediction_Wait_Timer)
-            # print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-            # break
-        # elif price_diff > 0 and score < predict_accuracy:
-            # DO_A_THING = False
-            # print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-            # systime.sleep(Prediction_Wait_Timer)
-            # print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-            # break
-        
-        if float(current_price) >= price_prediction:
+        if float(current_price) > price_prediction:
             print ("!!DEBUG!! Current Price is OVER prediction")
             #limitDistance_value = "2"
-        elif float(current_price) <= price_prediction:
+        elif float(current_price) < price_prediction:
             print ("!!DEBUG!! Current Price is UNDER prediction")
 
-        
-        if score < predict_accuracy:
-            print ("!!DEBUG TIME!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+        if float(score) < float(predict_accuracy):
+            print ("!!DEBUG!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
             DO_A_THING = False
-            print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+            print ("!!DEBUG!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
             systime.sleep(Prediction_Wait_Timer)
-            print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+            print ("!!DEBUG!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
             break
-
-        if price_diff < float(limitDistance_value) and score > predict_accuracy and Price_Change_Day_percent > 0:
-            DIRECTION_TO_TRADE = "BUY"
-            DIRECTION_TO_CLOSE = "SELL"
-            DIRECTION_TO_COMPARE = 'bid'
-            DO_A_THING = True
-        elif price_diff > 0 and score > predict_accuracy and Price_Change_Day_percent < 0:
+            
+        sufficient_distance = limitDistance_value * -1
+        #Otherwise here might have to change limitDistance_value to minus!!
+        
+        #Three things, Price difference is less than target, Accuracy is OK, Current Price is less than Price Prediction
+        if price_diff < 0 and score > predict_accuracy and float(current_price) < float(price_prediction):
+             DIRECTION_TO_TRADE = "BUY"
+             DIRECTION_TO_CLOSE = "SELL"
+             DIRECTION_TO_COMPARE = 'bid'
+             DO_A_THING = True
+        elif float(price_diff) > float(limitDistance_value) and score > predict_accuracy and float(current_price) > float(price_prediction):
             #!!!!Above Predicted Target!!!!
+            #Tight limit (Take Profit)
             limitDistance_value = "2"
-            DIRECTION_TO_TRADE = "SELL"
-            DIRECTION_TO_CLOSE = "BUY"
-            DIRECTION_TO_COMPARE = 'offer'
-            DO_A_THING = True
-        elif price_diff < float(limitDistance_value) and score > predict_accuracy and Price_Change_Day_percent < 0:
             DIRECTION_TO_TRADE = "SELL"
             DIRECTION_TO_CLOSE = "BUY"
             DIRECTION_TO_COMPARE = 'offer'
             DO_A_THING = True
         else:
             DO_A_THING = False
-            print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+            print ("!!DEBUG!! NO CRITERIA!!: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
             systime.sleep(Prediction_Wait_Timer)
-            print ("!!DEBUG TIME!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+            print ("!!DEBUG!! NO CRITERIA!! " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
             break
         
 
@@ -842,7 +829,7 @@ for times_round_loop in range(1, 9999):
     #This gets triggered if IG want a daft amount in your account for the margin, More than you specified initially. This happens sometimes... deal with it! 
     #This is fine, Whilst it is a bit hacky basically start over again.
     #######################################################################################
-    if str(d['reason']) == "ATTACHED_ORDER_LEVEL_ERROR" or str(d['reason']) == "MINIMUM_ORDER_SIZE_ERROR" or str(d['reason']) == "INSUFFICIENT_FUNDS":
+    if str(d['reason']) == "ATTACHED_ORDER_LEVEL_ERROR" or str(d['reason']) == "MINIMUM_ORDER_SIZE_ERROR" or str(d['reason']) == "INSUFFICIENT_FUNDS" or str(d['reason']) == "MARKET_OFFLINE":
         print ("!!DEBUG!! Not enough wonga in your account for this type of trade!!, Try again!!")
         continue
         
@@ -912,7 +899,6 @@ for times_round_loop in range(1, 9999):
                 base_url = REAL_OR_NO_REAL + '/positions/'+ DEAL_ID
                 auth_r = requests.get(base_url, headers=authenticated_headers)      
                 d = json.loads(auth_r.text)
-            
             
             if DIRECTION_TO_TRADE == "SELL":
                 PROFIT_OR_LOSS = float(d['position']['openLevel']) - float(d['market'][DIRECTION_TO_COMPARE])
@@ -1000,7 +986,28 @@ for times_round_loop in range(1, 9999):
                     # print(auth_r.reason)
                     # print (auth_r.text)
                     # print ("DEBUG : TIME AND IN PROFIT :- CLOSED")
-                
+            
+            if float (PROFIT_OR_LOSS) > 4 and elapsed_time > 1800:
+                #ENABLE THIS CODE WHEN HAPPY WITH VALUES
+                ########################################
+                SIZE = size_value
+                ORDER_TYPE = orderType_value
+                base_url = REAL_OR_NO_REAL + '/positions/otc'
+                data = {"dealId":DEAL_ID,"direction":DIRECTION_TO_CLOSE,"size":SIZE,"orderType":ORDER_TYPE}
+                #authenticated_headers_delete IS HACKY AF WORK AROUND!! AS PER .... https://labs.ig.com/node/36
+                authenticated_headers_delete = {'Content-Type':'application/json; charset=utf-8',
+                'Accept':'application/json; charset=utf-8',
+                'X-IG-API-KEY':API_KEY,
+                'CST':CST_token,
+                'X-SECURITY-TOKEN':x_sec_token,
+                '_method':"DELETE"}
+                auth_r = requests.post(base_url, data=json.dumps(data), headers=authenticated_headers_delete) 
+                #DEBUG
+                print(auth_r.status_code)
+                print(auth_r.reason)
+                print (auth_r.text)
+                print ("DEBUG : TIME AND IN PROFIT :- CLOSED")
+
                         
     except Exception as e:
         #print(e) #Yeah, I know now. 
