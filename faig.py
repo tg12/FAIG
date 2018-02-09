@@ -22,9 +22,9 @@ import sys, os
 ########################################################################################################################
 # REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
 # API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-# API_KEY = '**************************' 
-# API_KEY = '**************************'
-# data = {"identifier":"**************************","password": "**************************"}
+# API_KEY = '*********' 
+# API_KEY = '*********'
+# data = {"identifier":"*********","password": "*********"}
 ########################################################################################################################
 ########################################################################################################################
 ########################################################################################################################
@@ -34,8 +34,8 @@ import sys, os
 ########################################################################################################################
 REAL_OR_NO_REAL = 'https://api.ig.com/gateway/deal'
 API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-API_KEY = '**************************'
-data = {"identifier":"**************************","password": "**************************"}
+API_KEY = '*********'
+data = {"identifier":"*********","password": "*********"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -102,12 +102,12 @@ auth_r = requests.put(base_url, data=json.dumps(data), headers=authenticated_hea
 #UNIT TEST FOR OTHER STUFF
 limitDistance_value = "4" #Initial Limit (Take Profit), Worked out later per trade
 orderType_value = "MARKET"
-size_value = "1"
+size_value = "1.5"
 expiry_value = "DFB"
 guaranteedStop_value = True
 currencyCode_value = "GBP"
 forceOpen_value = True
-stopDistance_value = "250" #Initial Stop loss, Worked out later per trade
+stopDistance_value = "300" #Initial Stop loss, Worked out later per trade
 
 #HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
 #HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
@@ -204,6 +204,7 @@ for times_round_loop in range(1, 9999):
         # print ("-----------------DEBUG-----------------")
 
         MARKET_ID = d['instrument']['marketId']
+        
         current_price = d['snapshot']['bid']
         Price_Change_Day = d['snapshot']['netChange']
         Price_Change_Day_percent = float(d['snapshot']['percentageChange'])
@@ -239,6 +240,23 @@ for times_round_loop in range(1, 9999):
                 # print ("!!DEBUG!! :- !!!WARNING!!! Tight Spread Detected")
                 # Tight_Spread = True
 
+    
+    #Good ol "Crowd-sourcing" check.....
+    #Good ol "Crowd-sourcing" check.....
+    #Good ol "Crowd-sourcing" check.....
+    base_url = REAL_OR_NO_REAL + '/clientsentiment/'+ MARKET_ID
+    auth_r = requests.get(base_url, headers=authenticated_headers)
+    d = json.loads(auth_r.text)
+    
+    print ("-----------------DEBUG-----------------")
+    print(auth_r.status_code)
+    print(auth_r.reason)
+    print (auth_r.text)
+    print ("-----------------DEBUG-----------------")
+    
+    longPositionPercentage = float(d['longPositionPercentage'])
+    shortPositionPercentage = float(d['shortPositionPercentage'])
+    
     while not DO_A_THING:
         print ("!!Internal Notes only - Top of Loop!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
         base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/DAY/30'
@@ -427,8 +445,8 @@ for times_round_loop in range(1, 9999):
              
         max_range = max(TR_prices)
         low_range = min(TR_prices)
-        print ("stopDistance_value for " + str(epic_id) + " will bet set at " + str(int(max_range)))
-        print ("limitDistance_value for " + str(epic_id) + " will bet set at " + str(int(low_range)))
+        print ("stopDistance_value for " + str(epic_id) + " will bet set at " + str(float(max_range)))
+        print ("limitDistance_value for " + str(epic_id) + " will bet set at " + str(float(low_range)))
         if low_range > 10:
             print ("!!DEBUG!! WARNING - Take Profit over high value, Might take a while for this trade!!")
             
@@ -745,19 +763,37 @@ for times_round_loop in range(1, 9999):
         #Otherwise here might have to change limitDistance_value to minus!!
         
         #Three things, Price difference is less than target, Accuracy is OK, Current Price is less than Price Prediction
+        #Added a fourth thing "contrarian indicator"
         if price_diff < 0 and score > predict_accuracy and float(current_price) < float(price_prediction):
-             DIRECTION_TO_TRADE = "BUY"
-             DIRECTION_TO_CLOSE = "SELL"
-             DIRECTION_TO_COMPARE = 'bid'
-             DO_A_THING = True
-        elif float(price_diff) > float(limitDistance_value) and score > predict_accuracy and float(current_price) > float(price_prediction):
+            if float(shortPositionPercentage) < float(longPositionPercentage):
+                DIRECTION_TO_TRADE = "BUY"
+                DIRECTION_TO_CLOSE = "SELL"
+                DIRECTION_TO_COMPARE = 'bid'
+                DO_A_THING = True
+            elif float(shortPositionPercentage) > float(longPositionPercentage):
+                DIRECTION_TO_TRADE = "SELL"
+                DIRECTION_TO_CLOSE = "BUY"
+                DIRECTION_TO_COMPARE = 'offer'
+                DO_A_THING = True
+            else:
+                DO_A_THING = False
+        elif float(price_diff) > float(limitDistance_value) and score > predict_accuracy and float(current_price) > float(price_prediction) and float(longPositionPercentage) > float(shortPositionPercentage) :
             #!!!!Above Predicted Target!!!!
             #Tight limit (Take Profit)
-            limitDistance_value = "2"
-            DIRECTION_TO_TRADE = "SELL"
-            DIRECTION_TO_CLOSE = "BUY"
-            DIRECTION_TO_COMPARE = 'offer'
-            DO_A_THING = True
+            if float(shortPositionPercentage) < float(longPositionPercentage):
+                limitDistance_value = "2"
+                DIRECTION_TO_TRADE = "BUY"
+                DIRECTION_TO_CLOSE = "SELL"
+                DIRECTION_TO_COMPARE = 'bid'
+                DO_A_THING = True
+            elif float(shortPositionPercentage) > float(longPositionPercentage):
+                limitDistance_value = "2"
+                DIRECTION_TO_TRADE = "SELL"
+                DIRECTION_TO_CLOSE = "BUY"
+                DIRECTION_TO_COMPARE = 'offer'
+                DO_A_THING = True
+            else:
+                DO_A_THING = False
         else:
             DO_A_THING = False
             print ("!!DEBUG!! NO CRITERIA!!: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
@@ -851,7 +887,7 @@ for times_round_loop in range(1, 9999):
     ##########################################
     try:
         #while PROFIT_OR_LOSS < float(limitDistance_value): 
-        while PROFIT_OR_LOSS < float(limitDistance_value * int(size_value)) - 1: #Take something from the market, Before Take Profit.
+        while PROFIT_OR_LOSS < float(limitDistance_value * float(size_value)) - 1: #Take something from the market, Before Take Profit.
             elapsed_time = round((time() - Start_loop_time), 1) 
             print ("******************************")
             print ("Order Time : " + str(humanize_time(elapsed_time)))
@@ -892,7 +928,7 @@ for times_round_loop in range(1, 9999):
                 print ("Deal Number : " + str(times_round_loop) + " Profit/Loss : " + str(PROFIT_OR_LOSS))
                 systime.sleep(2) #Don't be too keen to read price
                 
-            ARTIFICIAL_STOP_LOSS = int(max_range) * int(size_value)
+            ARTIFICIAL_STOP_LOSS = float(max_range) * float(size_value)
             if ARTIFICIAL_STOP_LOSS > 100:
                 print ("!!!!WARNING!!!! STOP LOSS MIGHT BE TOO HIGH :- Current Value is " + str(ARTIFICIAL_STOP_LOSS))
             ARTIFICIAL_STOP_LOSS = ARTIFICIAL_STOP_LOSS * -1 #Make Negative, DO NOT REMOVE!!
@@ -967,7 +1003,7 @@ for times_round_loop in range(1, 9999):
                     print (auth_r.text)
                     print ("DEBUG : TIME AND IN PROFIT :- CLOSED")
             
-            if float (PROFIT_OR_LOSS) > 6 and elapsed_time > 1800:
+            if float (PROFIT_OR_LOSS) > 10 and elapsed_time < 2700:
                 #ENABLE THIS CODE WHEN HAPPY WITH VALUES
                 ########################################
                 SIZE = size_value
@@ -990,10 +1026,10 @@ for times_round_loop in range(1, 9999):
 
                         
     except Exception as e:
-        #print(e) #Yeah, I know now. 
+        print(e) #Yeah, I know now. 
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        print(exc_type, fname, exc_tb.tb_lineno)
+        #print(exc_type, fname, exc_tb.tb_lineno)
         print ("ERROR : ORDER MIGHT NOT BE OPEN FOR WHATEVER REASON")
         #WOAH CALM DOWN! WAIT .... STOP LOSS MIGHT HAVE BEEN HIT (Or take Profit)
         systime.sleep(random.randint(1, TIME_WAIT_MULTIPLIER))
