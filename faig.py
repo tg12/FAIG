@@ -22,9 +22,9 @@ import sys, os
 ########################################################################################################################
 # REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
 # API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-# API_KEY = '*********' 
-# API_KEY = '*********'
-# data = {"identifier":"*********","password": "*********"}
+# API_KEY = '*************' 
+# API_KEY = '*************'
+# data = {"identifier":"*************","password": "*************"}
 ########################################################################################################################
 ########################################################################################################################
 ########################################################################################################################
@@ -34,8 +34,8 @@ import sys, os
 ########################################################################################################################
 REAL_OR_NO_REAL = 'https://api.ig.com/gateway/deal'
 API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-API_KEY = '*********'
-data = {"identifier":"*********","password": "*********"}
+API_KEY = '*************'
+data = {"identifier":"*************","password": "*************"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -102,7 +102,7 @@ auth_r = requests.put(base_url, data=json.dumps(data), headers=authenticated_hea
 #UNIT TEST FOR OTHER STUFF
 limitDistance_value = "4" #Initial Limit (Take Profit), Worked out later per trade
 orderType_value = "MARKET"
-size_value = "1.5"
+size_value = "1"
 expiry_value = "DFB"
 guaranteedStop_value = True
 currencyCode_value = "GBP"
@@ -133,6 +133,15 @@ predict_accuracy = 0.89
 profitable_trade_count = 0
 previous_traded_epic_id = "None"
 Tight_Spread = False
+Client_Sentiment_Check = 59
+#******************************************************************************************************************************
+#******************************************************************************************************************************
+#******************************************************************************************************************************
+#"You can use sentiment as a filter. Only taking the setups going against the crowd. You must be in the minority of 40% or less."
+#More information See here :-https://www.reddit.com/r/Forex/comments/7wehbq/how_much_does_client_sentiment_sway_your_decisions/
+#******************************************************************************************************************************
+#******************************************************************************************************************************
+#******************************************************************************************************************************
 
 print ("START TIME : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
 
@@ -765,34 +774,36 @@ for times_round_loop in range(1, 9999):
         #Three things, Price difference is less than target, Accuracy is OK, Current Price is less than Price Prediction
         #Added a fourth thing "contrarian indicator"
         if price_diff < 0 and score > predict_accuracy and float(current_price) < float(price_prediction):
-            if float(shortPositionPercentage) < float(longPositionPercentage):
+            if float(shortPositionPercentage) < float(longPositionPercentage) and float(shortPositionPercentage) < Client_Sentiment_Check:
                 DIRECTION_TO_TRADE = "BUY"
                 DIRECTION_TO_CLOSE = "SELL"
                 DIRECTION_TO_COMPARE = 'bid'
                 DO_A_THING = True
-            elif float(shortPositionPercentage) > float(longPositionPercentage):
+            elif float(longPositionPercentage) < float(shortPositionPercentage) and float(longPositionPercentage) < Client_Sentiment_Check:
                 DIRECTION_TO_TRADE = "SELL"
                 DIRECTION_TO_CLOSE = "BUY"
                 DIRECTION_TO_COMPARE = 'offer'
                 DO_A_THING = True
             else:
+                print ("!!DEBUG No Trade This time")
                 DO_A_THING = False
-        elif float(price_diff) > float(limitDistance_value) and score > predict_accuracy and float(current_price) > float(price_prediction) and float(longPositionPercentage) > float(shortPositionPercentage) :
+        elif float(price_diff) > float(limitDistance_value) and score > predict_accuracy and float(current_price) > float(price_prediction):
             #!!!!Above Predicted Target!!!!
             #Tight limit (Take Profit)
-            if float(shortPositionPercentage) < float(longPositionPercentage):
+            if float(shortPositionPercentage) > float(longPositionPercentage) and float(shortPositionPercentage) > Client_Sentiment_Check:
                 limitDistance_value = "2"
                 DIRECTION_TO_TRADE = "BUY"
                 DIRECTION_TO_CLOSE = "SELL"
                 DIRECTION_TO_COMPARE = 'bid'
                 DO_A_THING = True
-            elif float(shortPositionPercentage) > float(longPositionPercentage):
+            elif float(longPositionPercentage) > float(shortPositionPercentage) and float(longPositionPercentage) > Client_Sentiment_Check:
                 limitDistance_value = "2"
                 DIRECTION_TO_TRADE = "SELL"
                 DIRECTION_TO_CLOSE = "BUY"
                 DIRECTION_TO_COMPARE = 'offer'
                 DO_A_THING = True
             else:
+                print ("!!DEBUG No Trade This time")
                 DO_A_THING = False
         else:
             DO_A_THING = False
@@ -1023,13 +1034,34 @@ for times_round_loop in range(1, 9999):
                 print(auth_r.reason)
                 print (auth_r.text)
                 print ("DEBUG : TIME AND IN PROFIT :- CLOSED")
+                
+            if float (PROFIT_OR_LOSS) > 20 and elapsed_time > 3600:
+                #ENABLE THIS CODE WHEN HAPPY WITH VALUES
+                ########################################
+                SIZE = size_value
+                ORDER_TYPE = orderType_value
+                base_url = REAL_OR_NO_REAL + '/positions/otc'
+                data = {"dealId":DEAL_ID,"direction":DIRECTION_TO_CLOSE,"size":SIZE,"orderType":ORDER_TYPE}
+                #authenticated_headers_delete IS HACKY AF WORK AROUND!! AS PER .... https://labs.ig.com/node/36
+                authenticated_headers_delete = {'Content-Type':'application/json; charset=utf-8',
+                'Accept':'application/json; charset=utf-8',
+                'X-IG-API-KEY':API_KEY,
+                'CST':CST_token,
+                'X-SECURITY-TOKEN':x_sec_token,
+                '_method':"DELETE"}
+                auth_r = requests.post(base_url, data=json.dumps(data), headers=authenticated_headers_delete) 
+                #DEBUG
+                print(auth_r.status_code)
+                print(auth_r.reason)
+                print (auth_r.text)
+                print ("DEBUG : TIME AND IN PROFIT :- CLOSED")
 
                         
     except Exception as e:
         print(e) #Yeah, I know now. 
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        #print(exc_type, fname, exc_tb.tb_lineno)
+        print(exc_type, fname, exc_tb.tb_lineno)
         print ("ERROR : ORDER MIGHT NOT BE OPEN FOR WHATEVER REASON")
         #WOAH CALM DOWN! WAIT .... STOP LOSS MIGHT HAVE BEEN HIT (Or take Profit)
         systime.sleep(random.randint(1, TIME_WAIT_MULTIPLIER))
