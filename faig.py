@@ -20,11 +20,11 @@ from sklearn.linear_model import LinearRegression
 import sys, os
 
 ########################################################################################################################
-REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
-API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-API_KEY = '**************' 
-#API_KEY = '**************'
-data = {"identifier":"**************","password": "**************"}
+# REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
+# API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
+# API_KEY = '*****************' 
+# #API_KEY = '*****************'
+# data = {"identifier":"**************","password": "************"}
 ########################################################################################################################
 ########################################################################################################################
 ########################################################################################################################
@@ -32,10 +32,10 @@ data = {"identifier":"**************","password": "**************"}
 ########################################################################################################################
 ########################################################################################################################
 ########################################################################################################################
-# REAL_OR_NO_REAL = 'https://api.ig.com/gateway/deal'
-# API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-# API_KEY = '**************'
-# data = {"identifier":"**************","password": "**************"}
+REAL_OR_NO_REAL = 'https://api.ig.com/gateway/deal'
+API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
+API_KEY = '*******************'
+data = {"identifier":"**************","password": "**************"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -218,7 +218,7 @@ for times_round_loop in range(1, 9999):
         else:
             Price_Change_Day_percent = float(d['snapshot']['percentageChange'])
 
-        if Price_Change_Day_percent < 0.20 and Price_Change_Day_percent < 1.9 and Price_Change_Day_percent < -0.20 and Price_Change_Day_percent > -1.9: 
+        if Price_Change_Day_percent < 0.48 and Price_Change_Day_percent < 1.9 and Price_Change_Day_percent < -0.48 and Price_Change_Day_percent > -1.9: 
             print ("Price Change Percentage on day is " + str(Price_Change_Day_percent))
             Price_Change_OK = True
             bid_price = d['snapshot']['bid']
@@ -725,7 +725,7 @@ for times_round_loop in range(1, 9999):
         
         #Fixing a weird bug with some exotic fx, Where the prediction is 0. 
         #Fixing a weird bug with some exotic fx, Where the prediction is 0.
-        if int(limitDistance_value) == 0:
+        if int(limitDistance_value) <= 0:
             limitDistance_value = "1"
             
         #stopDistance_value = int(max_range) 
@@ -992,7 +992,7 @@ for times_round_loop in range(1, 9999):
     ##########################################
     try:
         #while PROFIT_OR_LOSS < float(limitDistance_value): 
-        while PROFIT_OR_LOSS < float(limitDistance_value * float(size_value)) - 1: #Take something from the market, Before Take Profit.
+        while PROFIT_OR_LOSS < float(float(limitDistance_value) * float(size_value)) - 1: #Take something from the market, Before Take Profit.
             elapsed_time = round((time() - Start_loop_time), 1) 
             print ("******************************")
             print ("Order Time : " + str(humanize_time(elapsed_time)))
