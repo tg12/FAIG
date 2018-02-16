@@ -20,11 +20,11 @@ from sklearn.linear_model import LinearRegression
 import sys, os
 
 ########################################################################################################################
-# REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
-# API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-# API_KEY = '*****************' 
-# #API_KEY = '*****************'
-# data = {"identifier":"**************","password": "************"}
+REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
+API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
+API_KEY = '********************' 
+#API_KEY = '********************'
+data = {"identifier":"********************","password": "********************"}
 ########################################################################################################################
 ########################################################################################################################
 ########################################################################################################################
@@ -32,10 +32,10 @@ import sys, os
 ########################################################################################################################
 ########################################################################################################################
 ########################################################################################################################
-REAL_OR_NO_REAL = 'https://api.ig.com/gateway/deal'
-API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-API_KEY = '*******************'
-data = {"identifier":"**************","password": "**************"}
+# REAL_OR_NO_REAL = 'https://api.ig.com/gateway/deal'
+# API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
+# API_KEY = '********************'
+# data = {"identifier":"********************","password": "********************"}
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -103,12 +103,12 @@ auth_r = requests.put(base_url, data=json.dumps(data), headers=authenticated_hea
 #SET INITIAL VARIABLES, SOME ARE CALCUALTED LATER
 limitDistance_value = "4" 
 orderType_value = "MARKET"
-size_value = "1"
+size_value = "2"
 expiry_value = "DFB"
 guaranteedStop_value = True
 currencyCode_value = "GBP"
 forceOpen_value = True
-stopDistance_value = "250" #Initial Stop loss, Worked out later per trade
+stopDistance_value = "150" #Initial Stop loss, Worked out later per trade
 
 #HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
 #HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
@@ -130,7 +130,7 @@ epic_ids = ["CS.D.AUDUSD.TODAY.IP", "CS.D.EURCHF.TODAY.IP", "CS.D.EURGBP.TODAY.I
 predict_accuracy = 0.89
 TIME_WAIT_MULTIPLIER = 60
 #STOP_LOSS_MULTIPLIER = 4 #Not currently in use, 13th Jan
-Client_Sentiment_Check = 59
+Client_Sentiment_Check = 69
 profitable_trade_count = 0
 previous_traded_epic_id = "None"
 Tight_Spread = False
@@ -146,23 +146,6 @@ High_Trend_Watermark = 89
 #******************************************************************************************************************************
 
 print ("START TIME : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-
-# def exponential_average(values, window):
-    # weights = np.exp(np.linspace(-1.,0.,window))
-    # weights /= weights.sum()
-
-    # a = np.convolve(values, weights) [:len(values)]
-    # a[:window]=a[window]
-    # return a
-
-# def ExpMovingAverage(values, window):
-    # """ Numpy implementation of EMA
-    # """
-    # weights = np.exp(np.linspace(-1., 0., window))
-    # weights /= weights.sum()
-    # a =  np.convolve(values, weights, mode='full')[:len(values)]
-    # a[:window] = a[window]
-    # return a   
 
 def humanize_time(secs):
     mins, secs = divmod(secs, 60)
@@ -190,7 +173,7 @@ for times_round_loop in range(1, 9999):
         random.shuffle(epic_ids)
         epic_id = random.choice(epic_ids)
         #Don't Trade on the same epic twice in a row
-        if previous_traded_epic_id == epic_id:
+        if str(previous_traded_epic_id) == str(epic_id):
             Price_Change_OK = False
             print ("!!DEBUG!! : Don't Trade on the same epic twice in a row")
             continue
@@ -211,7 +194,6 @@ for times_round_loop in range(1, 9999):
         MARKET_ID = d['instrument']['marketId']
         current_price = d['snapshot']['bid']
         Price_Change_Day = d['snapshot']['netChange']
-        previous_traded_epic_id = epic_id
         
         if d['snapshot']['percentageChange'] is None:
             Price_Change_Day_percent = 0
@@ -774,7 +756,7 @@ for times_round_loop in range(1, 9999):
         #Three things, Price difference is less than target, Accuracy is OK, Current Price is less than Price Prediction
         #Added a fourth thing "contrarian indicator"
         
-        b_contrarian = True #THIS MUST BE SET EITHER WAY!! 
+        b_contrarian = False #THIS MUST BE SET EITHER WAY!! 
         if b_contrarian == True:
             print ("!!DEBUG!! b_contrarian SET!!")
             if price_diff < 0 and score > predict_accuracy and float(current_price) < float(price_prediction):
@@ -953,8 +935,8 @@ for times_round_loop in range(1, 9999):
     if str(d['reason']) == "ATTACHED_ORDER_LEVEL_ERROR" or str(d['reason']) == "MINIMUM_ORDER_SIZE_ERROR" or str(d['reason']) == "INSUFFICIENT_FUNDS" or str(d['reason']) == "MARKET_OFFLINE":
         print ("!!DEBUG!! Not enough wonga in your account for this type of trade!!, Try again!!")
         continue
-        
-    previous_traded_epic_id = epic_id    
+  
+                                         
     # the trade will only break even once the price of the asset being traded has surpassed the sell price (for long trades) or buy price (for short trades). 
     ##########################################
     ##########READ IN INITIAL PROFIT##########
@@ -1108,7 +1090,7 @@ for times_round_loop in range(1, 9999):
                     print (auth_r.text)
                     print ("DEBUG : TIME AND IN PROFIT :- CLOSED")
             
-            if float (PROFIT_OR_LOSS) > 10 and elapsed_time < 2700:
+            if float (PROFIT_OR_LOSS) > 9 and elapsed_time < 2700:
                 #ENABLE THIS CODE WHEN HAPPY WITH VALUES
                 ########################################
                 SIZE = size_value
@@ -1195,3 +1177,4 @@ for times_round_loop in range(1, 9999):
         # print(d['reason'])
         
         systime.sleep(random.randint(1, TIME_WAIT_MULTIPLIER)) #Obligatory Wait before doing next order
+        previous_traded_epic_id = str(epic_id)
