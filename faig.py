@@ -18,24 +18,16 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 ##################################################
 import sys, os
+import configparser
 
-########################################################################################################################
-REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
-API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-API_KEY = '********************' 
-#API_KEY = '********************'
-data = {"identifier":"********************","password": "********************"}
-########################################################################################################################
-########################################################################################################################
-########################################################################################################################
-# FOR REAL....
-########################################################################################################################
-########################################################################################################################
-########################################################################################################################
-# REAL_OR_NO_REAL = 'https://api.ig.com/gateway/deal'
-# API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-# API_KEY = '********************'
-# data = {"identifier":"********************","password": "********************"}
+config = configparser.ConfigParser()
+config.read("default.conf")
+config.read("config.conf")
+
+API_ENDPOINT = config['Config']['API_ENDPOINT']
+API_KEY = config['Config']['API_KEY']
+
+data = { "identifier": config['Auth']['USERNAME'], "password": config['Auth']['PASSWORD'] }
 
 headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
@@ -43,7 +35,7 @@ headers = {'Content-Type':'application/json; charset=utf-8',
         'Version':'2'
         }
 
-r = requests.post(API_ENDPOINT, data=json.dumps(data), headers=headers)
+r = requests.post(API_ENDPOINT + '/session', data=json.dumps(data), headers=headers)
  
 headers_json = dict(r.headers)
 CST_token = headers_json["CST"]
@@ -52,7 +44,7 @@ x_sec_token = headers_json["X-SECURITY-TOKEN"]
 print (R"X-SECURITY-TOKEN : " + x_sec_token)
 
 #GET ACCOUNTS
-base_url = REAL_OR_NO_REAL + '/accounts'
+base_url = API_ENDPOINT + '/accounts'
 authenticated_headers = {'Content-Type':'application/json; charset=utf-8',
         'Accept':'application/json; charset=utf-8',
         'X-IG-API-KEY':API_KEY,
@@ -72,7 +64,7 @@ for i in d['accounts']:
         spreadbet_acc_id = str(i['accountId'])
 
 #SET SPREAD BET ACCOUNT AS DEFAULT
-base_url = REAL_OR_NO_REAL + '/session'
+base_url = API_ENDPOINT + '/session'
 data = {"accountId":spreadbet_acc_id,"defaultAccount": "True"}
 auth_r = requests.put(base_url, data=json.dumps(data), headers=authenticated_headers)
 
@@ -180,7 +172,7 @@ for times_round_loop in range(1, 9999):
 
         print ("-----------------------------------------")
         print("!!DEBUG : Random epic_id is : " + str(epic_id))
-        base_url = REAL_OR_NO_REAL + '/markets/' + epic_id
+        base_url = API_ENDPOINT + '/markets/' + epic_id
         auth_r = requests.get(base_url, headers=authenticated_headers)
         d = json.loads(auth_r.text)
         systime.sleep(2)
@@ -229,7 +221,7 @@ for times_round_loop in range(1, 9999):
     #Good ol "Crowd-sourcing" check.....
     #Good ol "Crowd-sourcing" check.....
     #Good ol "Crowd-sourcing" check.....
-    base_url = REAL_OR_NO_REAL + '/clientsentiment/'+ MARKET_ID
+    base_url = API_ENDPOINT + '/clientsentiment/'+ MARKET_ID
     auth_r = requests.get(base_url, headers=authenticated_headers)
     d = json.loads(auth_r.text)
     
@@ -244,7 +236,7 @@ for times_round_loop in range(1, 9999):
     
     while not DO_A_THING:
         print ("!!Internal Notes only - Top of Loop!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/DAY/30'
+        base_url = API_ENDPOINT + '/prices/'+ epic_id + '/DAY/30'
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
         auth_r = requests.get(base_url, headers=authenticated_headers)
         d = json.loads(auth_r.text)
@@ -304,7 +296,7 @@ for times_round_loop in range(1, 9999):
         ############################################################
         ############################################################
         
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/HOUR_4/30'
+        base_url = API_ENDPOINT + '/prices/'+ epic_id + '/HOUR_4/30'
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
         auth_r = requests.get(base_url, headers=authenticated_headers)
         d = json.loads(auth_r.text)
@@ -332,7 +324,7 @@ for times_round_loop in range(1, 9999):
         ###################################################################################
         ###################################################################################
         
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/HOUR_3/30'
+        base_url = API_ENDPOINT + '/prices/'+ epic_id + '/HOUR_3/30'
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
         auth_r = requests.get(base_url, headers=authenticated_headers)
         d = json.loads(auth_r.text)
@@ -361,7 +353,7 @@ for times_round_loop in range(1, 9999):
         ###################################################################################
         ###################################################################################
         
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/HOUR_2/30'
+        base_url = API_ENDPOINT + '/prices/'+ epic_id + '/HOUR_2/30'
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
         auth_r = requests.get(base_url, headers=authenticated_headers)
         d = json.loads(auth_r.text)
@@ -391,7 +383,7 @@ for times_round_loop in range(1, 9999):
         ###################################################################################
         ###################################################################################
         
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/HOUR/30'
+        base_url = API_ENDPOINT + '/prices/'+ epic_id + '/HOUR/30'
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
         auth_r = requests.get(base_url, headers=authenticated_headers)
         d = json.loads(auth_r.text)
@@ -463,7 +455,7 @@ for times_round_loop in range(1, 9999):
         ###################################################################################
         ###################################################################################
         
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE_30/30'
+        base_url = API_ENDPOINT + '/prices/'+ epic_id + '/MINUTE_30/30'
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
         auth_r = requests.get(base_url, headers=authenticated_headers)
         d = json.loads(auth_r.text)
@@ -493,7 +485,7 @@ for times_round_loop in range(1, 9999):
         ###################################################################################
         ###################################################################################
         
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE_15/30'
+        base_url = API_ENDPOINT + '/prices/'+ epic_id + '/MINUTE_15/30'
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
         auth_r = requests.get(base_url, headers=authenticated_headers)
         d = json.loads(auth_r.text)
@@ -522,7 +514,7 @@ for times_round_loop in range(1, 9999):
         ###################################################################################
         ###################################################################################
         
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE_10/30'
+        base_url = API_ENDPOINT + '/prices/'+ epic_id + '/MINUTE_10/30'
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
         auth_r = requests.get(base_url, headers=authenticated_headers)
         d = json.loads(auth_r.text)
@@ -551,7 +543,7 @@ for times_round_loop in range(1, 9999):
         ###################################################################################
         ###################################################################################
         
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE_5/30'
+        base_url = API_ENDPOINT + '/prices/'+ epic_id + '/MINUTE_5/30'
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
         auth_r = requests.get(base_url, headers=authenticated_headers)
         d = json.loads(auth_r.text)
@@ -577,7 +569,7 @@ for times_round_loop in range(1, 9999):
             y.append(float(high_price))
             #y = High Prices
 
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE_3/30'
+        base_url = API_ENDPOINT + '/prices/'+ epic_id + '/MINUTE_3/30'
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
         auth_r = requests.get(base_url, headers=authenticated_headers)
         d = json.loads(auth_r.text)
@@ -606,7 +598,7 @@ for times_round_loop in range(1, 9999):
         ###################################################################################
         ###################################################################################
         
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE_2/30'
+        base_url = API_ENDPOINT + '/prices/'+ epic_id + '/MINUTE_2/30'
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
         auth_r = requests.get(base_url, headers=authenticated_headers)
         d = json.loads(auth_r.text)
@@ -635,7 +627,7 @@ for times_round_loop in range(1, 9999):
         ###################################################################################
         ###################################################################################
         
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE/30'
+        base_url = API_ENDPOINT + '/prices/'+ epic_id + '/MINUTE/30'
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
         auth_r = requests.get(base_url, headers=authenticated_headers)
         d = json.loads(auth_r.text)
@@ -664,7 +656,7 @@ for times_round_loop in range(1, 9999):
         ###################################################################################
         ###################################################################################
 
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/DAY/1'
+        base_url = API_ENDPOINT + '/prices/'+ epic_id + '/DAY/1'
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
         auth_r = requests.get(base_url, headers=authenticated_headers)
         d = json.loads(auth_r.text)
@@ -898,7 +890,7 @@ for times_round_loop in range(1, 9999):
         print ("-----------------DEBUG-----------------")
         continue
 
-    base_url = REAL_OR_NO_REAL + '/positions/otc'
+    base_url = API_ENDPOINT + '/positions/otc'
     authenticated_headers = {'Content-Type':'application/json; charset=utf-8',
             'Accept':'application/json; charset=utf-8',
             'X-IG-API-KEY':API_KEY,
@@ -920,7 +912,7 @@ for times_round_loop in range(1, 9999):
     # MAKE AN ORDER
     
     #CONFIRM MARKET ORDER
-    base_url = REAL_OR_NO_REAL + '/confirms/'+ deal_ref
+    base_url = API_ENDPOINT + '/confirms/'+ deal_ref
     auth_r = requests.get(base_url, headers=authenticated_headers)
     d = json.loads(auth_r.text)
     DEAL_ID = d['dealId']
@@ -942,7 +934,7 @@ for times_round_loop in range(1, 9999):
     ##########READ IN INITIAL PROFIT##########
     ##########################################
         
-    base_url = REAL_OR_NO_REAL + '/positions/'+ DEAL_ID
+    base_url = API_ENDPOINT + '/positions/'+ DEAL_ID
     auth_r = requests.get(base_url, headers=authenticated_headers)      
     d = json.loads(auth_r.text)
         
@@ -979,7 +971,7 @@ for times_round_loop in range(1, 9999):
             print ("******************************")
             print ("Order Time : " + str(humanize_time(elapsed_time)))
       
-            base_url = REAL_OR_NO_REAL + '/positions/'+ DEAL_ID
+            base_url = API_ENDPOINT + '/positions/'+ DEAL_ID
             auth_r = requests.get(base_url, headers=authenticated_headers)      
             d = json.loads(auth_r.text)
             
@@ -999,7 +991,7 @@ for times_round_loop in range(1, 9999):
                 # print (auth_r.text)
                 print ("-----------------DEBUG-----------------")
                 #Got some "basic" error checking after all
-                base_url = REAL_OR_NO_REAL + '/positions/'+ DEAL_ID
+                base_url = API_ENDPOINT + '/positions/'+ DEAL_ID
                 auth_r = requests.get(base_url, headers=authenticated_headers)      
                 d = json.loads(auth_r.text)
             
@@ -1025,7 +1017,7 @@ for times_round_loop in range(1, 9999):
                 print ("!!!WARNING!!! POTENTIAL DIRECTION CHANGE!!")
                 SIZE = size_value
                 ORDER_TYPE = orderType_value
-                base_url = REAL_OR_NO_REAL + '/positions/otc'
+                base_url = API_ENDPOINT + '/positions/otc'
                 data = {"dealId":DEAL_ID,"direction":DIRECTION_TO_CLOSE,"size":SIZE,"orderType":ORDER_TYPE}
                 #authenticated_headers_delete IS HACKY AF WORK AROUND!! AS PER .... https://labs.ig.com/node/36
                 authenticated_headers_delete = {'Content-Type':'application/json; charset=utf-8',
@@ -1049,7 +1041,7 @@ for times_round_loop in range(1, 9999):
                     print ("!!DEBUG!! TRADE OPEN OVER TIME AND IN PROFIT")
                     SIZE = size_value
                     ORDER_TYPE = orderType_value
-                    base_url = REAL_OR_NO_REAL + '/positions/otc'
+                    base_url = API_ENDPOINT + '/positions/otc'
                     data = {"dealId":DEAL_ID,"direction":DIRECTION_TO_CLOSE,"size":SIZE,"orderType":ORDER_TYPE}
                     #authenticated_headers_delete IS HACKY AF WORK AROUND!! AS PER .... https://labs.ig.com/node/36
                     authenticated_headers_delete = {'Content-Type':'application/json; charset=utf-8',
@@ -1074,7 +1066,7 @@ for times_round_loop in range(1, 9999):
                     #######################################
                     SIZE = size_value
                     ORDER_TYPE = orderType_value
-                    base_url = REAL_OR_NO_REAL + '/positions/otc'
+                    base_url = API_ENDPOINT + '/positions/otc'
                     data = {"dealId":DEAL_ID,"direction":DIRECTION_TO_CLOSE,"size":SIZE,"orderType":ORDER_TYPE}
                     #authenticated_headers_delete IS HACKY AF WORK AROUND!! AS PER .... https://labs.ig.com/node/36
                     authenticated_headers_delete = {'Content-Type':'application/json; charset=utf-8',
@@ -1095,7 +1087,7 @@ for times_round_loop in range(1, 9999):
                 ########################################
                 SIZE = size_value
                 ORDER_TYPE = orderType_value
-                base_url = REAL_OR_NO_REAL + '/positions/otc'
+                base_url = API_ENDPOINT + '/positions/otc'
                 data = {"dealId":DEAL_ID,"direction":DIRECTION_TO_CLOSE,"size":SIZE,"orderType":ORDER_TYPE}
                 #authenticated_headers_delete IS HACKY AF WORK AROUND!! AS PER .... https://labs.ig.com/node/36
                 authenticated_headers_delete = {'Content-Type':'application/json; charset=utf-8',
@@ -1116,7 +1108,7 @@ for times_round_loop in range(1, 9999):
                 ########################################
                 SIZE = size_value
                 ORDER_TYPE = orderType_value
-                base_url = REAL_OR_NO_REAL + '/positions/otc'
+                base_url = API_ENDPOINT + '/positions/otc'
                 data = {"dealId":DEAL_ID,"direction":DIRECTION_TO_CLOSE,"size":SIZE,"orderType":ORDER_TYPE}
                 #authenticated_headers_delete IS HACKY AF WORK AROUND!! AS PER .... https://labs.ig.com/node/36
                 authenticated_headers_delete = {'Content-Type':'application/json; charset=utf-8',
@@ -1151,7 +1143,7 @@ for times_round_loop in range(1, 9999):
         SIZE = size_value
         ORDER_TYPE = orderType_value
         
-        base_url = REAL_OR_NO_REAL + '/positions/otc'
+        base_url = API_ENDPOINT + '/positions/otc'
         data = {"dealId":DEAL_ID,"direction":DIRECTION_TO_CLOSE,"size":SIZE,"orderType":ORDER_TYPE}
         #authenticated_headers_delete IS HACKY AF WORK AROUND!! AS PER .... https://labs.ig.com/node/36
         authenticated_headers_delete = {'Content-Type':'application/json; charset=utf-8',
@@ -1168,7 +1160,7 @@ for times_round_loop in range(1, 9999):
         print (auth_r.text)
         
         # #CONFIRM CLOSE - FUTURE
-        # base_url = REAL_OR_NO_REAL + '/confirms/'+ deal_ref
+        # base_url = API_ENDPOINT + '/confirms/'+ deal_ref
         # auth_r = requests.get(base_url, headers=authenticated_headers)
         # d = json.loads(auth_r.text)
         # DEAL_ID = d['dealId']
