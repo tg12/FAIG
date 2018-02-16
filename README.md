@@ -20,6 +20,11 @@ https://www.reddit.com/r/UKInvesting/comments/7sr88q/update_on_the_faig_developm
 Donations help me keep work on this program, Send them here
 1B8rcU4A31LVso1imcrZqRTvPoRfhdhFea
 
+The outputs of this are put on the following two Subreddits.
+
+https://www.reddit.com/r/CryptoPredictions/
+
+https://www.reddit.com/r/ForexPredictions/
 
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WQ6V6K8ZY6D84">
   <img src="https://www.paypalobjects.com/en_US/GB/i/btn/btn_donateCC_LG.gif" alt="Donate with PayPal" />
