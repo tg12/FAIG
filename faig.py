@@ -16,15 +16,15 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 ##################################################
 import sys, os
+import configparser
 
 from igclient import IGClient
 
 igclient = IGClient()
 
-# called directly from IGClient
-#config = configparser.ConfigParser()
-#config.read("default.conf")
-#config.read("config.conf")
+config = configparser.ConfigParser()
+config.read("default.conf")
+config.read("config.conf")
 
 igclient.session()
  
@@ -46,14 +46,14 @@ r = igclient.update_session({"accountId":spreadbet_acc_id,"defaultAccount": "Tru
 
 # PROGRAMMABLE VALUES
 # UNIT TEST FOR CRYPTO'S
-# limitDistance_value = "1"
-# orderType_value = "MARKET"
-# size_value = "5"
-# expiry_value = "DFB"
-# guaranteedStop_value = True
-# currencyCode_value = "GBP"
-# forceOpen_value = True
-# stopDistance_value = "150"
+#limitDistance_value = "1"
+#orderType_value = "MARKET"
+#size_value = "5"
+#expiry_value = "DFB"
+#guaranteedStop_value = True
+#currencyCode_value = "GBP"
+#forceOpen_value = True
+#stopDistance_value = "150"
 
 # PROGRAMMABLE VALUES
 #SET INITIAL VARIABLES, SOME ARE CALCUALTED LATER
@@ -66,25 +66,7 @@ currencyCode_value = "GBP"
 forceOpen_value = True
 stopDistance_value = "150" #Initial Stop loss, Worked out later per trade
 
-#HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
-#HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
-#epic_id = "CS.D.BITCOIN.TODAY.IP" #Bitcoin
-#epic_id = "IX.D.SUNFUN.DAILY.IP" #Weekend Trading
-#epic_id = "CS.D.ETHUSD.TODAY.IP" #Ether
-#epic_id = "CS.D.BCHUSD.TODAY.IP" #Bitcoin Cash
-#HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
-#HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
-
-#ALL EPICS
-epic_ids = ["CS.D.AUDUSD.TODAY.IP", "CS.D.EURCHF.TODAY.IP", "CS.D.EURGBP.TODAY.IP", "CS.D.EURJPY.TODAY.IP", "CS.D.EURUSD.TODAY.IP", "CS.D.GBPEUR.TODAY.IP", "CS.D.GBPUSD.TODAY.IP", "CS.D.USDCAD.TODAY.IP", "CS.D.USDCHF.TODAY.IP", "CS.D.USDJPY.TODAY.IP", "CS.D.CADCHF.TODAY.IP", "CS.D.CADJPY.TODAY.IP", "CS.D.CHFJPY.TODAY.IP", "CS.D.EURCAD.TODAY.IP", "CS.D.EURSGD.TODAY.IP", "CS.D.EURZAR.TODAY.IP", "CS.D.GBPCAD.TODAY.IP", "CS.D.GBPCHF.TODAY.IP", "CS.D.GBPJPY.TODAY.IP", "CS.D.GBPSGD.TODAY.IP", "CS.D.GBPZAR.TODAY.IP", "CS.D.MXNJPY.TODAY.IP", "CS.D.NOKJPY.TODAY.IP", "CS.D.PLNJPY.TODAY.IP", "CS.D.SEKJPY.TODAY.IP", "CS.D.SGDJPY.TODAY.IP", "CS.D.USDSGD.TODAY.IP", "CS.D.USDZAR.TODAY.IP", "CS.D.AUDCAD.TODAY.IP", "CS.D.AUDCHF.TODAY.IP", "CS.D.AUDEUR.TODAY.IP", "CS.D.AUDGBP.TODAY.IP", "CS.D.AUDJPY.TODAY.IP", "CS.D.AUDNZD.TODAY.IP", "CS.D.AUDSGD.TODAY.IP", "CS.D.EURAUD.TODAY.IP", "CS.D.EURNZD.TODAY.IP", "CS.D.GBPAUD.TODAY.IP", "CS.D.GBPNZD.TODAY.IP", "CS.D.NZDAUD.TODAY.IP", "CS.D.NZDCAD.TODAY.IP", "CS.D.NZDCHF.TODAY.IP", "CS.D.NZDEUR.TODAY.IP", "CS.D.NZDGBP.TODAY.IP", "CS.D.NZDJPY.TODAY.IP", "CS.D.NZDUSD.TODAY.IP", "CS.D.CHFHUF.TODAY.IP", "CS.D.EURCZK.TODAY.IP", "CS.D.EURHUF.TODAY.IP", "CS.D.EURILS.TODAY.IP", "CS.D.EURMXN.TODAY.IP", "CS.D.EURPLN.TODAY.IP", "CS.D.EURTRY.TODAY.IP", "CS.D.GBPCZK.TODAY.IP", "CS.D.GBPHUF.TODAY.IP", "CS.D.GBPILS.TODAY.IP", "CS.D.GBPMXN.TODAY.IP", "CS.D.GBPPLN.TODAY.IP", "CS.D.GBPTRY.TODAY.IP", "CS.D.TRYJPY.TODAY.IP", "CS.D.USDCZK.TODAY.IP", "CS.D.USDHUF.TODAY.IP", "CS.D.USDILS.TODAY.IP", "CS.D.USDMXN.TODAY.IP", "CS.D.USDPLN.TODAY.IP", "CS.D.USDTRY.TODAY.IP", "CS.D.CADNOK.TODAY.IP", "CS.D.CHFNOK.TODAY.IP", "CS.D.EURDKK.TODAY.IP", "CS.D.EURNOK.TODAY.IP", "CS.D.EURSEK.TODAY.IP", "CS.D.GBPDKK.TODAY.IP", "CS.D.GBPNOK.TODAY.IP", "CS.D.GBPSEK.TODAY.IP", "CS.D.NOKSEK.TODAY.IP", "CS.D.USDDKK.TODAY.IP", "CS.D.USDNOK.TODAY.IP", "CS.D.USDSEK.TODAY.IP", "CS.D.AUDCNH.TODAY.IP", "CS.D.CADCNH.TODAY.IP", "CS.D.CNHJPY.TODAY.IP", "CS.D.BRLJPY.TODAY.IP", "CS.D.GBPINR.TODAY.IP", "CS.D.USDBRL.TODAY.IP", "CS.D.USDIDR.TODAY.IP", "CS.D.USDINR.TODAY.IP", "CS.D.USDKRW.TODAY.IP", "CS.D.USDMYR.TODAY.IP", "CS.D.USDPHP.TODAY.IP", "CS.D.USDTWD.TODAY.IP", "CS.D.EURCNH.TODAY.IP", "CS.D.sp_EURRUB.TODAY.IP", "CS.D.GBPCNH.TODAY.IP", "CS.D.NZDCNH.TODAY.IP", "CS.D.USDCNH.TODAY.IP", "CS.D.sp_USDRUB.TODAY.IP"]
-#ALL EPICS
-
-#epic_ids = [ 
-#"CS.D.BITCOIN.TODAY.IP", #Bitcoin
-#"IX.D.SUNFUN.DAILY.IP", #Weekend Trading
-#"CS.D.ETHUSD.TODAY.IP", #Ether
-#"CS.D.BCHUSD.TODAY.IP" #Bitcoin Cash
-#]
+epic_ids = json.loads(config['Epics']['EPIC_IDS'])
 
 #*******************************************************************
 predict_accuracy = 0.89
@@ -136,8 +118,8 @@ for times_round_loop in range(1, 9999):
             continue
 
         print("!!DEBUG : Random epic_id is : " + str(epic_id))
-        d = igclient.markets(epic_id)
         systime.sleep(2)
+        d = igclient.markets(epic_id)
 
         MARKET_ID = d['instrument']['marketId']
         current_price = d['snapshot']['bid']
@@ -591,10 +573,9 @@ for times_round_loop in range(1, 9999):
     
     if DIRECTION_TO_TRADE == "SELL":
         PROFIT_OR_LOSS = float(d['position']['openLevel']) - float(d['market'][DIRECTION_TO_COMPARE])
-        PROFIT_OR_LOSS = PROFIT_OR_LOSS * float(size_value)
     else:
         PROFIT_OR_LOSS = float(d['market'][DIRECTION_TO_COMPARE] - float(d['position']['openLevel']))
-        PROFIT_OR_LOSS = PROFIT_OR_LOSS * float(size_value)
+    PROFIT_OR_LOSS = PROFIT_OR_LOSS * float(size_value)
     print ("Deal Number : " + str(times_round_loop) + " Profit/Loss : " + str(PROFIT_OR_LOSS))
      
     ##########################################
@@ -634,10 +615,9 @@ for times_round_loop in range(1, 9999):
                
             if DIRECTION_TO_TRADE == "SELL":
                 PROFIT_OR_LOSS = float(d['position']['openLevel']) - float(d['market'][DIRECTION_TO_COMPARE])
-                PROFIT_OR_LOSS = float(PROFIT_OR_LOSS * float(size_value))
             else:
                 PROFIT_OR_LOSS = float(d['market'][DIRECTION_TO_COMPARE] - float(d['position']['openLevel']))
-                PROFIT_OR_LOSS = float(PROFIT_OR_LOSS * float(size_value))
+            PROFIT_OR_LOSS = float(PROFIT_OR_LOSS * float(size_value))
             print ("Deal Number : " + str(times_round_loop) + " Profit/Loss : " + str(PROFIT_OR_LOSS) + " Order Time : " + str(humanize_time(elapsed_time)))
             systime.sleep(2) #Don't be too keen to read price
                 
@@ -645,16 +625,19 @@ for times_round_loop in range(1, 9999):
             if ARTIFICIAL_STOP_LOSS > 100:
                 print ("!!!!WARNING!!!! STOP LOSS MIGHT BE TOO HIGH :- Current Value is " + str(ARTIFICIAL_STOP_LOSS))
             ARTIFICIAL_STOP_LOSS = ARTIFICIAL_STOP_LOSS * -1 #Make Negative, DO NOT REMOVE!!
-               
-            if PROFIT_OR_LOSS < ARTIFICIAL_STOP_LOSS:
-                #CLOSE TRADE/GTFO
-                print ("!!!WARNING!!! POTENTIAL DIRECTION CHANGE!!")
+
+            def close_trade():
                 SIZE = size_value
                 ORDER_TYPE = orderType_value
                 data = {"dealId":DEAL_ID,"direction":DIRECTION_TO_CLOSE,"size":SIZE,"orderType":ORDER_TYPE}
                 igclient.setdebug(True)
                 auth_r = igclient.positions_otc_close(data)
                 igclient.setdebug(False)
+               
+            if PROFIT_OR_LOSS < ARTIFICIAL_STOP_LOSS:
+                #CLOSE TRADE/GTFO
+                print ("!!!WARNING!!! POTENTIAL DIRECTION CHANGE!!")
+                close_trade()
                 print ("!!DEBUG TIME!! Direction Change Wait: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
                 Prediction_Wait_Timer = 900 #15Mins
                 systime.sleep(Prediction_Wait_Timer)
@@ -663,12 +646,7 @@ for times_round_loop in range(1, 9999):
                 print ("!!DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER TIME")
                 if float (PROFIT_OR_LOSS) > 0:
                     print ("!!DEBUG!! TRADE OPEN OVER TIME AND IN PROFIT")
-                    SIZE = size_value
-                    ORDER_TYPE = orderType_value
-                    data = {"dealId":DEAL_ID,"direction":DIRECTION_TO_CLOSE,"size":SIZE,"orderType":ORDER_TYPE}
-                    igclient.setdebug(True)
-                    auth_r = igclient.positions_otc_close(data)
-                    igclient.setdebug(False)
+                    close_trade()
                     print ("!!DEBUG!! : TIME AND IN PROFIT :- CLOSED")
                     
           
@@ -676,25 +654,11 @@ for times_round_loop in range(1, 9999):
                 print ("!!DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 5 HOURS")
                 if -9 <= float (PROFIT_OR_LOSS) <= 0:
                     print ("!!DEBUG!! TRADE OPEN OVER 5 HOURS, CUT LOSSES")
-                    #ENABLE THIS CODE WHEN HAPPY WITH VALUES
-                    #######################################
-                    SIZE = size_value
-                    ORDER_TYPE = orderType_value
-                    data = {"dealId":DEAL_ID,"direction":DIRECTION_TO_CLOSE,"size":SIZE,"orderType":ORDER_TYPE}
-                    igclient.setdebug(True)
-                    auth_r = igclient.positions_otc_close(data)
-                    igclient.setdebug(False)
+                    close_trade()
                     print ("DEBUG : TIME AND IN PROFIT :- CLOSED")
             
             if (float(PROFIT_OR_LOSS) > 9 and elapsed_time < 2700) or (float (PROFIT_OR_LOSS) > 20 and elapsed_time > 7200):
-                #ENABLE THIS CODE WHEN HAPPY WITH VALUES
-                ########################################
-                SIZE = size_value
-                ORDER_TYPE = orderType_value
-                data = {"dealId":DEAL_ID,"direction":DIRECTION_TO_CLOSE,"size":SIZE,"orderType":ORDER_TYPE}
-                igclient.setdebug(True)
-                auth_r = igclient.positions_otc_close(data)
-                igclient.setdebug(False)
+                close_trade()
                 print ("DEBUG : TIME AND IN PROFIT :- CLOSED")
 
                         
