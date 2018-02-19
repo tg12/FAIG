@@ -46,14 +46,14 @@ r = igclient.update_session({"accountId":spreadbet_acc_id,"defaultAccount": "Tru
 
 # PROGRAMMABLE VALUES
 # UNIT TEST FOR CRYPTO'S
-#limitDistance_value = "1"
-#orderType_value = "MARKET"
-#size_value = "5"
-#expiry_value = "DFB"
-#guaranteedStop_value = True
-#currencyCode_value = "GBP"
-#forceOpen_value = True
-#stopDistance_value = "150"
+# limitDistance_value = "1"
+# orderType_value = "MARKET"
+# size_value = "5"
+# expiry_value = "DFB"
+# guaranteedStop_value = True
+# currencyCode_value = "GBP"
+# forceOpen_value = True
+# stopDistance_value = "150"
 
 # PROGRAMMABLE VALUES
 #SET INITIAL VARIABLES, SOME ARE CALCUALTED LATER
@@ -117,7 +117,7 @@ for times_round_loop in range(1, 9999):
             print ("!!DEBUG!! : Don't Trade on the same epic twice in a row")
             continue
 
-        print("!!DEBUG : Random epic_id is : " + str(epic_id))
+        print("!!DEBUG : Random epic_id: " + str(epic_id), end='')
         systime.sleep(2)
         d = igclient.markets(epic_id)
 
@@ -130,18 +130,13 @@ for times_round_loop in range(1, 9999):
         else:
             Price_Change_Day_percent = float(d['snapshot']['percentageChange'])
 
-        if Price_Change_Day_percent < 0.48 and Price_Change_Day_percent < 1.9 and Price_Change_Day_percent < -0.48 and Price_Change_Day_percent > -1.9: 
-            print ("Price Change Percentage on day is " + str(Price_Change_Day_percent))
+        if (Price_Change_Day_percent > 0.48 and Price_Change_Day_percent < 1.9) or (Price_Change_Day_percent < -0.48 and Price_Change_Day_percent > -1.9): 
+            print (" Day Price Change {}% ".format(str(Price_Change_Day_percent)), end='')
             Price_Change_OK = True
             bid_price = d['snapshot']['bid']
             ask_price = d['snapshot']['offer']
             spread = float(bid_price) - float(ask_price)
-            #PUT SOME DEBUGGING HERE NEXT TIME IT FAILS
-            
-            # print ("bid : " + str(bid_price))
-            # print ("ask : " + str(ask_price))
-            # print ("-------------------------")
-            print ("spread : " + str(spread))
+
             ##################################################################################################################
             ##################################################################################################################
             #e.g Spread is -30, That is too big, In-fact way too big. Spread is -1.7, This is not too bad, We can trade on this reasonably well.
@@ -150,11 +145,16 @@ for times_round_loop in range(1, 9999):
             ##################################################################################################################
             #if spread is less than -2, It's too big
             if float(spread) < -2:
-             print ("!!DEBUG!! :- SPREAD NOT OK")
-             Price_Change_OK = False
-             systime.sleep(2)
+              print (":- spread not ok {}".format(spread), end="\n", flush=True)
+              Price_Change_OK = False
+              systime.sleep(2)
             elif float(spread) > -2:
-             Price_Change_OK = True
+              print (":- GOOD SPREAD {}".format(spread), end="\n", flush=True)
+              Price_Change_OK = True
+            else:
+              print (":- spread not ok {}".format(spread), end="\n", flush=True)
+        else:
+            print(": !Price change {}%".format(Price_Change_Day_percent), end="\n", flush=True)
 
     #Good ol "Crowd-sourcing" check.....
     d = igclient.clientsentiment(MARKET_ID)
@@ -239,12 +239,10 @@ for times_round_loop in range(1, 9999):
         
         price_ranges = []
         closing_prices = []
-        first_time_round_loop = True
         TR_prices = []
 
-
-        for i in d['prices']:
-            if first_time_round_loop == True:
+        for count, i in enumerate(d['prices']):
+            if count == 0:
                 #First time round loop cannot get previous
                 closePrice = i['closePrice'][price_compare]
                 closing_prices.append(closePrice)
@@ -252,7 +250,6 @@ for times_round_loop in range(1, 9999):
                 low_price = i['lowPrice'][price_compare]
                 price_range = float(high_price - closePrice)
                 price_ranges.append(price_range)
-                first_time_round_loop = False
             else:
                 prev_close = closing_prices[-1]
                 ###############################
@@ -391,7 +388,8 @@ for times_round_loop in range(1, 9999):
         #Three things, Price difference is less than target, Accuracy is OK, Current Price is less than Price Prediction
         #Added a fourth thing "contrarian indicator"
         
-        b_contrarian = False #THIS MUST BE SET EITHER WAY!! 
+        print ("price_diff:{} score:{} current_price:{} limitDistance_value:{} predict_accuracy:{} price_prediction:{}".format(price_diff, score, current_price, limitDistance_value, predict_accuracy, price_prediction))
+        b_contrarian = config['Trade']['b_contrarian'] #THIS MUST BE SET EITHER WAY!! 
         if b_contrarian == True:
             print ("!!DEBUG!! b_contrarian SET!!")
             if price_diff < 0 and score > predict_accuracy and float(current_price) < float(price_prediction):
@@ -520,8 +518,8 @@ for times_round_loop in range(1, 9999):
             else:
                 DO_A_THING = False
                 print ("!!DEBUG!! NO CRITERIA!!: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-                systime.sleep(Prediction_Wait_Timer)
-                print ("!!DEBUG!! NO CRITERIA!! " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+                #systime.sleep(Prediction_Wait_Timer)
+                #print ("!!DEBUG!! NO CRITERIA!! " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
                 break
 
     if not DO_A_THING:
