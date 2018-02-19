@@ -69,13 +69,11 @@ stopDistance_value = "150" #Initial Stop loss, Worked out later per trade
 epic_ids = json.loads(config['Epics']['EPIC_IDS'])
 
 #*******************************************************************
-predict_accuracy = 0.89
+predict_accuracy = config['Trade']['predict_accuracy']
 TIME_WAIT_MULTIPLIER = 60
 #STOP_LOSS_MULTIPLIER = 4 #Not currently in use, 13th Jan
 Client_Sentiment_Check = 69
 profitable_trade_count = 0
-previous_traded_epic_id = "None"
-Tight_Spread = False
 High_Trend_Watermark = 89
 
 #******************************************************************************************************************************
@@ -92,69 +90,61 @@ print ("START TIME : " + str(datetime.datetime.now(datetime.timezone.utc).strfti
 def humanize_time(secs):
     mins, secs = divmod(secs, 60)
     hours, mins = divmod(mins, 60)
-    return '%02d:%02d:%02d' % (hours, mins, secs)   
+    return '%02d:%02d:%02d' % (hours, mins, secs)
+
+def find_next_trade(epic_ids):
+  while(1):
+    random.shuffle(epic_ids)
+    for epic_id in epic_ids:
+      print("!!DEBUG!! : " + str(epic_id), end='')
+      systime.sleep(2) # we only get 30 per minute :(
+      d = igclient.markets(epic_id)
+
+      MARKET_ID = d['instrument']['marketId']
+      current_price = d['snapshot']['bid']
+      Price_Change_Day = d['snapshot']['netChange']
+      
+      if d['snapshot']['percentageChange'] is None:
+        Price_Change_Day_percent = 0.0
+      else:
+        Price_Change_Day_percent = float(d['snapshot']['percentageChange'])
+
+      Price_Change_Day_percent_h = float(config['Trade']['Price_Change_Day_percent_high'])
+      Price_Change_Day_percent_l = float(config['Trade']['Price_Change_Day_percent_low'])
+
+      if (Price_Change_Day_percent_h > Price_Change_Day_percent > Price_Change_Day_percent_l) or ((Price_Change_Day_percent_h * -1) <Price_Change_Day_percent < (Price_Change_Day_percent_l * -1)): 
+          print (" Day Price Change {}% ".format(str(Price_Change_Day_percent)), end='')
+          bid_price = d['snapshot']['bid']
+          ask_price = d['snapshot']['offer']
+          spread = float(bid_price) - float(ask_price)
+
+          ##################################################################################################################
+          #e.g Spread is -30, That is too big, In-fact way too big. Spread is -1.7, This is not too bad, We can trade on this reasonably well.
+          #Spread is 0.8. This is considered a tight spread
+          ##################################################################################################################
+          #if spread is less than -2, It's too big
+          if float(spread) < float(config['Trade']['max_spread']):
+            print (":- spread not ok {}".format(spread), end="\n", flush=True)
+          elif float(spread) > float(config['Trade']['max_spread']):
+            print (":- GOOD SPREAD {}".format(spread), end="\n", flush=True)
+            return (epic_id, MARKET_ID)
+          else:
+            print (":- spread exactly {} - not ok".format(spread), end="\n", flush=True)
+      else:
+        print(": !Price change {}%".format(Price_Change_Day_percent), end="\n", flush=True)
+
+
+
     
 for times_round_loop in range(1, 9999):
 
 #*******************************************************************
-    DO_A_THING = False
-    Price_Change_OK = False
-    Tight_Spread = False
     Start_loop_time = time()
+
+    [epic_id, MARKET_ID] = find_next_trade(epic_ids)
+ 
+    DO_A_THING = False
     price_compare = "bid"
-    Price_Change_Day_percent = 0
-    low_price_list = []
-    high_price_list = []
-    close_price_list = []
-    volume_list = []
-
-    while not Price_Change_OK:
-        random.shuffle(epic_ids)
-        epic_id = random.choice(epic_ids)
-        #Don't Trade on the same epic twice in a row
-        if str(previous_traded_epic_id) == str(epic_id):
-            Price_Change_OK = False
-            print ("!!DEBUG!! : Don't Trade on the same epic twice in a row")
-            continue
-
-        print("!!DEBUG : Random epic_id: " + str(epic_id), end='')
-        systime.sleep(2)
-        d = igclient.markets(epic_id)
-
-        MARKET_ID = d['instrument']['marketId']
-        current_price = d['snapshot']['bid']
-        Price_Change_Day = d['snapshot']['netChange']
-        
-        if d['snapshot']['percentageChange'] is None:
-            Price_Change_Day_percent = 0
-        else:
-            Price_Change_Day_percent = float(d['snapshot']['percentageChange'])
-
-        if (Price_Change_Day_percent > 0.48 and Price_Change_Day_percent < 1.9) or (Price_Change_Day_percent < -0.48 and Price_Change_Day_percent > -1.9): 
-            print (" Day Price Change {}% ".format(str(Price_Change_Day_percent)), end='')
-            Price_Change_OK = True
-            bid_price = d['snapshot']['bid']
-            ask_price = d['snapshot']['offer']
-            spread = float(bid_price) - float(ask_price)
-
-            ##################################################################################################################
-            ##################################################################################################################
-            #e.g Spread is -30, That is too big, In-fact way too big. Spread is -1.7, This is not too bad, We can trade on this reasonably well.
-            #Spread is 0.8. This is considered a tight spread
-            ##################################################################################################################
-            ##################################################################################################################
-            #if spread is less than -2, It's too big
-            if float(spread) < -2:
-              print (":- spread not ok {}".format(spread), end="\n", flush=True)
-              Price_Change_OK = False
-              systime.sleep(2)
-            elif float(spread) > -2:
-              print (":- GOOD SPREAD {}".format(spread), end="\n", flush=True)
-              Price_Change_OK = True
-            else:
-              print (":- spread exactly {} - not ok".format(spread), end="\n", flush=True)
-        else:
-            print(": !Price change {}%".format(Price_Change_Day_percent), end="\n", flush=True)
 
     #Good ol "Crowd-sourcing" check.....
     d = igclient.clientsentiment(MARKET_ID)
@@ -396,26 +386,19 @@ for times_round_loop in range(1, 9999):
             if price_diff < 0 and score > predict_accuracy and float(current_price) < float(price_prediction):
                 if float(shortPositionPercentage) > float(longPositionPercentage) and float(shortPositionPercentage) > Client_Sentiment_Check:
                     DIRECTION_TO_TRADE = "BUY"
-                    DIRECTION_TO_CLOSE = "SELL"
-                    DIRECTION_TO_COMPARE = 'bid'
                     DO_A_THING = True
                 elif float(longPositionPercentage) > float(shortPositionPercentage) and float(longPositionPercentage) > Client_Sentiment_Check:
                     DIRECTION_TO_TRADE = "SELL"
-                    DIRECTION_TO_CLOSE = "BUY"
-                    DIRECTION_TO_COMPARE = 'offer'
                     DO_A_THING = True
                 elif longPositionPercentage >= High_Trend_Watermark:
                     DIRECTION_TO_TRADE = "BUY"
-                    DIRECTION_TO_CLOSE = "SELL"
-                    DIRECTION_TO_COMPARE = 'bid'
                     DO_A_THING = True
                 elif shortPositionPercentage >= High_Trend_Watermark:
                     DIRECTION_TO_TRADE = "SELL"
-                    DIRECTION_TO_CLOSE = "BUY"
-                    DIRECTION_TO_COMPARE = 'offer'
                     DO_A_THING = True
                 else:
                     print ("!!DEBUG No Trade This time")
+                    print ("!!DEBUG shortPositionPercentage:{} longPositionPercentage:{} Client_Sentiment_Check:{}".format(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check))
                     DO_A_THING = False
                     break
                 
@@ -425,29 +408,22 @@ for times_round_loop in range(1, 9999):
                 if float(shortPositionPercentage) > float(longPositionPercentage) and float(shortPositionPercentage) > Client_Sentiment_Check:
                     limitDistance_value = "2"
                     DIRECTION_TO_TRADE = "BUY"
-                    DIRECTION_TO_CLOSE = "SELL"
-                    DIRECTION_TO_COMPARE = 'bid'
                     DO_A_THING = True
                 elif float(longPositionPercentage) > float(shortPositionPercentage) and float(longPositionPercentage) > Client_Sentiment_Check:
                     limitDistance_value = "2"
                     DIRECTION_TO_TRADE = "SELL"
-                    DIRECTION_TO_CLOSE = "BUY"
-                    DIRECTION_TO_COMPARE = 'offer'
                     DO_A_THING = True
                 elif longPositionPercentage >= High_Trend_Watermark:
                     limitDistance_value = "2"
                     DIRECTION_TO_TRADE = "BUY"
-                    DIRECTION_TO_CLOSE = "SELL"
-                    DIRECTION_TO_COMPARE = 'bid'
                     DO_A_THING = True
                 elif shortPositionPercentage >= High_Trend_Watermark:
                     limitDistance_value = "2"
                     DIRECTION_TO_TRADE = "SELL"
-                    DIRECTION_TO_CLOSE = "BUY"
-                    DIRECTION_TO_COMPARE = 'offer'
                     DO_A_THING = True
                 else:
                     print ("!!DEBUG No Trade This time")
+                    print ("!!DEBUG shortPositionPercentage:{} longPositionPercentage:{} Client_Sentiment_Check:{}".format(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check))
                     DO_A_THING = False
                     break
             else:
@@ -457,63 +433,49 @@ for times_round_loop in range(1, 9999):
                 print ("!!DEBUG!! NO CRITERIA!! " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
                 break
         
-        elif b_contrarian == False:
+        else: # b_contrarian == False:
             print ("!!DEBUG!! b_contrarian NOT SET!! !!WARNING!! :- You are following the client sentiment")
             if price_diff < 0 and score > predict_accuracy and float(current_price) < float(price_prediction):
                 if float(longPositionPercentage) > float(shortPositionPercentage) and float(longPositionPercentage) > Client_Sentiment_Check:
                     DIRECTION_TO_TRADE = "BUY"
-                    DIRECTION_TO_CLOSE = "SELL"
-                    DIRECTION_TO_COMPARE = 'bid'
                     DO_A_THING = True
                 elif float(shortPositionPercentage) > float(longPositionPercentage) and float(shortPositionPercentage) > Client_Sentiment_Check:
                     DIRECTION_TO_TRADE = "SELL"
-                    DIRECTION_TO_CLOSE = "BUY"
-                    DIRECTION_TO_COMPARE = 'offer'
                     DO_A_THING = True
                 elif longPositionPercentage >= High_Trend_Watermark:
                     DIRECTION_TO_TRADE = "BUY"
-                    DIRECTION_TO_CLOSE = "SELL"
-                    DIRECTION_TO_COMPARE = 'bid'
                     DO_A_THING = True
                 elif shortPositionPercentage >= High_Trend_Watermark:
                     DIRECTION_TO_TRADE = "SELL"
-                    DIRECTION_TO_CLOSE = "BUY"
-                    DIRECTION_TO_COMPARE = 'offer'
                     DO_A_THING = True
                 else:
                     print ("!!DEBUG No Trade This time")
+                    print ("!!DEBUG longPositionPercentage:{} shortPositionPercentage:{} Client_Sentiment_Check:{} High_Trend_Watermark:{}".format(longPositionPercentage, shortPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark))
                     DO_A_THING = False
                     break
                 
             elif float(price_diff) > float(limitDistance_value) and score > predict_accuracy and float(current_price) > float(price_prediction):
                 #!!!!Above Predicted Target!!!!
                 #Tight limit (Take Profit)
-                if float(longPositionPercentage) > float(shortPositionPercentage) and float(longPositionPercentage) > Client_Sentiment_Check:
+                if float(longPositionPercentage) > float(shortPositionPercentage) and float(longPositionPercentage) >= Client_Sentiment_Check:
                     limitDistance_value = "2"
                     DIRECTION_TO_TRADE = "BUY"
-                    DIRECTION_TO_CLOSE = "SELL"
-                    DIRECTION_TO_COMPARE = 'bid'
                     DO_A_THING = True
-                elif float(shortPositionPercentage) > float(longPositionPercentage) and float(shortPositionPercentage) > Client_Sentiment_Check:
+                elif float(shortPositionPercentage) > float(longPositionPercentage) and float(shortPositionPercentage) >= Client_Sentiment_Check:
                     limitDistance_value = "2"
                     DIRECTION_TO_TRADE = "SELL"
-                    DIRECTION_TO_CLOSE = "BUY"
-                    DIRECTION_TO_COMPARE = 'offer'
                     DO_A_THING = True
                 elif longPositionPercentage >= High_Trend_Watermark:
                     limitDistance_value = "2"
                     DIRECTION_TO_TRADE = "BUY"
-                    DIRECTION_TO_CLOSE = "SELL"
-                    DIRECTION_TO_COMPARE = 'bid'
                     DO_A_THING = True
                 elif shortPositionPercentage >= High_Trend_Watermark:
                     limitDistance_value = "2"
                     DIRECTION_TO_TRADE = "SELL"
-                    DIRECTION_TO_CLOSE = "BUY"
-                    DIRECTION_TO_COMPARE = 'offer'
                     DO_A_THING = True
                 else:
                     print ("!!DEBUG No Trade This time")
+                    print ("!!DEBUG longPositionPercentage:{} shortPositionPercentage:{} Client_Sentiment_Check:{} High_Trend_Watermark:{}".format(longPositionPercentage, shortPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark))
                     DO_A_THING = False
                     break
             else:
@@ -526,11 +488,16 @@ for times_round_loop in range(1, 9999):
     if not DO_A_THING:
         #DO_A_THING NOT SET FOR WHATEVER REASON, GO BACK TO MAIN PROGRAM LOOP
         print ("-----------------DEBUG-----------------")
-        print ("!!DEBUG!! AN ERROR OCCURED")
-        print ("!!DEBUG!! Reminder, Check what the f*** is going on here")
-        print ("!!DEBUG!! Most likely DO_A_THING Not Set!!")
+        print ("!!DEBUG!! DO_A_THING Not Set - Check above to diagnose!!")
         print ("-----------------DEBUG-----------------")
         continue
+
+    if DIRECTION_TO_TRADE == 'SELL':
+      DIRECTION_TO_CLOSE = 'BUY'
+      DIRECTION_TO_COMPARE = 'offer'
+    else:
+      DIRECTION_TO_CLOSE = 'SELL'
+      DIRECTION_TO_COMPARE = 'bid'
 
     data = {"direction":DIRECTION_TO_TRADE,"epic": epic_id, "limitDistance":limitDistance_value, "orderType":orderType_value, "size":size_value,"expiry":expiry_value,"guaranteedStop":guaranteedStop_value,"currencyCode":currencyCode_value,"forceOpen":forceOpen_value,"stopDistance":stopDistance_value}
     igclient.setdebug(True)
@@ -566,10 +533,6 @@ for times_round_loop in range(1, 9999):
     d = igclient.positions(DEAL_ID)
     igclient.setdebug(False)
         
-    ##########################################
-    ##########READ IN INITIAL PROFIT##########
-    ##########################################
-    
     if DIRECTION_TO_TRADE == "SELL":
         PROFIT_OR_LOSS = float(d['position']['openLevel']) - float(d['market'][DIRECTION_TO_COMPARE])
     else:
@@ -577,10 +540,6 @@ for times_round_loop in range(1, 9999):
     PROFIT_OR_LOSS = PROFIT_OR_LOSS * float(size_value)
     print ("Deal Number : " + str(times_round_loop) + " Profit/Loss : " + str(PROFIT_OR_LOSS))
      
-    ##########################################
-    ##########READ IN INITIAL PROFIT##########
-    ##########################################
-    
     ##########################################
     #####KEEP READING IN FOR PROFIT###########
     ##########################################
@@ -693,4 +652,3 @@ for times_round_loop in range(1, 9999):
         # print(d['reason'])
         
         systime.sleep(random.randint(1, TIME_WAIT_MULTIPLIER)) #Obligatory Wait before doing next order
-        previous_traded_epic_id = str(epic_id)
