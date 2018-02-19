@@ -35,7 +35,10 @@ class IGClient(object):
     self.session_headers = self.headers.copy()
     self.session_headers.update({ 'Version': '2' })
 
-    r = requests.post(self.API_ENDPOINT + '/session', data=json.dumps(data), headers=self.session_headers)
+    curr_json = self.json
+    self.json = False # force off to let us use handlereq
+    r = self._handlereq( requests.post(self.API_ENDPOINT + '/session', data=json.dumps(data), headers=self.session_headers) )
+    self.json = curr_json # set it back
     headers_json = dict(r.headers)
     for h in ['CST', 'X-SECURITY-TOKEN']:
       self.auth[h] = headers_json[h]
@@ -45,7 +48,7 @@ class IGClient(object):
 
     self.loggedin = True
 
-    return ((r, dict(r.headers))[ self.json == True ])
+    return ((r, json.loads(r.text))[ self.json == True ])
 
   def _handlereq(self, r):
     if self.debug == True:

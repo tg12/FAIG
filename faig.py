@@ -152,7 +152,7 @@ for times_round_loop in range(1, 9999):
               print (":- GOOD SPREAD {}".format(spread), end="\n", flush=True)
               Price_Change_OK = True
             else:
-              print (":- spread not ok {}".format(spread), end="\n", flush=True)
+              print (":- spread exactly {} - not ok".format(spread), end="\n", flush=True)
         else:
             print(": !Price change {}%".format(Price_Change_Day_percent), end="\n", flush=True)
 
@@ -378,6 +378,7 @@ for times_round_loop in range(1, 9999):
         Prediction_Wait_Timer = int(TIME_WAIT_MULTIPLIER) #Wait
 
         if float(score) < float(predict_accuracy):
+            # NOT ACCURATE ENOUGH (YET)
             print ("!!DEBUG!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
             DO_A_THING = False
             print ("!!DEBUG!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
@@ -389,7 +390,7 @@ for times_round_loop in range(1, 9999):
         #Added a fourth thing "contrarian indicator"
         
         print ("price_diff:{} score:{} current_price:{} limitDistance_value:{} predict_accuracy:{} price_prediction:{}".format(price_diff, score, current_price, limitDistance_value, predict_accuracy, price_prediction))
-        b_contrarian = config['Trade']['b_contrarian'] #THIS MUST BE SET EITHER WAY!! 
+        b_contrarian = eval(config['Trade']['b_contrarian']) #THIS MUST BE SET EITHER WAY!! 
         if b_contrarian == True:
             print ("!!DEBUG!! b_contrarian SET!!")
             if price_diff < 0 and score > predict_accuracy and float(current_price) < float(price_prediction):
@@ -451,7 +452,7 @@ for times_round_loop in range(1, 9999):
                     break
             else:
                 DO_A_THING = False
-                print ("!!DEBUG!! NO CRITERIA!!: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+                print ("!!DEBUG!! NO CRITERIA YET - SLEEPING!!: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
                 systime.sleep(Prediction_Wait_Timer)
                 print ("!!DEBUG!! NO CRITERIA!! " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
                 break
@@ -517,9 +518,9 @@ for times_round_loop in range(1, 9999):
                     break
             else:
                 DO_A_THING = False
-                print ("!!DEBUG!! NO CRITERIA!!: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-                #systime.sleep(Prediction_Wait_Timer)
-                #print ("!!DEBUG!! NO CRITERIA!! " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+                print ("!!DEBUG!! NO CRITERIA YET - SLEEPING!!: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+                systime.sleep(Prediction_Wait_Timer)
+                print ("!!DEBUG!! NO CRITERIA!! " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
                 break
 
     if not DO_A_THING:
