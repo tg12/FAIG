@@ -19,6 +19,7 @@ import sys, os
 import configparser
 
 from igclient import IGClient
+import igstream
 
 igclient = IGClient()
 
@@ -26,8 +27,9 @@ config = configparser.ConfigParser()
 config.read("default.conf")
 config.read("config.conf")
 
-igclient.session()
- 
+d = igclient.session()
+igstreamclient = igstream.IGStream(igclient=igclient, loginresponse=d)
+
 #GET ACCOUNTS
 d = igclient.accounts()
 
@@ -35,7 +37,17 @@ for i in d['accounts']:
     if str(i['accountType']) == "SPREADBET":
         print ("Spreadbet Account ID is : " + str(i['accountId']))
         spreadbet_acc_id = str(i['accountId'])
+        igclient.accountId = spreadbet_acc_id
 
+subscription = igstream.Subscription(
+    mode="DISTINCT",
+    items=["TRADE:"+str(igclient.accountId)],
+    fields=["OPU"])
+
+def on_item_update(item_update):
+    print(item_update)
+igstreamclient.subscribe(subscription=subscription, listener=on_item_update)
+ 
 #SET SPREAD BET ACCOUNT AS DEFAULT
 r = igclient.update_session({"accountId":spreadbet_acc_id,"defaultAccount": "True"})
 #ERROR about account ID been the same, Ignore! 
@@ -69,7 +81,7 @@ stopDistance_value = "150" #Initial Stop loss, Worked out later per trade
 epic_ids = json.loads(config['Epics']['EPIC_IDS'])
 
 #*******************************************************************
-predict_accuracy = config['Trade']['predict_accuracy']
+predict_accuracy = float(config['Trade']['predict_accuracy'])
 TIME_WAIT_MULTIPLIER = 60
 #STOP_LOSS_MULTIPLIER = 4 #Not currently in use, 13th Jan
 Client_Sentiment_Check = 69
@@ -127,7 +139,7 @@ def find_next_trade(epic_ids):
             print (":- spread not ok {}".format(spread), end="\n", flush=True)
           elif float(spread) > float(config['Trade']['max_spread']):
             print (":- GOOD SPREAD {}".format(spread), end="\n", flush=True)
-            return (epic_id, MARKET_ID)
+            return d
           else:
             print (":- spread exactly {} - not ok".format(spread), end="\n", flush=True)
       else:
@@ -141,7 +153,10 @@ for times_round_loop in range(1, 9999):
 #*******************************************************************
     Start_loop_time = time()
 
-    [epic_id, MARKET_ID] = find_next_trade(epic_ids)
+    d = find_next_trade(epic_ids)
+    epic_id = d['instrument']['epic']
+    MARKET_ID = d['instrument']['marketId']
+    current_price = d['snapshot']['bid']
  
     DO_A_THING = False
     price_compare = "bid"
@@ -397,7 +412,7 @@ for times_round_loop in range(1, 9999):
                     DIRECTION_TO_TRADE = "SELL"
                     DO_A_THING = True
                 else:
-                    print ("!!DEBUG No Trade This time")
+                    print ("!!DEBUG No Trade This time 1")
                     print ("!!DEBUG shortPositionPercentage:{} longPositionPercentage:{} Client_Sentiment_Check:{}".format(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check))
                     DO_A_THING = False
                     break
@@ -422,7 +437,7 @@ for times_round_loop in range(1, 9999):
                     DIRECTION_TO_TRADE = "SELL"
                     DO_A_THING = True
                 else:
-                    print ("!!DEBUG No Trade This time")
+                    print ("!!DEBUG No Trade This time 2")
                     print ("!!DEBUG shortPositionPercentage:{} longPositionPercentage:{} Client_Sentiment_Check:{}".format(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check))
                     DO_A_THING = False
                     break
@@ -449,7 +464,7 @@ for times_round_loop in range(1, 9999):
                     DIRECTION_TO_TRADE = "SELL"
                     DO_A_THING = True
                 else:
-                    print ("!!DEBUG No Trade This time")
+                    print ("!!DEBUG No Trade This time 3")
                     print ("!!DEBUG longPositionPercentage:{} shortPositionPercentage:{} Client_Sentiment_Check:{} High_Trend_Watermark:{}".format(longPositionPercentage, shortPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark))
                     DO_A_THING = False
                     break
@@ -474,7 +489,7 @@ for times_round_loop in range(1, 9999):
                     DIRECTION_TO_TRADE = "SELL"
                     DO_A_THING = True
                 else:
-                    print ("!!DEBUG No Trade This time")
+                    print ("!!DEBUG No Trade This time 4")
                     print ("!!DEBUG longPositionPercentage:{} shortPositionPercentage:{} Client_Sentiment_Check:{} High_Trend_Watermark:{}".format(longPositionPercentage, shortPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark))
                     DO_A_THING = False
                     break
@@ -528,6 +543,11 @@ for times_round_loop in range(1, 9999):
     ##########################################
     ##########READ IN INITIAL PROFIT##########
     ##########################################
+
+    # let account stream provide updates, and let limit close it (for now)
+    # TODO: monitor trades with stream thread or waste of a stream?
+    systime.sleep(random.randint(1, TIME_WAIT_MULTIPLIER)) #Obligatory Wait before doing next order
+    continue
     
     igclient.setdebug(True)
     d = igclient.positions(DEAL_ID)
