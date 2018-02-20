@@ -146,8 +146,34 @@ def find_next_trade(epic_ids):
         print(": !Price change {}%".format(Price_Change_Day_percent), end="\n", flush=True)
 
 
+def trade_type_buy_short(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark):
+  if float(shortPositionPercentage) > float(longPositionPercentage) and float(shortPositionPercentage) > Client_Sentiment_Check:
+      return "BUY"
+  elif float(longPositionPercentage) > float(shortPositionPercentage) and float(longPositionPercentage) > Client_Sentiment_Check:
+      return "SELL"
+  elif longPositionPercentage >= High_Trend_Watermark:
+      return "BUY"
+  elif shortPositionPercentage >= High_Trend_Watermark:
+      return "SELL"
+  else:
+      print ("!!DEBUG No Trade This time BS")
+      print ("!!DEBUG shortPositionPercentage:{} longPositionPercentage:{} Client_Sentiment_Check:{} High_Trend_Watermark:{}".format(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark))
 
-    
+def trade_type_buy_long(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark):
+  if float(longPositionPercentage) > float(shortPositionPercentage) and float(longPositionPercentage) > Client_Sentiment_Check:
+    return "BUY"
+  elif float(shortPositionPercentage) > float(longPositionPercentage) and float(shortPositionPercentage) > Client_Sentiment_Check:
+    return "SELL"
+  elif longPositionPercentage >= High_Trend_Watermark:
+    return "BUY"
+  elif shortPositionPercentage >= High_Trend_Watermark:
+    return "SELL"
+  else:
+    print ("!!DEBUG No Trade This time BL")
+    print ("!!DEBUG longPositionPercentage:{} shortPositionPercentage:{} Client_Sentiment_Check:{} High_Trend_Watermark:{}".format(longPositionPercentage, shortPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark))
+
+b_contrarian = eval(config['Trade']['b_contrarian']) #THIS MUST BE SET EITHER WAY!! 
+
 for times_round_loop in range(1, 9999):
 
 #*******************************************************************
@@ -166,6 +192,17 @@ for times_round_loop in range(1, 9999):
     
     longPositionPercentage = float(d['longPositionPercentage'])
     shortPositionPercentage = float(d['shortPositionPercentage'])
+
+    # we can check this right now! before pulling in all the market data
+    EARLY_CHECK = None
+    if b_contrarian == True:
+      EARLY_CHECK = trade_type_buy_short(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark)
+    else:
+      EARLY_CHECK = trade_type_buy_long(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark)
+
+    if EARLY_CHECK is None:
+      # no point pulling in market data (right now), we'll reject this later on anyway
+      continue
     
     while not DO_A_THING:
         print ("!!Internal Notes only - Top of Loop!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
@@ -395,52 +432,26 @@ for times_round_loop in range(1, 9999):
         #Added a fourth thing "contrarian indicator"
         
         print ("price_diff:{} score:{} current_price:{} limitDistance_value:{} predict_accuracy:{} price_prediction:{}".format(price_diff, score, current_price, limitDistance_value, predict_accuracy, price_prediction))
-        b_contrarian = eval(config['Trade']['b_contrarian']) #THIS MUST BE SET EITHER WAY!! 
         if b_contrarian == True:
             print ("!!DEBUG!! b_contrarian SET!!")
             if price_diff < 0 and score > predict_accuracy and float(current_price) < float(price_prediction):
-                if float(shortPositionPercentage) > float(longPositionPercentage) and float(shortPositionPercentage) > Client_Sentiment_Check:
-                    DIRECTION_TO_TRADE = "BUY"
-                    DO_A_THING = True
-                elif float(longPositionPercentage) > float(shortPositionPercentage) and float(longPositionPercentage) > Client_Sentiment_Check:
-                    DIRECTION_TO_TRADE = "SELL"
-                    DO_A_THING = True
-                elif longPositionPercentage >= High_Trend_Watermark:
-                    DIRECTION_TO_TRADE = "BUY"
-                    DO_A_THING = True
-                elif shortPositionPercentage >= High_Trend_Watermark:
-                    DIRECTION_TO_TRADE = "SELL"
-                    DO_A_THING = True
-                else:
-                    print ("!!DEBUG No Trade This time 1")
-                    print ("!!DEBUG shortPositionPercentage:{} longPositionPercentage:{} Client_Sentiment_Check:{}".format(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check))
-                    DO_A_THING = False
-                    break
+              DIRECTION_TO_TRADE = trade_type_buy_short(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark)
+              if DIRECTION_TO_TRADE is not None:
+                DO_A_THING = True
+              else:
+                DO_A_THING = False
+                break
                 
             elif float(price_diff) > float(limitDistance_value) and score > predict_accuracy and float(current_price) > float(price_prediction):
                 #!!!!Above Predicted Target!!!!
                 #Tight limit (Take Profit)
-                if float(shortPositionPercentage) > float(longPositionPercentage) and float(shortPositionPercentage) > Client_Sentiment_Check:
-                    limitDistance_value = "2"
-                    DIRECTION_TO_TRADE = "BUY"
-                    DO_A_THING = True
-                elif float(longPositionPercentage) > float(shortPositionPercentage) and float(longPositionPercentage) > Client_Sentiment_Check:
-                    limitDistance_value = "2"
-                    DIRECTION_TO_TRADE = "SELL"
-                    DO_A_THING = True
-                elif longPositionPercentage >= High_Trend_Watermark:
-                    limitDistance_value = "2"
-                    DIRECTION_TO_TRADE = "BUY"
-                    DO_A_THING = True
-                elif shortPositionPercentage >= High_Trend_Watermark:
-                    limitDistance_value = "2"
-                    DIRECTION_TO_TRADE = "SELL"
-                    DO_A_THING = True
+                DIRECTION_TO_TRADE = trade_type_buy_short(shortPositionPercentage, longPositionPercentage,  Client_Sentiment_Check, High_Trend_Watermark)
+                if DIRECTION_TO_TRADE is not None:
+                  limitDistance_value = "2"
+                  DO_A_THING = True
                 else:
-                    print ("!!DEBUG No Trade This time 2")
-                    print ("!!DEBUG shortPositionPercentage:{} longPositionPercentage:{} Client_Sentiment_Check:{}".format(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check))
-                    DO_A_THING = False
-                    break
+                  DO_A_THING = False
+                  break
             else:
                 DO_A_THING = False
                 print ("!!DEBUG!! NO CRITERIA YET - SLEEPING!!: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
@@ -449,50 +460,24 @@ for times_round_loop in range(1, 9999):
                 break
         
         else: # b_contrarian == False:
-            print ("!!DEBUG!! b_contrarian NOT SET!! !!WARNING!! :- You are following the client sentiment")
+            print ("!!DEBUG!! b_contrarian is false!! :- You are following the client sentiment")
             if price_diff < 0 and score > predict_accuracy and float(current_price) < float(price_prediction):
-                if float(longPositionPercentage) > float(shortPositionPercentage) and float(longPositionPercentage) > Client_Sentiment_Check:
-                    DIRECTION_TO_TRADE = "BUY"
-                    DO_A_THING = True
-                elif float(shortPositionPercentage) > float(longPositionPercentage) and float(shortPositionPercentage) > Client_Sentiment_Check:
-                    DIRECTION_TO_TRADE = "SELL"
-                    DO_A_THING = True
-                elif longPositionPercentage >= High_Trend_Watermark:
-                    DIRECTION_TO_TRADE = "BUY"
-                    DO_A_THING = True
-                elif shortPositionPercentage >= High_Trend_Watermark:
-                    DIRECTION_TO_TRADE = "SELL"
-                    DO_A_THING = True
+                DIRECTION_TO_TRADE = trade_type_buy_long(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark)
+                if DIRECTION_TO_TRADE is not None:
+                  DO_A_THING = True
                 else:
-                    print ("!!DEBUG No Trade This time 3")
-                    print ("!!DEBUG longPositionPercentage:{} shortPositionPercentage:{} Client_Sentiment_Check:{} High_Trend_Watermark:{}".format(longPositionPercentage, shortPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark))
-                    DO_A_THING = False
-                    break
+                  DO_A_THING = False
+                  break
                 
             elif float(price_diff) > float(limitDistance_value) and score > predict_accuracy and float(current_price) > float(price_prediction):
                 #!!!!Above Predicted Target!!!!
                 #Tight limit (Take Profit)
-                if float(longPositionPercentage) > float(shortPositionPercentage) and float(longPositionPercentage) >= Client_Sentiment_Check:
-                    limitDistance_value = "2"
-                    DIRECTION_TO_TRADE = "BUY"
-                    DO_A_THING = True
-                elif float(shortPositionPercentage) > float(longPositionPercentage) and float(shortPositionPercentage) >= Client_Sentiment_Check:
-                    limitDistance_value = "2"
-                    DIRECTION_TO_TRADE = "SELL"
-                    DO_A_THING = True
-                elif longPositionPercentage >= High_Trend_Watermark:
-                    limitDistance_value = "2"
-                    DIRECTION_TO_TRADE = "BUY"
-                    DO_A_THING = True
-                elif shortPositionPercentage >= High_Trend_Watermark:
-                    limitDistance_value = "2"
-                    DIRECTION_TO_TRADE = "SELL"
-                    DO_A_THING = True
+                DIRECTION_TO_TRADE = trade_type_buy_long(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark)
+                if DIRECTION_TO_TRADE is not None:
+                  DO_A_THING = True
                 else:
-                    print ("!!DEBUG No Trade This time 4")
-                    print ("!!DEBUG longPositionPercentage:{} shortPositionPercentage:{} Client_Sentiment_Check:{} High_Trend_Watermark:{}".format(longPositionPercentage, shortPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark))
-                    DO_A_THING = False
-                    break
+                  DO_A_THING = False
+                  break
             else:
                 DO_A_THING = False
                 print ("!!DEBUG!! NO CRITERIA YET - SLEEPING!!: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
@@ -515,7 +500,7 @@ for times_round_loop in range(1, 9999):
       DIRECTION_TO_COMPARE = 'bid'
 
     data = {"direction":DIRECTION_TO_TRADE,"epic": epic_id, "limitDistance":limitDistance_value, "orderType":orderType_value, "size":size_value,"expiry":expiry_value,"guaranteedStop":guaranteedStop_value,"currencyCode":currencyCode_value,"forceOpen":forceOpen_value,"stopDistance":stopDistance_value}
-    igclient.setdebug(True)
+#    igclient.setdebug(True)
     d = igclient.positions_otc(data)
     
     deal_ref = d['dealReference']
@@ -524,11 +509,9 @@ for times_round_loop in range(1, 9999):
 
     #CONFIRM MARKET ORDER
     d = igclient.confirms(deal_ref)    
-    igclient.setdebug(False)
+#    igclient.setdebug(False)
     DEAL_ID = d['dealId']
-    print("DEAL ID : " + str(d['dealId']))
-    print(d['dealStatus'])
-    print(d['reason'])
+    print("DEAL ID : {} - {} - {}".format(str(d['dealId']), d['dealStatus'], d['reason']))
     
     #######################################################################################
     #This gets triggered if IG want a daft amount in your account for the margin, More than you specified initially. This happens sometimes... deal with it! 
