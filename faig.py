@@ -109,37 +109,49 @@ def find_next_trade(epic_ids):
     random.shuffle(epic_ids)
     for epic_id in epic_ids:
       print("!!DEBUG!! : " + str(epic_id), end='')
-      systime.sleep(2) # we only get 30 per minute :(
-      d = igclient.markets(epic_id)
+      #systime.sleep(2) # we only get 30 API calls per minute :( but streaming doesn't count?
 
-      MARKET_ID = d['instrument']['marketId']
-      current_price = d['snapshot']['bid']
-      Price_Change_Day = d['snapshot']['netChange']
+      try:
+        subscription = igstream.Subscription(
+          mode="MERGE",
+          items=["MARKET:{}".format(epic_id)],
+          fields=["MID_OPEN","HIGH","LOW","CHANGE","CHANGE_PCT","UPDATE_TIME","MARKET_DELAY","MARKET_STATE","BID","OFFER"]
+        )
+        res = igstreamclient.fetch_one(subscription)
+      except IndexError:
+        # fall back to non-stream version
+        res = igclient.markets(epic_id)
+        res['values'] = {}
+        res['values']['BID'] = res['snapshot']['bid']
+        res['values']['OFFER'] = res['snapshot']['offer']
+        res['values']['CHANGE'] = res['snapshot']['netChange']
+        res['values']['CHANGE_PCT'] = res['snapshot']['percentageChange']
+
+      res['values']['EPIC'] = epic_id
+
+      current_price = res['values']['BID']
+      Price_Change_Day = res['values']['CHANGE']
       
-      if d['snapshot']['percentageChange'] is None:
+      if res['values']['CHANGE_PCT'] is None:
         Price_Change_Day_percent = 0.0
       else:
-        Price_Change_Day_percent = float(d['snapshot']['percentageChange'])
+        Price_Change_Day_percent = float(res['values']['CHANGE_PCT'])
 
       Price_Change_Day_percent_h = float(config['Trade']['Price_Change_Day_percent_high'])
       Price_Change_Day_percent_l = float(config['Trade']['Price_Change_Day_percent_low'])
 
       if (Price_Change_Day_percent_h > Price_Change_Day_percent > Price_Change_Day_percent_l) or ((Price_Change_Day_percent_h * -1) <Price_Change_Day_percent < (Price_Change_Day_percent_l * -1)): 
           print (" Day Price Change {}% ".format(str(Price_Change_Day_percent)), end='')
-          bid_price = d['snapshot']['bid']
-          ask_price = d['snapshot']['offer']
+          bid_price = res['values']['BID']
+          ask_price = res['values']['OFFER']
           spread = float(bid_price) - float(ask_price)
 
-          ##################################################################################################################
-          #e.g Spread is -30, That is too big, In-fact way too big. Spread is -1.7, This is not too bad, We can trade on this reasonably well.
-          #Spread is 0.8. This is considered a tight spread
-          ##################################################################################################################
           #if spread is less than -2, It's too big
           if float(spread) < float(config['Trade']['max_spread']):
             print (":- spread not ok {}".format(spread), end="\n", flush=True)
           elif float(spread) > float(config['Trade']['max_spread']):
             print (":- GOOD SPREAD {}".format(spread), end="\n", flush=True)
-            return d
+            return res
           else:
             print (":- spread exactly {} - not ok".format(spread), end="\n", flush=True)
       else:
@@ -180,9 +192,10 @@ for times_round_loop in range(1, 9999):
     Start_loop_time = time()
 
     d = find_next_trade(epic_ids)
-    epic_id = d['instrument']['epic']
-    MARKET_ID = d['instrument']['marketId']
-    current_price = d['snapshot']['bid']
+    epic_id = d['values']['EPIC']
+    current_price = d['values']['BID']
+    d = igclient.markets(epic_id)
+    MARKET_ID = d['instrument']['marketId'] # need a lookup just for this? cache it
  
     DO_A_THING = False
     price_compare = "bid"

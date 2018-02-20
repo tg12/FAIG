@@ -87,6 +87,7 @@ class Subscription(object):
         self.mode = mode
         self.snapshot = "true"
         self._listeners = []
+        self._results = []
 
     def _decode(self, value, last):
         """Decode the field value according to
@@ -131,6 +132,7 @@ class Subscription(object):
             'values': self._items_map[item_pos]
         }
 
+        self._results.append(item_info)
         # Update each registered listener with new event
         for on_item_update in self._listeners:
             on_item_update(item_info)
@@ -248,6 +250,7 @@ class LSClient(object):
             self._stream_connection_thread = threading.Thread(
                 name="STREAM-CONN-THREAD-{0}".format(self._bind_counter),
                 target=self._receive
+                #args=(self._results[self._current_subscription_key])
             )
             self._stream_connection_thread.setDaemon(True)
             self._stream_connection_thread.start()
@@ -322,7 +325,7 @@ class LSClient(object):
 
             if server_response == OK_CMD:
                 del self._subscriptions[subcription_key]
-                log.info("Unsubscribed successfully")
+                log.debug("Unsubscribed successfully")
             else:
                 log.warning("Server error:" + server_response)
         else:
@@ -429,34 +432,44 @@ class IGStream(object):
             print(traceback.format_exc())
             sys.exit(1)
 
+    def fetch_one(self, subscription):
+        # we may get more than one, or none, in which case this blocks
+        # so yeah, fetch_one is a terrible name
+
+        # we're going to need a blank listen
+        def do_nothing(self):
+            pass
+
+        # set the subscription
+        sub_key = self.subscribe(subscription=subscription, listener=do_nothing)
+
+        # wait for input THIS IS BLOCKING
+        count = 0
+        while(1):
+            count += 1
+            if len(self.lightstreamer_client._subscriptions[sub_key]._results) > 0:
+                break
+            elif count > 10000: # if nothing after 10s, bail 
+                break
+            else:
+                time.sleep(1/1000)
+
+        # grab the results before we lose it on unsubscribe
+        ret = self.lightstreamer_client._subscriptions[sub_key]._results
+
+        # clean up
+        self.unsubscribe(sub_key)
+
+        return ret[0]
+
+
     def subscribe(self, subscription, listener):
-
-        # Making a new Subscription in MERGE mode
-        #subscription = Subscription(
-        #    mode="MERGE",
-        #    items=["MARKET:CS.D.BITCOIN.TODAY.IP"],
-        ##    adapter="QUOTE_ADAPTER",
-        #    fields=["HIGH", "LOW", "UPDATE_TIME", "BID", "OFFER", "CHANGE"])
-
-        #subscription = Subscription(
-        #    mode="DISTINCT",
-        #    items=["TRADE:"+ACCOUNTID],
-        #    fields=["OPU"])
-
-        # A simple function acting as a Subscription listener
-        #def on_item_update(item_update):
-        #    print("{stock_name:<19}: Last{last_price:>6} - Time {time:<8} - "
-        #          "Bid {bid:>5} - Ask {ask:>5}".format(**item_update["values"]))
-
-        #def on_item_update(item_update):
-        #    print(item_update)
 
         # Adding the "on_item_update" function to Subscription
         subscription.addlistener(listener)
 
         # Registering the Subscription
         sub_key = self.lightstreamer_client.subscribe(subscription)
-#        wait_for_input()
         return sub_key
 
 
