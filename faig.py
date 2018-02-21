@@ -4,11 +4,9 @@
 # -*- coding: utf-8 -*-
 import time
 import datetime
-import requests
 import json
 import logging
 import sys
-import urllib
 from time import time, sleep
 import random
 import time as systime
@@ -18,53 +16,20 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 ##################################################
 import sys, os
+import configparser
 
-########################################################################################################################
-REAL_OR_NO_REAL = 'https://demo-api.ig.com/gateway/deal'
-API_ENDPOINT = "https://demo-api.ig.com/gateway/deal/session"
-API_KEY = '********************' 
-#API_KEY = '********************'
-data = {"identifier":"********************","password": "********************"}
-########################################################################################################################
-########################################################################################################################
-########################################################################################################################
-# FOR REAL....
-########################################################################################################################
-########################################################################################################################
-########################################################################################################################
-# REAL_OR_NO_REAL = 'https://api.ig.com/gateway/deal'
-# API_ENDPOINT = "https://api.ig.com/gateway/deal/session"
-# API_KEY = '********************'
-# data = {"identifier":"********************","password": "********************"}
+from igclient import IGClient
 
-headers = {'Content-Type':'application/json; charset=utf-8',
-        'Accept':'application/json; charset=utf-8',
-        'X-IG-API-KEY':API_KEY,
-        'Version':'2'
-        }
+igclient = IGClient()
 
-r = requests.post(API_ENDPOINT, data=json.dumps(data), headers=headers)
+config = configparser.ConfigParser()
+config.read("default.conf")
+config.read("config.conf")
+
+igclient.session()
  
-headers_json = dict(r.headers)
-CST_token = headers_json["CST"]
-print (R"CST : " + CST_token)
-x_sec_token = headers_json["X-SECURITY-TOKEN"]
-print (R"X-SECURITY-TOKEN : " + x_sec_token)
-
 #GET ACCOUNTS
-base_url = REAL_OR_NO_REAL + '/accounts'
-authenticated_headers = {'Content-Type':'application/json; charset=utf-8',
-        'Accept':'application/json; charset=utf-8',
-        'X-IG-API-KEY':API_KEY,
-        'CST':CST_token,
-        'X-SECURITY-TOKEN':x_sec_token}
-
-auth_r = requests.get(base_url, headers=authenticated_headers)
-d = json.loads(auth_r.text)
-
-# print(auth_r.status_code)
-# print(auth_r.reason)
-# print (auth_r.text)
+d = igclient.accounts()
 
 for i in d['accounts']:
     if str(i['accountType']) == "SPREADBET":
@@ -72,19 +37,10 @@ for i in d['accounts']:
         spreadbet_acc_id = str(i['accountId'])
 
 #SET SPREAD BET ACCOUNT AS DEFAULT
-base_url = REAL_OR_NO_REAL + '/session'
-data = {"accountId":spreadbet_acc_id,"defaultAccount": "True"}
-auth_r = requests.put(base_url, data=json.dumps(data), headers=authenticated_headers)
-
-# print(auth_r.status_code)
-# print(auth_r.reason)
-# print (auth_r.text)
+r = igclient.update_session({"accountId":spreadbet_acc_id,"defaultAccount": "True"})
 #ERROR about account ID been the same, Ignore! 
 
 ###################################################################################
-##########################END OF LOGIN CODE########################################
-##########################END OF LOGIN CODE########################################
-##########################END OF LOGIN CODE########################################
 ##########################END OF LOGIN CODE########################################
 ###################################################################################
 
@@ -110,22 +66,8 @@ currencyCode_value = "GBP"
 forceOpen_value = True
 stopDistance_value = "150" #Initial Stop loss, Worked out later per trade
 
-#HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
-#HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
-#epic_id = "CS.D.BITCOIN.TODAY.IP" #Bitcoin
-#epic_id = "IX.D.SUNFUN.DAILY.IP" #Weekend Trading
-#epic_id = "CS.D.ETHUSD.TODAY.IP" #Ether
-#epic_id = "CS.D.BCHUSD.TODAY.IP" #Bitcoin Cash
-#HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
-#HACKY/Weekend Testing - DO NOT USE!!! UNLESS YOU KNOW WHAT YOU ARE DOING!!
+epic_ids = json.loads(config['Epics']['EPIC_IDS'])
 
-#ALL EPICS
-epic_ids = ["CS.D.AUDUSD.TODAY.IP", "CS.D.EURCHF.TODAY.IP", "CS.D.EURGBP.TODAY.IP", "CS.D.EURJPY.TODAY.IP", "CS.D.EURUSD.TODAY.IP", "CS.D.GBPEUR.TODAY.IP", "CS.D.GBPUSD.TODAY.IP", "CS.D.USDCAD.TODAY.IP", "CS.D.USDCHF.TODAY.IP", "CS.D.USDJPY.TODAY.IP", "CS.D.CADCHF.TODAY.IP", "CS.D.CADJPY.TODAY.IP", "CS.D.CHFJPY.TODAY.IP", "CS.D.EURCAD.TODAY.IP", "CS.D.EURSGD.TODAY.IP", "CS.D.EURZAR.TODAY.IP", "CS.D.GBPCAD.TODAY.IP", "CS.D.GBPCHF.TODAY.IP", "CS.D.GBPJPY.TODAY.IP", "CS.D.GBPSGD.TODAY.IP", "CS.D.GBPZAR.TODAY.IP", "CS.D.MXNJPY.TODAY.IP", "CS.D.NOKJPY.TODAY.IP", "CS.D.PLNJPY.TODAY.IP", "CS.D.SEKJPY.TODAY.IP", "CS.D.SGDJPY.TODAY.IP", "CS.D.USDSGD.TODAY.IP", "CS.D.USDZAR.TODAY.IP", "CS.D.AUDCAD.TODAY.IP", "CS.D.AUDCHF.TODAY.IP", "CS.D.AUDEUR.TODAY.IP", "CS.D.AUDGBP.TODAY.IP", "CS.D.AUDJPY.TODAY.IP", "CS.D.AUDNZD.TODAY.IP", "CS.D.AUDSGD.TODAY.IP", "CS.D.EURAUD.TODAY.IP", "CS.D.EURNZD.TODAY.IP", "CS.D.GBPAUD.TODAY.IP", "CS.D.GBPNZD.TODAY.IP", "CS.D.NZDAUD.TODAY.IP", "CS.D.NZDCAD.TODAY.IP", "CS.D.NZDCHF.TODAY.IP", "CS.D.NZDEUR.TODAY.IP", "CS.D.NZDGBP.TODAY.IP", "CS.D.NZDJPY.TODAY.IP", "CS.D.NZDUSD.TODAY.IP", "CS.D.CHFHUF.TODAY.IP", "CS.D.EURCZK.TODAY.IP", "CS.D.EURHUF.TODAY.IP", "CS.D.EURILS.TODAY.IP", "CS.D.EURMXN.TODAY.IP", "CS.D.EURPLN.TODAY.IP", "CS.D.EURTRY.TODAY.IP", "CS.D.GBPCZK.TODAY.IP", "CS.D.GBPHUF.TODAY.IP", "CS.D.GBPILS.TODAY.IP", "CS.D.GBPMXN.TODAY.IP", "CS.D.GBPPLN.TODAY.IP", "CS.D.GBPTRY.TODAY.IP", "CS.D.TRYJPY.TODAY.IP", "CS.D.USDCZK.TODAY.IP", "CS.D.USDHUF.TODAY.IP", "CS.D.USDILS.TODAY.IP", "CS.D.USDMXN.TODAY.IP", "CS.D.USDPLN.TODAY.IP", "CS.D.USDTRY.TODAY.IP", "CS.D.CADNOK.TODAY.IP", "CS.D.CHFNOK.TODAY.IP", "CS.D.EURDKK.TODAY.IP", "CS.D.EURNOK.TODAY.IP", "CS.D.EURSEK.TODAY.IP", "CS.D.GBPDKK.TODAY.IP", "CS.D.GBPNOK.TODAY.IP", "CS.D.GBPSEK.TODAY.IP", "CS.D.NOKSEK.TODAY.IP", "CS.D.USDDKK.TODAY.IP", "CS.D.USDNOK.TODAY.IP", "CS.D.USDSEK.TODAY.IP", "CS.D.AUDCNH.TODAY.IP", "CS.D.CADCNH.TODAY.IP", "CS.D.CNHJPY.TODAY.IP", "CS.D.BRLJPY.TODAY.IP", "CS.D.GBPINR.TODAY.IP", "CS.D.USDBRL.TODAY.IP", "CS.D.USDIDR.TODAY.IP", "CS.D.USDINR.TODAY.IP", "CS.D.USDKRW.TODAY.IP", "CS.D.USDMYR.TODAY.IP", "CS.D.USDPHP.TODAY.IP", "CS.D.USDTWD.TODAY.IP", "CS.D.EURCNH.TODAY.IP", "CS.D.sp_EURRUB.TODAY.IP", "CS.D.GBPCNH.TODAY.IP", "CS.D.NZDCNH.TODAY.IP", "CS.D.USDCNH.TODAY.IP", "CS.D.sp_USDRUB.TODAY.IP"]
-#ALL EPICS
-
-#*******************************************************************
-#*******************************************************************
-#*******************************************************************
 #*******************************************************************
 predict_accuracy = 0.89
 TIME_WAIT_MULTIPLIER = 60
@@ -155,9 +97,6 @@ def humanize_time(secs):
 for times_round_loop in range(1, 9999):
 
 #*******************************************************************
-#*******************************************************************
-#*******************************************************************
-#*******************************************************************
     DO_A_THING = False
     Price_Change_OK = False
     Tight_Spread = False
@@ -178,18 +117,9 @@ for times_round_loop in range(1, 9999):
             print ("!!DEBUG!! : Don't Trade on the same epic twice in a row")
             continue
 
-        print ("-----------------------------------------")
-        print("!!DEBUG : Random epic_id is : " + str(epic_id))
-        base_url = REAL_OR_NO_REAL + '/markets/' + epic_id
-        auth_r = requests.get(base_url, headers=authenticated_headers)
-        d = json.loads(auth_r.text)
+        print("!!DEBUG : Random epic_id: " + str(epic_id), end='')
         systime.sleep(2)
-
-        # print ("-----------------DEBUG-----------------")
-        # print(auth_r.status_code)
-        # print(auth_r.reason)
-        # print (auth_r.text)
-        # print ("-----------------DEBUG-----------------")
+        d = igclient.markets(epic_id)
 
         MARKET_ID = d['instrument']['marketId']
         current_price = d['snapshot']['bid']
@@ -200,18 +130,13 @@ for times_round_loop in range(1, 9999):
         else:
             Price_Change_Day_percent = float(d['snapshot']['percentageChange'])
 
-        if Price_Change_Day_percent < 0.48 and Price_Change_Day_percent < 1.9 and Price_Change_Day_percent < -0.48 and Price_Change_Day_percent > -1.9: 
-            print ("Price Change Percentage on day is " + str(Price_Change_Day_percent))
+        if (Price_Change_Day_percent > 0.48 and Price_Change_Day_percent < 1.9) or (Price_Change_Day_percent < -0.48 and Price_Change_Day_percent > -1.9): 
+            print (" Day Price Change {}% ".format(str(Price_Change_Day_percent)), end='')
             Price_Change_OK = True
             bid_price = d['snapshot']['bid']
             ask_price = d['snapshot']['offer']
             spread = float(bid_price) - float(ask_price)
-            #PUT SOME DEBUGGING HERE NEXT TIME IT FAILS
-            
-            # print ("bid : " + str(bid_price))
-            # print ("ask : " + str(ask_price))
-            # print ("-------------------------")
-            print ("spread : " + str(spread))
+
             ##################################################################################################################
             ##################################################################################################################
             #e.g Spread is -30, That is too big, In-fact way too big. Spread is -1.7, This is not too bad, We can trade on this reasonably well.
@@ -220,40 +145,28 @@ for times_round_loop in range(1, 9999):
             ##################################################################################################################
             #if spread is less than -2, It's too big
             if float(spread) < -2:
-             print ("!!DEBUG!! :- SPREAD NOT OK")
-             Price_Change_OK = False
-             systime.sleep(2)
+              print (":- spread not ok {}".format(spread), end="\n", flush=True)
+              Price_Change_OK = False
+              systime.sleep(2)
             elif float(spread) > -2:
-             Price_Change_OK = True
+              print (":- GOOD SPREAD {}".format(spread), end="\n", flush=True)
+              Price_Change_OK = True
+            else:
+              print (":- spread exactly {} - not ok".format(spread), end="\n", flush=True)
+        else:
+            print(": !Price change {}%".format(Price_Change_Day_percent), end="\n", flush=True)
 
     #Good ol "Crowd-sourcing" check.....
-    #Good ol "Crowd-sourcing" check.....
-    #Good ol "Crowd-sourcing" check.....
-    base_url = REAL_OR_NO_REAL + '/clientsentiment/'+ MARKET_ID
-    auth_r = requests.get(base_url, headers=authenticated_headers)
-    d = json.loads(auth_r.text)
-    
-    print ("-----------------DEBUG-----------------")
-    print(auth_r.status_code)
-    print(auth_r.reason)
-    print (auth_r.text)
-    print ("-----------------DEBUG-----------------")
+    d = igclient.clientsentiment(MARKET_ID)
     
     longPositionPercentage = float(d['longPositionPercentage'])
     shortPositionPercentage = float(d['shortPositionPercentage'])
     
     while not DO_A_THING:
         print ("!!Internal Notes only - Top of Loop!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/DAY/30'
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
-        auth_r = requests.get(base_url, headers=authenticated_headers)
-        d = json.loads(auth_r.text)
+        d = igclient.prices(epic_id, 'DAY/30')
         
-        # print ("-----------------DEBUG-----------------")
-        # print(auth_r.status_code)
-        # print(auth_r.reason)
-        # print (auth_r.text)
-        # print ("-----------------DEBUG-----------------")
         day_moving_avg_30 = []
         # Your input data, X and Y are lists (or Numpy Arrays)
         #THIS IS YOUR TRAINING DATA
@@ -300,131 +213,36 @@ for times_round_loop in range(1, 9999):
         # print ("-----------------DEBUG-----------------")
         
         ############################################################
-        ############################################################
-        ############################################################
-        ############################################################
-        
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/HOUR_4/30'
-        # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
-        auth_r = requests.get(base_url, headers=authenticated_headers)
-        d = json.loads(auth_r.text)
-        
-        # print ("-----------------DEBUG-----------------")
-        # print(auth_r.status_code)
-        # print(auth_r.reason)
-        # print (auth_r.text)
-        # print ("-----------------DEBUG-----------------")
-        for i in d['prices']:
-            tmp_list = []
-            high_price = i['highPrice'][price_compare]
-            low_price = i['lowPrice'][price_compare]
-            volume = i['lastTradedVolume']
-            #---------------------------------
-            tmp_list.append(float(low_price))
-            tmp_list.append(float(volume))
-            x.append(tmp_list)
-            #x is Low Price and Volume
-            y.append(float(high_price))
-            #y = High Prices
-            
-        ###################################################################################
-        ###################################################################################
-        ###################################################################################
-        ###################################################################################
-        
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/HOUR_3/30'
-        # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
-        auth_r = requests.get(base_url, headers=authenticated_headers)
-        d = json.loads(auth_r.text)
-        
-        # print ("-----------------DEBUG-----------------")
-        # print(auth_r.status_code)
-        # print(auth_r.reason)
-        # print (auth_r.text)
-        # print ("-----------------DEBUG-----------------")
-      
-        for i in d['prices']:
-            tmp_list = []
-            high_price = i['highPrice'][price_compare]
-            low_price = i['lowPrice'][price_compare]
-            volume = i['lastTradedVolume']
-            #---------------------------------
-            tmp_list.append(float(low_price))
-            tmp_list.append(float(volume))
-            x.append(tmp_list)
-            #x is Low Price and Volume
-            y.append(float(high_price))
-            #y = High Prices
-            
-        ###################################################################################
-        ###################################################################################
-        ###################################################################################
-        ###################################################################################
-        
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/HOUR_2/30'
-        # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
-        auth_r = requests.get(base_url, headers=authenticated_headers)
-        d = json.loads(auth_r.text)
-        
-        # print ("-----------------DEBUG-----------------")
-        # print(auth_r.status_code)
-        # print(auth_r.reason)
-        # print (auth_r.text)
-        # print ("-----------------DEBUG-----------------")
-     
-        for i in d['prices']:
-            tmp_list = []
-            high_price = i['highPrice'][price_compare]
-            low_price = i['lowPrice'][price_compare]
-            volume = i['lastTradedVolume']
-            #---------------------------------
-            tmp_list.append(float(low_price))
-            tmp_list.append(float(volume))
-            x.append(tmp_list)
-            #x is Low Price and Volume
-            y.append(float(high_price))
-            #y = High Prices
-        
 
-        ###################################################################################
-        ###################################################################################
-        ###################################################################################
-        ###################################################################################
-        
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/HOUR/30'
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
-        auth_r = requests.get(base_url, headers=authenticated_headers)
-        d = json.loads(auth_r.text)
-        
-        # print ("-----------------DEBUG-----------------")
-        # print(auth_r.status_code)
-        # print(auth_r.reason)
-        # print (auth_r.text)
-        # print ("-----------------DEBUG-----------------")
-        
-        for i in d['prices']:
-            tmp_list = []
-            high_price = i['highPrice'][price_compare]
-            low_price = i['lowPrice'][price_compare]
-            volume = i['lastTradedVolume']
-            #---------------------------------
-            tmp_list.append(float(low_price))
-            tmp_list.append(float(volume))
-            x.append(tmp_list)
-            #x is Low Price and Volume
-            y.append(float(high_price))
-            #y = High Prices
+        resolutions = ['HOUR_4/30', 'HOUR_3/30', 'HOUR_2/30', 'HOUR/30']
+        for resolution in resolutions:
+            d = igclient.prices(epic_id, resolution)
+            
+            for i in d['prices']:
+                tmp_list = []
+                high_price = i['highPrice'][price_compare]
+                low_price = i['lowPrice'][price_compare]
+                volume = i['lastTradedVolume']
+                #---------------------------------
+                if low_price != None:
+                    tmp_list.append(float(low_price))
+                    tmp_list.append(float(volume))
+                    x.append(tmp_list)
+                    #x is Low Price and Volume
+                    y.append(float(high_price))
+                    #y = High Prices
+            
+        ###################################################################################
         
         #Cut down on API Calls by using this again! 
         
         price_ranges = []
         closing_prices = []
-        first_time_round_loop = True
         TR_prices = []
 
-
-        for i in d['prices']:
-            if first_time_round_loop == True:
+        for count, i in enumerate(d['prices']):
+            if count == 0:
                 #First time round loop cannot get previous
                 closePrice = i['closePrice'][price_compare]
                 closing_prices.append(closePrice)
@@ -432,7 +250,6 @@ for times_round_loop in range(1, 9999):
                 low_price = i['lowPrice'][price_compare]
                 price_range = float(high_price - closePrice)
                 price_ranges.append(price_range)
-                first_time_round_loop = False
             else:
                 prev_close = closing_prices[-1]
                 ###############################
@@ -440,7 +257,11 @@ for times_round_loop in range(1, 9999):
                 closing_prices.append(closePrice)
                 high_price = i['highPrice'][price_compare]
                 low_price = i['lowPrice'][price_compare]
-                price_range = float(high_price - closePrice)
+                try:
+                  price_range = float(high_price - closePrice)
+                except Exception:
+                  print ("No data for {e}.{r}".format(e=epic_id, r=resolution))
+                  #sys.exit(1)
                 price_ranges.append(price_range)
                 TR = max(high_price-low_price, abs(high_price-prev_close), abs(low_price-prev_close))
                 #print (TR)
@@ -460,224 +281,35 @@ for times_round_loop in range(1, 9999):
 
         ###################################################################################
         ###################################################################################
-        ###################################################################################
-        ###################################################################################
         
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE_30/30'
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
-        auth_r = requests.get(base_url, headers=authenticated_headers)
-        d = json.loads(auth_r.text)
-        
-        # print ("-----------------DEBUG-----------------")
-        # print(auth_r.status_code)
-        # print(auth_r.reason)
-        # print (auth_r.text)
-        # print ("-----------------DEBUG-----------------")
-  
-
-        for i in d['prices']:
-            tmp_list = []
-            high_price = i['highPrice'][price_compare]
-            low_price = i['lowPrice'][price_compare]
-            volume = i['lastTradedVolume']
-            #---------------------------------
-            tmp_list.append(float(low_price))
-            tmp_list.append(float(volume))
-            x.append(tmp_list)
-            #x is Low Price and Volume
-            y.append(float(high_price))
-            #y = High Prices
-
-        ###################################################################################
-        ###################################################################################
-        ###################################################################################
-        ###################################################################################
-        
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE_15/30'
-        # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
-        auth_r = requests.get(base_url, headers=authenticated_headers)
-        d = json.loads(auth_r.text)
-        
-        # print ("-----------------DEBUG-----------------")
-        # print(auth_r.status_code)
-        # print(auth_r.reason)
-        # print (auth_r.text)
-        # print ("-----------------DEBUG-----------------")
-    
-        for i in d['prices']:
-            tmp_list = []
-            high_price = i['highPrice'][price_compare]
-            low_price = i['lowPrice'][price_compare]
-            volume = i['lastTradedVolume']
-            #---------------------------------
-            tmp_list.append(float(low_price))
-            tmp_list.append(float(volume))
-            x.append(tmp_list)
-            #x is Low Price and Volume
-            y.append(float(high_price))
-            #y = High Prices
-        
-        ###################################################################################
-        ###################################################################################
-        ###################################################################################
-        ###################################################################################
-        
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE_10/30'
-        # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
-        auth_r = requests.get(base_url, headers=authenticated_headers)
-        d = json.loads(auth_r.text)
-        
-        # print ("-----------------DEBUG-----------------")
-        # print(auth_r.status_code)
-        # print(auth_r.reason)
-        # print (auth_r.text)
-        # print ("-----------------DEBUG-----------------")
-     
-        for i in d['prices']:
-            tmp_list = []
-            high_price = i['highPrice'][price_compare]
-            low_price = i['lowPrice'][price_compare]
-            volume = i['lastTradedVolume']
-            #---------------------------------
-            tmp_list.append(float(low_price))
-            tmp_list.append(float(volume))
-            x.append(tmp_list)
-            #x is Low Price and Volume
-            y.append(float(high_price))
-            #y = High Prices
-        
-        ###################################################################################
-        ###################################################################################
-        ###################################################################################
-        ###################################################################################
-        
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE_5/30'
-        # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
-        auth_r = requests.get(base_url, headers=authenticated_headers)
-        d = json.loads(auth_r.text)
-        
-        # print ("-----------------DEBUG-----------------")
-        # print(auth_r.status_code)
-        # print(auth_r.reason)
-        # print (auth_r.text)
-        # print ("-----------------DEBUG-----------------")
-        
-        
-
-        for i in d['prices']:
-            tmp_list = []
-            high_price = i['highPrice'][price_compare]
-            low_price = i['lowPrice'][price_compare]
-            volume = i['lastTradedVolume']
-            #---------------------------------
-            tmp_list.append(float(low_price))
-            tmp_list.append(float(volume))
-            x.append(tmp_list)
-            #x is Low Price and Volume
-            y.append(float(high_price))
-            #y = High Prices
-
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE_3/30'
-        # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
-        auth_r = requests.get(base_url, headers=authenticated_headers)
-        d = json.loads(auth_r.text)
-        
-        # print ("-----------------DEBUG-----------------")
-        # print(auth_r.status_code)
-        # print(auth_r.reason)
-        # print (auth_r.text)
-        # print ("-----------------DEBUG-----------------")
-
-        for i in d['prices']:
-            tmp_list = []
-            high_price = i['highPrice'][price_compare]
-            low_price = i['lowPrice'][price_compare]
-            volume = i['lastTradedVolume']
-            #---------------------------------
-            tmp_list.append(float(low_price))
-            tmp_list.append(float(volume))
-            x.append(tmp_list)
-            #x is Low Price and Volume
-            y.append(float(high_price))
-            #y = High Prices
-        
-        ###################################################################################
-        ###################################################################################
-        ###################################################################################
-        ###################################################################################
-        
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE_2/30'
-        # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
-        auth_r = requests.get(base_url, headers=authenticated_headers)
-        d = json.loads(auth_r.text)
-        
-        # print ("-----------------DEBUG-----------------")
-        # print(auth_r.status_code)
-        # print(auth_r.reason)
-        # print (auth_r.text)
-        # print ("-----------------DEBUG-----------------")
-  
-        for i in d['prices']:
-            tmp_list = []
-            high_price = i['highPrice'][price_compare]
-            low_price = i['lowPrice'][price_compare]
-            volume = i['lastTradedVolume']
-            #---------------------------------
-            tmp_list.append(float(low_price))
-            tmp_list.append(float(volume))
-            x.append(tmp_list)
-            #x is Low Price and Volume
-            y.append(float(high_price))
-            #y = High Prices
+        resolutions = ['MINUTE_30/30', 'MINUTE_15/30', 'MINUTE_10/30', 'MINUTE_5/30', 'MINUTE_3/30', 'MINUTE_2/30', 'MINUTE/30']
+        for resolution in resolutions:
+            d = igclient.prices(epic_id, resolution)
             
-        ###################################################################################
-        ###################################################################################
-        ###################################################################################
-        ###################################################################################
-        
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/MINUTE/30'
-        # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
-        auth_r = requests.get(base_url, headers=authenticated_headers)
-        d = json.loads(auth_r.text)
-        
-        # print ("-----------------DEBUG-----------------")
-        # print(auth_r.status_code)
-        # print(auth_r.reason)
-        # print (auth_r.text)
-        # print ("-----------------DEBUG-----------------")
-    
-        for i in d['prices']:
-            tmp_list = []
-            high_price = i['highPrice'][price_compare]
-            low_price = i['lowPrice'][price_compare]
-            volume = i['lastTradedVolume']
-            #---------------------------------
-            tmp_list.append(float(low_price))
-            tmp_list.append(float(volume))
-            x.append(tmp_list)
-            #x is Low Price and Volume
-            y.append(float(high_price))
-            #y = High Prices
-            
-        ###################################################################################
-        ###################################################################################
+            for i in d['prices']:
+                tmp_list = []
+                high_price = i['highPrice'][price_compare]
+                low_price = i['lowPrice'][price_compare]
+                volume = i['lastTradedVolume']
+                #---------------------------------
+                tmp_list.append(float(low_price))
+                tmp_list.append(float(volume))
+                x.append(tmp_list)
+                #x is Low Price and Volume
+                y.append(float(high_price))
+                #y = High Prices
+
         ###################################################################################
         ###################################################################################
 
-        base_url = REAL_OR_NO_REAL + '/prices/'+ epic_id + '/DAY/1'
-        # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
-        auth_r = requests.get(base_url, headers=authenticated_headers)
-        d = json.loads(auth_r.text)
-
+        d = igclient.prices(epic_id, 'DAY/1')
+        
         for i in d['prices']:
             low_price = i['lowPrice'][price_compare]
             volume = i['lastTradedVolume']
 
         #####################################################################
-        #########################PREDICTION CODE#############################
-        #########################PREDICTION CODE#############################
-        #########################PREDICTION CODE#############################
-        #########################PREDICTION CODE#############################
         #########################PREDICTION CODE#############################
         #####################################################################
         
@@ -746,6 +378,7 @@ for times_round_loop in range(1, 9999):
         Prediction_Wait_Timer = int(TIME_WAIT_MULTIPLIER) #Wait
 
         if float(score) < float(predict_accuracy):
+            # NOT ACCURATE ENOUGH (YET)
             print ("!!DEBUG!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
             DO_A_THING = False
             print ("!!DEBUG!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
@@ -756,7 +389,8 @@ for times_round_loop in range(1, 9999):
         #Three things, Price difference is less than target, Accuracy is OK, Current Price is less than Price Prediction
         #Added a fourth thing "contrarian indicator"
         
-        b_contrarian = False #THIS MUST BE SET EITHER WAY!! 
+        print ("price_diff:{} score:{} current_price:{} limitDistance_value:{} predict_accuracy:{} price_prediction:{}".format(price_diff, score, current_price, limitDistance_value, predict_accuracy, price_prediction))
+        b_contrarian = eval(config['Trade']['b_contrarian']) #THIS MUST BE SET EITHER WAY!! 
         if b_contrarian == True:
             print ("!!DEBUG!! b_contrarian SET!!")
             if price_diff < 0 and score > predict_accuracy and float(current_price) < float(price_prediction):
@@ -818,7 +452,7 @@ for times_round_loop in range(1, 9999):
                     break
             else:
                 DO_A_THING = False
-                print ("!!DEBUG!! NO CRITERIA!!: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+                print ("!!DEBUG!! NO CRITERIA YET - SLEEPING!!: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
                 systime.sleep(Prediction_Wait_Timer)
                 print ("!!DEBUG!! NO CRITERIA!! " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
                 break
@@ -884,7 +518,7 @@ for times_round_loop in range(1, 9999):
                     break
             else:
                 DO_A_THING = False
-                print ("!!DEBUG!! NO CRITERIA!!: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+                print ("!!DEBUG!! NO CRITERIA YET - SLEEPING!!: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
                 systime.sleep(Prediction_Wait_Timer)
                 print ("!!DEBUG!! NO CRITERIA!! " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
                 break
@@ -898,31 +532,17 @@ for times_round_loop in range(1, 9999):
         print ("-----------------DEBUG-----------------")
         continue
 
-    base_url = REAL_OR_NO_REAL + '/positions/otc'
-    authenticated_headers = {'Content-Type':'application/json; charset=utf-8',
-            'Accept':'application/json; charset=utf-8',
-            'X-IG-API-KEY':API_KEY,
-            'CST':CST_token,
-            'X-SECURITY-TOKEN':x_sec_token}
-            
     data = {"direction":DIRECTION_TO_TRADE,"epic": epic_id, "limitDistance":limitDistance_value, "orderType":orderType_value, "size":size_value,"expiry":expiry_value,"guaranteedStop":guaranteedStop_value,"currencyCode":currencyCode_value,"forceOpen":forceOpen_value,"stopDistance":stopDistance_value}
-    r = requests.post(base_url, data=json.dumps(data), headers=authenticated_headers)
+    igclient.setdebug(True)
+    d = igclient.positions_otc(data)
     
-    print ("-----------------DEBUG-----------------")
-    print(r.status_code)
-    print(r.reason)
-    print (r.text)
-    print ("-----------------DEBUG-----------------")
-
-    d = json.loads(r.text)
     deal_ref = d['dealReference']
     systime.sleep(2)
     # MAKE AN ORDER
-    
+
     #CONFIRM MARKET ORDER
-    base_url = REAL_OR_NO_REAL + '/confirms/'+ deal_ref
-    auth_r = requests.get(base_url, headers=authenticated_headers)
-    d = json.loads(auth_r.text)
+    d = igclient.confirms(deal_ref)    
+    igclient.setdebug(False)
     DEAL_ID = d['dealId']
     print("DEAL ID : " + str(d['dealId']))
     print(d['dealStatus'])
@@ -941,29 +561,21 @@ for times_round_loop in range(1, 9999):
     ##########################################
     ##########READ IN INITIAL PROFIT##########
     ##########################################
-        
-    base_url = REAL_OR_NO_REAL + '/positions/'+ DEAL_ID
-    auth_r = requests.get(base_url, headers=authenticated_headers)      
-    d = json.loads(auth_r.text)
-        
-    print ("-----------------DEBUG-----------------")
-    print(r.status_code)
-    print(r.reason)
-    print (r.text)
-    print ("-----------------DEBUG-----------------")
     
+    igclient.setdebug(True)
+    d = igclient.positions(DEAL_ID)
+    igclient.setdebug(False)
+        
     ##########################################
     ##########READ IN INITIAL PROFIT##########
     ##########################################
     
     if DIRECTION_TO_TRADE == "SELL":
         PROFIT_OR_LOSS = float(d['position']['openLevel']) - float(d['market'][DIRECTION_TO_COMPARE])
-        PROFIT_OR_LOSS = PROFIT_OR_LOSS * float(size_value)
-        print ("Deal Number : " + str(times_round_loop) + " Profit/Loss : " + str(PROFIT_OR_LOSS))
     else:
         PROFIT_OR_LOSS = float(d['market'][DIRECTION_TO_COMPARE] - float(d['position']['openLevel']))
-        PROFIT_OR_LOSS = PROFIT_OR_LOSS * float(size_value)
-        print ("Deal Number : " + str(times_round_loop) + " Profit/Loss : " + str(PROFIT_OR_LOSS))
+    PROFIT_OR_LOSS = PROFIT_OR_LOSS * float(size_value)
+    print ("Deal Number : " + str(times_round_loop) + " Profit/Loss : " + str(PROFIT_OR_LOSS))
      
     ##########################################
     ##########READ IN INITIAL PROFIT##########
@@ -976,11 +588,10 @@ for times_round_loop in range(1, 9999):
         #while PROFIT_OR_LOSS < float(limitDistance_value): 
         while PROFIT_OR_LOSS < float(float(limitDistance_value) * float(size_value)) - 1: #Take something from the market, Before Take Profit.
             elapsed_time = round((time() - Start_loop_time), 1) 
-            print ("******************************")
-            print ("Order Time : " + str(humanize_time(elapsed_time)))
-      
-            base_url = REAL_OR_NO_REAL + '/positions/'+ DEAL_ID
-            auth_r = requests.get(base_url, headers=authenticated_headers)      
+
+            igclient.json = False
+            auth_r = igclient.positions(DEAL_ID)
+            igclient.json = True
             d = json.loads(auth_r.text)
             
             while not int(auth_r.status_code) == 200:
@@ -999,46 +610,33 @@ for times_round_loop in range(1, 9999):
                 # print (auth_r.text)
                 print ("-----------------DEBUG-----------------")
                 #Got some "basic" error checking after all
-                base_url = REAL_OR_NO_REAL + '/positions/'+ DEAL_ID
-                auth_r = requests.get(base_url, headers=authenticated_headers)      
-                d = json.loads(auth_r.text)
-            
+                d = igclient.positions(DEAL_ID)
+               
             if DIRECTION_TO_TRADE == "SELL":
                 PROFIT_OR_LOSS = float(d['position']['openLevel']) - float(d['market'][DIRECTION_TO_COMPARE])
-                PROFIT_OR_LOSS = float(d['position']['openLevel']) - float(d['market'][DIRECTION_TO_COMPARE])
-                PROFIT_OR_LOSS = float(PROFIT_OR_LOSS * float(size_value))
-                print ("Deal Number : " + str(times_round_loop) + " Profit/Loss : " + str(PROFIT_OR_LOSS))
-                systime.sleep(2) #Don't be too keen to read price
             else:
                 PROFIT_OR_LOSS = float(d['market'][DIRECTION_TO_COMPARE] - float(d['position']['openLevel']))
-                PROFIT_OR_LOSS = float(PROFIT_OR_LOSS * float(size_value))
-                print ("Deal Number : " + str(times_round_loop) + " Profit/Loss : " + str(PROFIT_OR_LOSS))
-                systime.sleep(2) #Don't be too keen to read price
+            PROFIT_OR_LOSS = float(PROFIT_OR_LOSS * float(size_value))
+            print ("Deal Number : " + str(times_round_loop) + " Profit/Loss : " + str(PROFIT_OR_LOSS) + " Order Time : " + str(humanize_time(elapsed_time)))
+            systime.sleep(2) #Don't be too keen to read price
                 
             ARTIFICIAL_STOP_LOSS = float(max_range) * float(size_value)
             if ARTIFICIAL_STOP_LOSS > 100:
                 print ("!!!!WARNING!!!! STOP LOSS MIGHT BE TOO HIGH :- Current Value is " + str(ARTIFICIAL_STOP_LOSS))
             ARTIFICIAL_STOP_LOSS = ARTIFICIAL_STOP_LOSS * -1 #Make Negative, DO NOT REMOVE!!
+
+            def close_trade():
+                SIZE = size_value
+                ORDER_TYPE = orderType_value
+                data = {"dealId":DEAL_ID,"direction":DIRECTION_TO_CLOSE,"size":SIZE,"orderType":ORDER_TYPE}
+                igclient.setdebug(True)
+                auth_r = igclient.positions_otc_close(data)
+                igclient.setdebug(False)
                
             if PROFIT_OR_LOSS < ARTIFICIAL_STOP_LOSS:
                 #CLOSE TRADE/GTFO
                 print ("!!!WARNING!!! POTENTIAL DIRECTION CHANGE!!")
-                SIZE = size_value
-                ORDER_TYPE = orderType_value
-                base_url = REAL_OR_NO_REAL + '/positions/otc'
-                data = {"dealId":DEAL_ID,"direction":DIRECTION_TO_CLOSE,"size":SIZE,"orderType":ORDER_TYPE}
-                #authenticated_headers_delete IS HACKY AF WORK AROUND!! AS PER .... https://labs.ig.com/node/36
-                authenticated_headers_delete = {'Content-Type':'application/json; charset=utf-8',
-                'Accept':'application/json; charset=utf-8',
-                'X-IG-API-KEY':API_KEY,
-                'CST':CST_token,
-                'X-SECURITY-TOKEN':x_sec_token,
-                '_method':"DELETE"}
-                auth_r = requests.post(base_url, data=json.dumps(data), headers=authenticated_headers_delete) 
-                #DEBUG
-                print(auth_r.status_code)
-                print(auth_r.reason)
-                print (auth_r.text)
+                close_trade()
                 print ("!!DEBUG TIME!! Direction Change Wait: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
                 Prediction_Wait_Timer = 900 #15Mins
                 systime.sleep(Prediction_Wait_Timer)
@@ -1047,22 +645,7 @@ for times_round_loop in range(1, 9999):
                 print ("!!DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER TIME")
                 if float (PROFIT_OR_LOSS) > 0:
                     print ("!!DEBUG!! TRADE OPEN OVER TIME AND IN PROFIT")
-                    SIZE = size_value
-                    ORDER_TYPE = orderType_value
-                    base_url = REAL_OR_NO_REAL + '/positions/otc'
-                    data = {"dealId":DEAL_ID,"direction":DIRECTION_TO_CLOSE,"size":SIZE,"orderType":ORDER_TYPE}
-                    #authenticated_headers_delete IS HACKY AF WORK AROUND!! AS PER .... https://labs.ig.com/node/36
-                    authenticated_headers_delete = {'Content-Type':'application/json; charset=utf-8',
-                    'Accept':'application/json; charset=utf-8',
-                    'X-IG-API-KEY':API_KEY,
-                    'CST':CST_token,
-                    'X-SECURITY-TOKEN':x_sec_token,
-                    '_method':"DELETE"}
-                    auth_r = requests.post(base_url, data=json.dumps(data), headers=authenticated_headers_delete) 
-                    #DEBUG
-                    print(auth_r.status_code)
-                    print(auth_r.reason)
-                    print (auth_r.text)
+                    close_trade()
                     print ("!!DEBUG!! : TIME AND IN PROFIT :- CLOSED")
                     
           
@@ -1070,66 +653,11 @@ for times_round_loop in range(1, 9999):
                 print ("!!DEBUG!! WARNING: TRADE HAS BEEN OPEN OVER 5 HOURS")
                 if -9 <= float (PROFIT_OR_LOSS) <= 0:
                     print ("!!DEBUG!! TRADE OPEN OVER 5 HOURS, CUT LOSSES")
-                    #ENABLE THIS CODE WHEN HAPPY WITH VALUES
-                    #######################################
-                    SIZE = size_value
-                    ORDER_TYPE = orderType_value
-                    base_url = REAL_OR_NO_REAL + '/positions/otc'
-                    data = {"dealId":DEAL_ID,"direction":DIRECTION_TO_CLOSE,"size":SIZE,"orderType":ORDER_TYPE}
-                    #authenticated_headers_delete IS HACKY AF WORK AROUND!! AS PER .... https://labs.ig.com/node/36
-                    authenticated_headers_delete = {'Content-Type':'application/json; charset=utf-8',
-                    'Accept':'application/json; charset=utf-8',
-                    'X-IG-API-KEY':API_KEY,
-                    'CST':CST_token,
-                    'X-SECURITY-TOKEN':x_sec_token,
-                    '_method':"DELETE"}
-                    auth_r = requests.post(base_url, data=json.dumps(data), headers=authenticated_headers_delete) 
-                    #DEBUG
-                    print(auth_r.status_code)
-                    print(auth_r.reason)
-                    print (auth_r.text)
+                    close_trade()
                     print ("DEBUG : TIME AND IN PROFIT :- CLOSED")
             
-            if float (PROFIT_OR_LOSS) > 9 and elapsed_time < 2700:
-                #ENABLE THIS CODE WHEN HAPPY WITH VALUES
-                ########################################
-                SIZE = size_value
-                ORDER_TYPE = orderType_value
-                base_url = REAL_OR_NO_REAL + '/positions/otc'
-                data = {"dealId":DEAL_ID,"direction":DIRECTION_TO_CLOSE,"size":SIZE,"orderType":ORDER_TYPE}
-                #authenticated_headers_delete IS HACKY AF WORK AROUND!! AS PER .... https://labs.ig.com/node/36
-                authenticated_headers_delete = {'Content-Type':'application/json; charset=utf-8',
-                'Accept':'application/json; charset=utf-8',
-                'X-IG-API-KEY':API_KEY,
-                'CST':CST_token,
-                'X-SECURITY-TOKEN':x_sec_token,
-                '_method':"DELETE"}
-                auth_r = requests.post(base_url, data=json.dumps(data), headers=authenticated_headers_delete) 
-                #DEBUG
-                print(auth_r.status_code)
-                print(auth_r.reason)
-                print (auth_r.text)
-                print ("DEBUG : TIME AND IN PROFIT :- CLOSED")
-                
-            if float (PROFIT_OR_LOSS) > 20 and elapsed_time > 7200:
-                #ENABLE THIS CODE WHEN HAPPY WITH VALUES
-                ########################################
-                SIZE = size_value
-                ORDER_TYPE = orderType_value
-                base_url = REAL_OR_NO_REAL + '/positions/otc'
-                data = {"dealId":DEAL_ID,"direction":DIRECTION_TO_CLOSE,"size":SIZE,"orderType":ORDER_TYPE}
-                #authenticated_headers_delete IS HACKY AF WORK AROUND!! AS PER .... https://labs.ig.com/node/36
-                authenticated_headers_delete = {'Content-Type':'application/json; charset=utf-8',
-                'Accept':'application/json; charset=utf-8',
-                'X-IG-API-KEY':API_KEY,
-                'CST':CST_token,
-                'X-SECURITY-TOKEN':x_sec_token,
-                '_method':"DELETE"}
-                auth_r = requests.post(base_url, data=json.dumps(data), headers=authenticated_headers_delete) 
-                #DEBUG
-                print(auth_r.status_code)
-                print(auth_r.reason)
-                print (auth_r.text)
+            if (float(PROFIT_OR_LOSS) > 9 and elapsed_time < 2700) or (float (PROFIT_OR_LOSS) > 20 and elapsed_time > 7200):
+                close_trade()
                 print ("DEBUG : TIME AND IN PROFIT :- CLOSED")
 
                         
@@ -1151,26 +679,14 @@ for times_round_loop in range(1, 9999):
         SIZE = size_value
         ORDER_TYPE = orderType_value
         
-        base_url = REAL_OR_NO_REAL + '/positions/otc'
-        data = {"dealId":DEAL_ID,"direction":DIRECTION_TO_CLOSE,"size":SIZE,"orderType":ORDER_TYPE}
-        #authenticated_headers_delete IS HACKY AF WORK AROUND!! AS PER .... https://labs.ig.com/node/36
-        authenticated_headers_delete = {'Content-Type':'application/json; charset=utf-8',
-                'Accept':'application/json; charset=utf-8',
-                'X-IG-API-KEY':API_KEY,
-                'CST':CST_token,
-                'X-SECURITY-TOKEN':x_sec_token,
-                '_method':"DELETE"}
-        
-        auth_r = requests.post(base_url, data=json.dumps(data), headers=authenticated_headers_delete)   
         #CLOSE TRADE
-        print(auth_r.status_code)
-        print(auth_r.reason)
-        print (auth_r.text)
+        data = {"dealId":DEAL_ID,"direction":DIRECTION_TO_CLOSE,"size":SIZE,"orderType":ORDER_TYPE}
+        igclient.setdebug(True)
+        auth_r = igclient.positions_otc_close(data)
+        igclient.setdebug(False)
         
         # #CONFIRM CLOSE - FUTURE
-        # base_url = REAL_OR_NO_REAL + '/confirms/'+ deal_ref
-        # auth_r = requests.get(base_url, headers=authenticated_headers)
-        # d = json.loads(auth_r.text)
+        # d = igclient.confirms(deal_ref)
         # DEAL_ID = d['dealId']
         # print("DEAL ID : " + str(d['dealId']))
         # print(d['dealStatus'])
