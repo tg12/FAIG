@@ -452,7 +452,7 @@ class IGStream(object):
             elif count > 10000: # if nothing after 10s, bail 
                 break
             else:
-                time.sleep(1/1000)
+                time.sleep(000.1)
 
         # grab the results before we lose it on unsubscribe
         ret = self.lightstreamer_client._subscriptions[sub_key]._results

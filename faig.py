@@ -78,7 +78,8 @@ currencyCode_value = "GBP"
 forceOpen_value = True
 stopDistance_value = "150" #Initial Stop loss, Worked out later per trade
 
-epic_ids = json.loads(config['Epics']['EPIC_IDS'])
+epics = json.loads(config['Epics']['EPICS'])
+epic_ids = list(epics.keys())
 
 #*******************************************************************
 predict_accuracy = float(config['Trade']['predict_accuracy'])
@@ -104,29 +105,32 @@ def humanize_time(secs):
     hours, mins = divmod(mins, 60)
     return '%02d:%02d:%02d' % (hours, mins, secs)
 
+def fetch_current_price(epic_id):
+  try:
+    subscription = igstream.Subscription(
+      mode="MERGE",
+      items=["MARKET:{}".format(epic_id)],
+      fields=["MID_OPEN","HIGH","LOW","CHANGE","CHANGE_PCT","UPDATE_TIME","MARKET_DELAY","MARKET_STATE","BID","OFFER"]
+    )
+    res = igstreamclient.fetch_one(subscription)
+  except IndexError:
+    # fall back to non-stream version
+    res = igclient.markets(epic_id)
+    res['values'] = {}
+    res['values']['BID'] = res['snapshot']['bid']
+    res['values']['OFFER'] = res['snapshot']['offer']
+    res['values']['CHANGE'] = res['snapshot']['netChange']
+    res['values']['CHANGE_PCT'] = res['snapshot']['percentageChange']
+  return res
+
 def find_next_trade(epic_ids):
   while(1):
     random.shuffle(epic_ids)
     for epic_id in epic_ids:
       print("!!DEBUG!! : " + str(epic_id), end='')
-      #systime.sleep(2) # we only get 30 API calls per minute :( but streaming doesn't count?
+      #systime.sleep(2) # we only get 30 API calls per minute :( but streaming doesn't count, so no sleep
 
-      try:
-        subscription = igstream.Subscription(
-          mode="MERGE",
-          items=["MARKET:{}".format(epic_id)],
-          fields=["MID_OPEN","HIGH","LOW","CHANGE","CHANGE_PCT","UPDATE_TIME","MARKET_DELAY","MARKET_STATE","BID","OFFER"]
-        )
-        res = igstreamclient.fetch_one(subscription)
-      except IndexError:
-        # fall back to non-stream version
-        res = igclient.markets(epic_id)
-        res['values'] = {}
-        res['values']['BID'] = res['snapshot']['bid']
-        res['values']['OFFER'] = res['snapshot']['offer']
-        res['values']['CHANGE'] = res['snapshot']['netChange']
-        res['values']['CHANGE_PCT'] = res['snapshot']['percentageChange']
-
+      res = fetch_current_price(epic_id)
       res['values']['EPIC'] = epic_id
 
       current_price = res['values']['BID']
@@ -146,17 +150,18 @@ def find_next_trade(epic_ids):
           ask_price = res['values']['OFFER']
           spread = float(bid_price) - float(ask_price)
 
+          max_permitted_spread = float(epics[epic_id]['minspread'] * float(config['Trade']['spread_multiplier']) * -1)
+
           #if spread is less than -2, It's too big
-          if float(spread) < float(config['Trade']['max_spread']):
-            print (":- spread not ok {}".format(spread), end="\n", flush=True)
-          elif float(spread) > float(config['Trade']['max_spread']):
-            print (":- GOOD SPREAD {}".format(spread), end="\n", flush=True)
+          if float(spread) > max_permitted_spread:
+            print (":- GOOD SPREAD {0:.2f}>{1:.2f}".format(spread,max_permitted_spread), end="\n", flush=True)
             return res
           else:
-            print (":- spread exactly {} - not ok".format(spread), end="\n", flush=True)
+            print (":- spread not ok {0:.2f}<={1:.2f}".format(spread,max_permitted_spread), end="\n", flush=True)
       else:
-        print(": !Price change {}%".format(Price_Change_Day_percent), end="\n", flush=True)
+        print(": !Price change {}%".format(Price_Change_Day_percent), end="\n", flush=True) 
 
+    systime.sleep(30) # that's all of them
 
 def trade_type_buy_short(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark):
   if float(shortPositionPercentage) > float(longPositionPercentage) and float(shortPositionPercentage) > Client_Sentiment_Check:
@@ -184,7 +189,20 @@ def trade_type_buy_long(shortPositionPercentage, longPositionPercentage, Client_
     print ("!!DEBUG No Trade This time BL")
     print ("!!DEBUG longPositionPercentage:{} shortPositionPercentage:{} Client_Sentiment_Check:{} High_Trend_Watermark:{}".format(longPositionPercentage, shortPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark))
 
-b_contrarian = eval(config['Trade']['b_contrarian']) #THIS MUST BE SET EITHER WAY!! 
+b_contrarian = eval(config['Trade']['b_contrarian']) #THIS MUST BE SET EITHER WAY!!
+
+market_ids = {}
+
+def get_market_id(epic_id):
+  try:
+    MARKET_ID = market_ids[epic_id]
+  except KeyError:
+    # lookup and cache - these won't change
+    d = igclient.markets(epic_id)
+    market_ids[epic_id] = d['instrument']['marketId']
+    MARKET_ID = market_ids[epic_id]
+  return MARKET_ID
+
 
 for times_round_loop in range(1, 9999):
 
@@ -194,8 +212,7 @@ for times_round_loop in range(1, 9999):
     d = find_next_trade(epic_ids)
     epic_id = d['values']['EPIC']
     current_price = d['values']['BID']
-    d = igclient.markets(epic_id)
-    MARKET_ID = d['instrument']['marketId'] # need a lookup just for this? cache it
+    MARKET_ID = get_market_id(epic_id)
  
     DO_A_THING = False
     price_compare = "bid"
