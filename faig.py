@@ -89,6 +89,7 @@ Client_Sentiment_Check = 69
 profitable_trade_count = 0
 High_Trend_Watermark = 89
 
+
 #******************************************************************************************************************************
 #******************************************************************************************************************************
 #******************************************************************************************************************************
@@ -104,6 +105,15 @@ def humanize_time(secs):
     mins, secs = divmod(secs, 60)
     hours, mins = divmod(mins, 60)
     return '%02d:%02d:%02d' % (hours, mins, secs)
+
+def fetch_day_highlow(epic_id):
+  subscription = igstream.Subscription(
+      mode="MERGE",
+      items=["CHART:{}:HOUR".format(epic_id)],
+      fields=["LTV", "DAY_LOW", "DAY_HIGH"]
+    )
+  res = igstreamclient.fetch_one(subscription)
+  return res
 
 def fetch_current_price(epic_id):
   try:
@@ -150,7 +160,8 @@ def find_next_trade(epic_ids):
           ask_price = res['values']['OFFER']
           spread = float(bid_price) - float(ask_price)
 
-          max_permitted_spread = float(epics[epic_id]['minspread'] * float(config['Trade']['spread_multiplier']) * -1)
+          max_permitted_spread = floar(config['Trade']['max_spread'])
+          #max_permitted_spread = float(epics[epic_id]['minspread'] * float(config['Trade']['spread_multiplier']) * -1)
 
           #if spread is less than -2, It's too big
           if float(spread) > max_permitted_spread:
@@ -190,6 +201,7 @@ def trade_type_buy_long(shortPositionPercentage, longPositionPercentage, Client_
     print ("!!DEBUG longPositionPercentage:{} shortPositionPercentage:{} Client_Sentiment_Check:{} High_Trend_Watermark:{}".format(longPositionPercentage, shortPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark))
 
 b_contrarian = eval(config['Trade']['b_contrarian']) #THIS MUST BE SET EITHER WAY!!
+high_resolution = eval(config['Trade']['high_resolution'])
 
 market_ids = {}
 
@@ -211,7 +223,7 @@ for times_round_loop in range(1, 9999):
 
     d = find_next_trade(epic_ids)
     epic_id = d['values']['EPIC']
-    current_price = d['values']['BID']
+    current_price = float(d['values']['BID'])
     MARKET_ID = get_market_id(epic_id)
  
     DO_A_THING = False
@@ -287,7 +299,10 @@ for times_round_loop in range(1, 9999):
         ############################################################
 
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
-        resolutions = ['HOUR_4/30', 'HOUR_3/30', 'HOUR_2/30', 'HOUR/30']
+        if high_resolution == True:
+          resolutions = ['HOUR_4/30', 'HOUR_3/30', 'HOUR_2/30', 'HOUR/30']
+        else:
+          resolutions = ['HOUR_4/30']
         for resolution in resolutions:
             d = igclient.prices(epic_id, resolution)
             
@@ -355,7 +370,10 @@ for times_round_loop in range(1, 9999):
         ###################################################################################
         
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
-        resolutions = ['MINUTE_30/30', 'MINUTE_15/30', 'MINUTE_10/30', 'MINUTE_5/30', 'MINUTE_3/30', 'MINUTE_2/30', 'MINUTE/30']
+        if high_resolution == True:
+          resolutions = ['MINUTE_30/30', 'MINUTE_15/30', 'MINUTE_10/30', 'MINUTE_5/30', 'MINUTE_3/30', 'MINUTE_2/30', 'MINUTE/30']
+        else:
+          resolutions = ['MINUTE_30/30', 'MINUTE/30']
         for resolution in resolutions:
             d = igclient.prices(epic_id, resolution)
             
@@ -375,11 +393,16 @@ for times_round_loop in range(1, 9999):
         ###################################################################################
         ###################################################################################
 
-        d = igclient.prices(epic_id, 'DAY/1')
+        if high_resolution == True:
+          d = igclient.prices(epic_id, 'DAY/1')
         
-        for i in d['prices']:
+          for i in d['prices']:
             low_price = i['lowPrice'][price_compare]
             volume = i['lastTradedVolume']
+        else:
+          res = fetch_day_highlow(epic_id)
+          low_price = float(res['values']['DAY_LOW'])
+          volume = float(res['values']['LTV']) # this is (now) an hourly volume - will that be an issue?
 
         #####################################################################
         #########################PREDICTION CODE#############################
@@ -399,7 +422,7 @@ for times_round_loop in range(1, 9999):
 
 
         score = genius_regression_model.score(x,y)
-        predictions = {'intercept': genius_regression_model.intercept_, 'coefficient': genius_regression_model.coef_,   'predicted_value': price_prediction, 'accuracy' : score}
+        predictions = {'intercept': genius_regression_model.intercept_, 'coefficient': genius_regression_model.coef_, 'current_price': current_price, 'predicted_value': price_prediction, 'accuracy' : score}
         print ("-----------------DEBUG-----------------")
         print (score)
         print (predictions)
