@@ -1,5 +1,4 @@
 '''This is to check is price change is within required range.'''
-import json
 import random
 from time import sleep
 import logging
@@ -19,8 +18,8 @@ class MarketWatcher():
     '''
     ok = False  # Whether price changes obey rules.
     client = None  # IG client
-    epic_ids = []  # List of epic IDs.
-    epic_id = None  # Current epic ID.
+    epics = []  # List of epic IDs.
+    epic = None  # Current epic ID.
     # Market data.
     market_id = None
     current_price = None
@@ -33,15 +32,15 @@ class MarketWatcher():
     max_change = 1.9
     max_spread = 2
 
-    def __init__(self, client, config, exclude_ids=None):
+    def __init__(self, client, epics=None):
+        assert isinstance(epics, list)
         self.client = client
-        # Get all epic IDs which are not last traded one.
-        self.epic_ids = [i for i in json.loads(config['Epics']['EPIC_IDS']) if exclude_ids is None or i not in exclude_ids]
+        self.epics = epics
 
     def watch(self):
         '''This is to keep updating the market data until a valid price movement is observed.'''
         while not self.ok:
-            self.epic_id = self.__get_random_epic_id()
+            self.epic = self.__get_random_epic_id()
             self.__update_market_data()
             if self.__price_change_is_in_range():
                 self.__do_if_price_change_in_range()
@@ -56,14 +55,14 @@ class MarketWatcher():
         If previous traded epic ID os not provided, same epic may be chosen.
 
         '''
-        random.shuffle(self.epic_ids)
-        epic_id = random.choice(self.epic_ids)
+        random.shuffle(self.epics)
+        epic = random.choice(self.epics)
         sleep(2)
-        return epic_id
+        return epic
 
     def __update_market_data(self):
         '''This is to update market data.'''
-        i = self.client.markets(self.epic_id)
+        i = self.client.markets(self.epic)
         instrument, snapshot = i['instrument'], i['snapshot']
 
         self.market_id = instrument['marketId']
@@ -129,4 +128,4 @@ class MarketWatcher():
         self.__log('Pass')
 
     def __log(self, msg):
-        logging.info('epic: {epic}, price: {bid}/{ask}, spread: {spread}, price change: {price_change}, percentage change: {percent_change} -> {msg}'.format(msg=msg, epic=self.epic_id, bid=int(self.bid), ask=int(self.ask), spread=int(self.spread), price_change=round(self.price_change, 2), percent_change=round(self.percent_change, 2)))
+        logging.info('epic: {epic}, price: {bid}/{ask}, spread: {spread}, price change: {price_change}, percentage change: {percent_change} -> {msg}'.format(msg=msg, epic=self.epic, bid=int(self.bid), ask=int(self.ask), spread=int(self.spread), price_change=round(self.price_change, 2), percent_change=round(self.percent_change, 2)))
