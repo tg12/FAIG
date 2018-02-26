@@ -32,7 +32,7 @@ class MarketWatcher():
     max_change = 1.9
     max_spread = 2
 
-    def __init__(self, client, epics=None):
+    def __init__(self, client, epics):
         assert isinstance(epics, list)
         self.client = client
         self.epics = epics
