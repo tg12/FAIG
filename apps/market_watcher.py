@@ -89,8 +89,6 @@ class MarketWatcher():
         # Calculate spread.
         self.spread = self.ask - self.bid
 
-        logging.info('{epic}, bid: {bid}, ask: {ask}, spread: {spread}, price change: {price_change}, percentage change: {percent_change}'.format(epic=self.epic_id, bid=self.bid, ask=self.ask, spread=self.spread, price_change=self.price_change, percent_change=self.percent_change))
-
     def __price_change_is_in_range(self):
         '''This is to check if price change is in range.'''
         x = self.percent_change
@@ -115,17 +113,20 @@ class MarketWatcher():
             self.__do_if_spread_equal_limit()
 
     def __do_if_spread_larger_than_limit(self):
-        logging.info('Spread is larger than limit, not ok.')
+        self.__log('Pass')
         self.ok = False
         systime.sleep(2)
 
     def __do_if_spread_smaller_than_limit(self):
-        logging.info('Good spread!!')
+        self.__log('Hit')
         self.ok = True
 
     def __do_if_spread_equal_limit(self):
-        logging.info('Spread is the same as limit, not ok.')
+        self.__log('Pass')
         self.ok = False
 
     def __do_if_price_change_outside_range(self):
-        logging.info('Price change is outside range, not ok.')
+        self.__log('Pass')
+
+    def __log(self, msg):
+        logging.info('epic: {epic}, price: {bid}/{ask}, spread: {spread}, price change: {price_change}, percentage change: {percent_change} -> {msg}'.format(msg=msg, epic=self.epic_id, bid=int(self.bid), ask=int(self.ask), spread=int(self.spread), price_change=round(self.price_change, 2), percent_change=round(self.percent_change, 2)))
