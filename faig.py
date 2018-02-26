@@ -160,8 +160,10 @@ def find_next_trade(epic_ids):
           ask_price = res['values']['OFFER']
           spread = float(bid_price) - float(ask_price)
 
-          max_permitted_spread = floar(config['Trade']['max_spread'])
-          #max_permitted_spread = float(epics[epic_id]['minspread'] * float(config['Trade']['spread_multiplier']) * -1)
+          if eval(config['Trade']['use_max_spread']) == True:
+            max_permitted_spread = float(config['Trade']['max_spread'])
+          else:
+            max_permitted_spread = float(epics[epic_id]['minspread'] * float(config['Trade']['spread_multiplier']) * -1)
 
           #if spread is less than -2, It's too big
           if float(spread) > max_permitted_spread:
@@ -172,6 +174,7 @@ def find_next_trade(epic_ids):
       else:
         print(": !Price change {}%".format(Price_Change_Day_percent), end="\n", flush=True) 
 
+    print ("sleeping for 30s, since we've hit the end of the epic list")
     systime.sleep(30) # that's all of them
 
 def trade_type_buy_short(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark):
@@ -200,7 +203,8 @@ def trade_type_buy_long(shortPositionPercentage, longPositionPercentage, Client_
     print ("!!DEBUG No Trade This time BL")
     print ("!!DEBUG longPositionPercentage:{} shortPositionPercentage:{} Client_Sentiment_Check:{} High_Trend_Watermark:{}".format(longPositionPercentage, shortPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark))
 
-b_contrarian = eval(config['Trade']['b_contrarian']) #THIS MUST BE SET EITHER WAY!!
+use_clientsentiment = eval(config['Trade']['use_clientsentiment'])
+b_contrarian = eval(config['Trade']['b_contrarian']) #THIS MUST BE SET IF use_clientsentiment == True
 high_resolution = eval(config['Trade']['high_resolution'])
 
 market_ids = {}
@@ -215,91 +219,125 @@ def get_market_id(epic_id):
     MARKET_ID = market_ids[epic_id]
   return MARKET_ID
 
+def determine_trade_direction():
+  if use_clientsentiment:
+    if b_contrarian == True:
+        #print ("!!DEBUG!! b_contrarian SET!!")
+        if price_diff < 0 and score > predict_accuracy and float(current_price) < float(price_prediction):
+           return trade_type_buy_short(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark)
+        elif float(price_diff) > float(limitDistance_value) and score > predict_accuracy and float(current_price) > float(price_prediction):
+            #!!!!Above Predicted Target!!!!
+            #Tight limit (Take Profit)
+            return trade_type_buy_short(shortPositionPercentage, longPositionPercentage,  Client_Sentiment_Check, High_Trend_Watermark)
+            # limitDistance_value = "2"
+        else:
+            print ("!!DEBUG!! NO CRITERIA YET - SLEEPING!!: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+            systime.sleep(Prediction_Wait_Timer)
+            print ("!!DEBUG!! NO CRITERIA!! " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+    
+    else: # b_contrarian == False:
+        #print ("!!DEBUG!! b_contrarian is false!! :- You are following the client sentiment")
+        if price_diff < 0 and score > predict_accuracy and float(current_price) < float(price_prediction):
+            return trade_type_buy_long(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark)          
+        elif float(price_diff) > float(limitDistance_value) and score > predict_accuracy and float(current_price) > float(price_prediction):
+            #!!!!Above Predicted Target!!!!
+            #Tight limit (Take Profit)
+            return trade_type_buy_long(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark)
+        else:
+            print ("!!DEBUG!! NO CRITERIA YET - SLEEPING!!: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+            systime.sleep(Prediction_Wait_Timer)
+            print ("!!DEBUG!! NO CRITERIA!! " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+  else:
+    # no client sentiment, we only care about price
+    #print ("price_diff:{} score:{} current_price:{} limitDistance_value:{} predict_accuracy:{} price_prediction:{}".format(price_diff, score, current_price, limitDistance_value, predict_accuracy, price_prediction))
+    if score < predict_accuracy:
+      return None
+    elif price_prediction > current_price:
+      return "BUY"
+    else:
+      return "SELL"
+
+  return None
+
 
 for times_round_loop in range(1, 9999):
 
 #*******************************************************************
     Start_loop_time = time()
 
-    d = find_next_trade(epic_ids)
+    d = find_next_trade(epic_ids) # TODO limit exposure per-epic
     epic_id = d['values']['EPIC']
     current_price = float(d['values']['BID'])
-    MARKET_ID = get_market_id(epic_id)
  
-    DO_A_THING = False
     price_compare = "bid"
 
-    #Good ol "Crowd-sourcing" check.....
-    d = igclient.clientsentiment(MARKET_ID)
-    
-    longPositionPercentage = float(d['longPositionPercentage'])
-    shortPositionPercentage = float(d['shortPositionPercentage'])
+    if use_clientsentiment:
+      MARKET_ID = get_market_id(epic_id)
+      #Good ol "Crowd-sourcing" check.....
+      d = igclient.clientsentiment(MARKET_ID)
+      
+      longPositionPercentage = float(d['longPositionPercentage'])
+      shortPositionPercentage = float(d['shortPositionPercentage'])
 
-    # we can check this right now! before pulling in all the market data
-    EARLY_CHECK = None
-    if b_contrarian == True:
-      EARLY_CHECK = trade_type_buy_short(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark)
-    else:
-      EARLY_CHECK = trade_type_buy_long(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark)
+      # we can check this right now! before pulling in all the market data
+      EARLY_CHECK = None
+      if b_contrarian == True:
+        EARLY_CHECK = trade_type_buy_short(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark)
+      else:
+        EARLY_CHECK = trade_type_buy_long(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark)
 
-    if EARLY_CHECK is None:
-      # no point pulling in market data (right now), we'll reject this later on anyway
-      continue
+      if EARLY_CHECK is None:
+        # no point pulling in market data (right now), we'll reject this later on anyway
+        continue
     
-    while not DO_A_THING:
+    DIRECTION_TO_TRADE = None
+    while DIRECTION_TO_TRADE is None:
         print ("!!Internal Notes only - Top of Loop!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-        # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
-        d = igclient.prices(epic_id, 'DAY/30')
-        
-        day_moving_avg_30 = []
         # Your input data, X and Y are lists (or Numpy Arrays)
         #THIS IS YOUR TRAINING DATA
         x = [] #This is Low Price, Volume
         y = [] #This is High Price
-        
-        #I only need this API call for real world values
-        remaining_allowance = d['allowance']['remainingAllowance']
-        reset_time = humanize_time(int(d['allowance']['allowanceExpiry']))
-                
-        print ("-----------------DEBUG-----------------")
-        print ("Remaining API Calls left : " + str(remaining_allowance))
-        print ("Time to API Key reset : " + str(reset_time))
-        print ("-----------------DEBUG-----------------")
-   
-        # print ("-----------------DEBUG-----------------")
-        # print(auth_r.status_code)
-        # print(auth_r.reason)
-        # print (auth_r.text)
-        # print ("-----------------DEBUG-----------------")
-        
-     
-        for i in d['prices']:
-            tmp_list = []
-            high_price = i['highPrice'][price_compare]
-            low_price = i['lowPrice'][price_compare]
-            open_price = i['openPrice'][price_compare]
-            close_price = i['closePrice'][price_compare]
-            volume = i['lastTradedVolume']
-            #---------------------------------
-            tmp_list.append(float(low_price))
-            tmp_list.append(float(volume))
-            x.append(tmp_list)
-            #x is Low Price and Volume
-            y.append(float(high_price))
-            #y = High Prices
-            price_change_on_day = close_price - open_price
-            #print ("DEBUG price_change_day : " + str(price_change_on_day))
-            day_moving_avg_30.append(float(price_change_on_day))
-            
-        avg_price_movement_day = np.mean(day_moving_avg_30)
-        # print ("-----------------DEBUG-----------------")
-        # print ("DEBUG average movement over last 30 days : " + str(avg_price_movement_day)) 
-        # print ("-----------------DEBUG-----------------")
+
+        if high_resolution:
+          d = igclient.prices(epic_id, 'DAY/30')          
+          
+          #I only need this API call for real world values
+          remaining_allowance = d['allowance']['remainingAllowance']
+          reset_time = humanize_time(int(d['allowance']['allowanceExpiry']))
+                  
+          print ("-----------------DEBUG-----------------")
+          print ("Remaining API Calls left : " + str(remaining_allowance))
+          print ("Time to API Key reset : " + str(reset_time))
+          print ("-----------------DEBUG-----------------")
+          
+          # day_moving_avg_30 = []
+          for i in d['prices']:
+              tmp_list = []
+              high_price = i['highPrice'][price_compare]
+              low_price = i['lowPrice'][price_compare]
+              open_price = i['openPrice'][price_compare]
+              close_price = i['closePrice'][price_compare]
+              volume = i['lastTradedVolume']
+              #---------------------------------
+              tmp_list.append(float(low_price))
+              tmp_list.append(float(volume))
+              x.append(tmp_list)
+              #x is Low Price and Volume
+              y.append(float(high_price))
+              #y = High Prices
+              # price_change_on_day = close_price - open_price
+              #print ("DEBUG price_change_day : " + str(price_change_on_day))
+              # day_moving_avg_30.append(float(price_change_on_day))
+              
+          # avg_price_movement_day = np.mean(day_moving_avg_30)
+          # print ("-----------------DEBUG-----------------")
+          # print ("DEBUG average movement over last 30 days : " + str(avg_price_movement_day)) 
+          # print ("-----------------DEBUG-----------------")
         
         ############################################################
 
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
-        if high_resolution == True:
+        if high_resolution:
           resolutions = ['HOUR_4/30', 'HOUR_3/30', 'HOUR_2/30', 'HOUR/30']
         else:
           resolutions = ['HOUR_4/30']
@@ -362,15 +400,8 @@ for times_round_loop in range(1, 9999):
         if low_range > 10:
             print ("!!DEBUG!! WARNING - Take Profit over high value, Might take a while for this trade!!")
             
-        #print ("MAX RANGE FOR " + str(epic_id) + " IS " + str(int(max_range)))
-        #print ("LOW RANGE FOR " + str(epic_id) + " IS " + str(int(low_range)))
-        #Cut down on API Calls by using this again! 
-
-        ###################################################################################
-        ###################################################################################
-        
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
-        if high_resolution == True:
+        if high_resolution:
           resolutions = ['MINUTE_30/30', 'MINUTE_15/30', 'MINUTE_10/30', 'MINUTE_5/30', 'MINUTE_3/30', 'MINUTE_2/30', 'MINUTE/30']
         else:
           resolutions = ['MINUTE_30/30', 'MINUTE/30']
@@ -393,7 +424,7 @@ for times_round_loop in range(1, 9999):
         ###################################################################################
         ###################################################################################
 
-        if high_resolution == True:
+        if high_resolution:
           d = igclient.prices(epic_id, 'DAY/1')
         
           for i in d['prices']:
@@ -430,12 +461,14 @@ for times_round_loop in range(1, 9999):
             
         price_diff = current_price - price_prediction
         
-        limitDistance_value = int(low_range)
+        #limitDistance_value = int((low_range/2) * score) #  vary according to our certainty
+        limitDistance_value = int(price_diff * score * float(config['Trade']['greed'])) # vary according to certainty and greed
+        print ("!!DEBUG current_price={}, price_diff={}, target={}".format(current_price, price_diff, limitDistance_value))
         
         #Fixing a weird bug with some exotic fx, Where the prediction is 0. 
         #Fixing a weird bug with some exotic fx, Where the prediction is 0.
-        if int(limitDistance_value) <= 0:
-            limitDistance_value = "1"
+#        if int(limitDistance_value) <= 0:
+#            limitDistance_value = "1"
             
         #stopDistance_value = int(max_range) 
         #NOTE Sometimes IG Index want a massive stop loss for Guaranteed, Either don't use Guaranteed or "sell at market" with Artificial Stop loss
@@ -459,15 +492,9 @@ for times_round_loop in range(1, 9999):
                    
         ################################################################
         #########################ORDER CODE#############################
-        #########################ORDER CODE#############################
-        #########################ORDER CODE#############################
-        #########################ORDER CODE#############################
         ################################################################
         
         ################################################################
-        #############Predict Accuracy isn't that great. ################
-        #############Predict Accuracy isn't that great. ################
-        #############Predict Accuracy isn't that great. ################
         #############Predict Accuracy isn't that great. ################
         ################################################################
         Prediction_Wait_Timer = int(TIME_WAIT_MULTIPLIER) #Wait
@@ -475,7 +502,6 @@ for times_round_loop in range(1, 9999):
         if float(score) < float(predict_accuracy):
             # NOT ACCURATE ENOUGH (YET)
             print ("!!DEBUG!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-            DO_A_THING = False
             print ("!!DEBUG!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
             systime.sleep(Prediction_Wait_Timer)
             print ("!!DEBUG!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
@@ -485,75 +511,19 @@ for times_round_loop in range(1, 9999):
         #Added a fourth thing "contrarian indicator"
         
         print ("price_diff:{} score:{} current_price:{} limitDistance_value:{} predict_accuracy:{} price_prediction:{}".format(price_diff, score, current_price, limitDistance_value, predict_accuracy, price_prediction))
-        if b_contrarian == True:
-            print ("!!DEBUG!! b_contrarian SET!!")
-            if price_diff < 0 and score > predict_accuracy and float(current_price) < float(price_prediction):
-              DIRECTION_TO_TRADE = trade_type_buy_short(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark)
-              if DIRECTION_TO_TRADE is not None:
-                DO_A_THING = True
-              else:
-                DO_A_THING = False
-                break
-                
-            elif float(price_diff) > float(limitDistance_value) and score > predict_accuracy and float(current_price) > float(price_prediction):
-                #!!!!Above Predicted Target!!!!
-                #Tight limit (Take Profit)
-                DIRECTION_TO_TRADE = trade_type_buy_short(shortPositionPercentage, longPositionPercentage,  Client_Sentiment_Check, High_Trend_Watermark)
-                if DIRECTION_TO_TRADE is not None:
-                  limitDistance_value = "2"
-                  DO_A_THING = True
-                else:
-                  DO_A_THING = False
-                  break
-            else:
-                DO_A_THING = False
-                print ("!!DEBUG!! NO CRITERIA YET - SLEEPING!!: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-                systime.sleep(Prediction_Wait_Timer)
-                print ("!!DEBUG!! NO CRITERIA!! " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-                break
-        
-        else: # b_contrarian == False:
-            print ("!!DEBUG!! b_contrarian is false!! :- You are following the client sentiment")
-            if price_diff < 0 and score > predict_accuracy and float(current_price) < float(price_prediction):
-                DIRECTION_TO_TRADE = trade_type_buy_long(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark)
-                if DIRECTION_TO_TRADE is not None:
-                  DO_A_THING = True
-                else:
-                  DO_A_THING = False
-                  break
-                
-            elif float(price_diff) > float(limitDistance_value) and score > predict_accuracy and float(current_price) > float(price_prediction):
-                #!!!!Above Predicted Target!!!!
-                #Tight limit (Take Profit)
-                DIRECTION_TO_TRADE = trade_type_buy_long(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark)
-                if DIRECTION_TO_TRADE is not None:
-                  DO_A_THING = True
-                else:
-                  DO_A_THING = False
-                  break
-            else:
-                DO_A_THING = False
-                print ("!!DEBUG!! NO CRITERIA YET - SLEEPING!!: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-                systime.sleep(Prediction_Wait_Timer)
-                print ("!!DEBUG!! NO CRITERIA!! " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-                break
+        DIRECTION_TO_TRADE = determine_trade_direction()
 
-    if not DO_A_THING:
-        #DO_A_THING NOT SET FOR WHATEVER REASON, GO BACK TO MAIN PROGRAM LOOP
-        print ("-----------------DEBUG-----------------")
-        print ("!!DEBUG!! DO_A_THING Not Set - Check above to diagnose!!")
-        print ("-----------------DEBUG-----------------")
-        continue
-
+    # LET'S DO THIS
     if DIRECTION_TO_TRADE == 'SELL':
       DIRECTION_TO_CLOSE = 'BUY'
       DIRECTION_TO_COMPARE = 'offer'
     else:
       DIRECTION_TO_CLOSE = 'SELL'
       DIRECTION_TO_COMPARE = 'bid'
+      limitDistance_value *= -1
 
-    data = {"direction":DIRECTION_TO_TRADE,"epic": epic_id, "limitDistance":limitDistance_value, "orderType":orderType_value, "size":size_value,"expiry":expiry_value,"guaranteedStop":guaranteedStop_value,"currencyCode":currencyCode_value,"forceOpen":forceOpen_value,"stopDistance":stopDistance_value}
-#    igclient.setdebug(True)
+    data = {"direction":DIRECTION_TO_TRADE,"epic": epic_id, "limitDistance":str(limitDistance_value), "orderType":orderType_value, "size":size_value,"expiry":expiry_value,"guaranteedStop":guaranteedStop_value,"currencyCode":currencyCode_value,"forceOpen":forceOpen_value,"stopDistance":stopDistance_value}
+    #igclient.setdebug(True)
     d = igclient.positions_otc(data)
     
     deal_ref = d['dealReference']
@@ -562,7 +532,7 @@ for times_round_loop in range(1, 9999):
 
     #CONFIRM MARKET ORDER
     d = igclient.confirms(deal_ref)    
-#    igclient.setdebug(False)
+    #igclient.setdebug(False)
     DEAL_ID = d['dealId']
     print("DEAL ID : {} - {} - {}".format(str(d['dealId']), d['dealStatus'], d['reason']))
     
