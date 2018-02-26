@@ -1,0 +1,131 @@
+'''This is to check is price change is within required range.'''
+import json
+import random
+from time import sleep
+import logging
+
+logging.basicConfig(level='INFO', format='%(asctime)s %(message)s')
+
+
+class MarketWatcher():
+    '''
+
+    This is an observer of market and report when certain criteria meet.
+
+    There are 2 types of information to observe.
+    1) When absolute price change is within range.
+    2) When spread is smaller than a limit.
+
+    '''
+    ok = False  # Whether price changes obey rules.
+    client = None  # IG client
+    epic_ids = []  # List of epic IDs.
+    epic_id = None  # Current epic ID.
+    # Market data.
+    market_id = None
+    current_price = None
+    price_change = None
+    percent_change = None
+    bid = None
+    ask = None
+    # Range of price changes and spread to consider trading.
+    min_change = 0.48
+    max_change = 1.9
+    max_spread = 2
+
+    def __init__(self, client, config, exclude_ids=None):
+        self.client = client
+        # Get all epic IDs which are not last traded one.
+        self.epic_ids = [i for i in json.loads(config['Epics']['EPIC_IDS']) if exclude_ids is None or i not in exclude_ids]
+
+    def watch(self):
+        '''This is to keep updating the market data until a valid price movement is observed.'''
+        while not self.ok:
+            self.epic_id = self.__get_random_epic_id()
+            self.__update_market_data()
+            if self.__price_change_is_in_range():
+                self.__do_if_price_change_in_range()
+            else:
+                self.__do_if_price_change_outside_range()
+
+    def __get_random_epic_id(self):
+        '''
+
+        This is to get random epic ID. It must be different from last traded epic ID.
+
+        If previous traded epic ID os not provided, same epic may be chosen.
+
+        '''
+        random.shuffle(self.epic_ids)
+        epic_id = random.choice(self.epic_ids)
+        sleep(2)
+        return epic_id
+
+    def __update_market_data(self):
+        '''This is to update market data.'''
+        i = self.client.markets(self.epic_id)
+        instrument, snapshot = i['instrument'], i['snapshot']
+
+        self.market_id = instrument['marketId']
+        self.current_price = snapshot['bid']
+        self.price_change = snapshot['netChange']
+
+        def to_float(x):
+            if x is None:
+                return 0
+            else:
+                return float(x)
+
+        # Convert percentage change to float. It could be None.
+        if snapshot['percentageChange'] is None:
+            self.percent_change = 0
+        else:
+            self.percent_change = to_float(snapshot['percentageChange'])
+
+#       # Convert bid ask prices to float.
+        self.bid = to_float(snapshot['bid'])
+        self.ask = to_float(snapshot['offer'])
+
+        # Calculate spread.
+        self.spread = self.ask - self.bid
+
+        logging.info('{epic}, bid: {bid}, ask: {ask}, spread: {spread}, price change: {price_change}, percentage change: {percent_change}'.format(epic=self.epic_id, bid=self.bid, ask=self.ask, spread=self.spread, price_change=self.price_change, percent_change=self.percent_change))
+
+    def __price_change_is_in_range(self):
+        '''This is to check if price change is in range.'''
+        x = self.percent_change
+        return (self.min_change < abs(x) < self.max_change)
+
+    def __do_if_price_change_in_range(self):
+        '''
+
+        This is to check if spread is in range.
+
+        Examples
+        Spread is -30, That is too big, In-fact way too big.
+        Spread is -1.7, This is not too bad, We can trade on this reasonably well.
+        Spread is 0.8. This is considered a tight spread.
+
+        '''
+        if self.data["spread"] > self.max_spread:
+            self.__do_if_spread_larger_than_limit()
+        elif self.spread < self.max_spread:
+            self.__do_if_spread_smaller_than_limit()
+        else:
+            self.__do_if_spread_equal_limit()
+
+    def __do_if_spread_larger_than_limit(self):
+        logging.info('Spread is larger than limit, not ok.')
+        self.ok = False
+        systime.sleep(2)
+
+    def __do_if_spread_smaller_than_limit(self):
+        logging.info('Good spread!!')
+        self.ok = True
+
+    def __do_if_spread_equal_limit(self):
+        logging.info('Spread is the same as limit, not ok.')
+        self.ok = False
+
+    def __do_if_price_change_outside_range(self):
+        logging.info('Price change is outside range, not ok.')
