@@ -66,7 +66,7 @@ open_positions = igclient.positions()
 # SET INITIAL VARIABLES, SOME ARE CALCUALTED LATER
 limitDistance_value = "4"
 orderType_value = "MARKET"
-size_value = "2"
+size_value = "1"
 expiry_value = "DFB"
 guaranteedStop_value = True
 currencyCode_value = "GBP"
@@ -244,73 +244,20 @@ for times_round_loop in range(1, 9999):
     while DIRECTION_TO_TRADE is None:
         print("!!Internal Notes only - Top of Loop!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
         # Your input data, X and Y are lists (or Numpy Arrays)
-        # THIS IS YOUR TRAINING DATA
-        x = []  # This is Low Price, Volume
-        y = []  # This is High Price
-
-        if high_resolution:
-            d = igclient.prices(epic_id, 'DAY/30')
-
-            # I only need this API call for real world values
-            remaining_allowance = d['allowance']['remainingAllowance']
-            reset_time = humanize_time(int(d['allowance']['allowanceExpiry']))
-
-            print("-----------------DEBUG-----------------")
-            print("Remaining API Calls left : " + str(remaining_allowance))
-            print("Time to API Key reset : " + str(reset_time))
-            print("-----------------DEBUG-----------------")
-
-            # day_moving_avg_30 = []
-            for i in d['prices']:
-                tmp_list = []
-                high_price = i['highPrice'][price_compare]
-                low_price = i['lowPrice'][price_compare]
-                open_price = i['openPrice'][price_compare]
-                close_price = i['closePrice'][price_compare]
-                volume = i['lastTradedVolume']
-                #---------------------------------
-                tmp_list.append(float(low_price))
-                tmp_list.append(float(volume))
-                x.append(tmp_list)
-                # x is Low Price and Volume
-                y.append(float(high_price))
-                # y = High Prices
-                # price_change_on_day = close_price - open_price
-                #print ("DEBUG price_change_day : " + str(price_change_on_day))
-                # day_moving_avg_30.append(float(price_change_on_day))
-
-            # avg_price_movement_day = np.mean(day_moving_avg_30)
-            # print ("-----------------DEBUG-----------------")
-            # print ("DEBUG average movement over last 30 days : " + str(avg_price_movement_day))
-            # print ("-----------------DEBUG-----------------")
-
+        
+        #THIS IS YOUR TRAINING DATA
+        x = [] #This is Low Price, Volume
+        y = [] #This is High Price
+       
         ############################################################
-
-        # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
-        if high_resolution:
-            resolutions = ['HOUR_4/30', 'HOUR_3/30', 'HOUR_2/30', 'HOUR/30']
-        else:
-            resolutions = ['HOUR_4/30']
+        resolutions = ['DAY/14'] #This is just for the Average True Range, Base it on the last 14 days trading. (14 is the default in ATR)
         for resolution in resolutions:
-            d = igclient.prices(epic_id, resolution)
+          d = igclient.prices(epic_id, resolution)
 
-            for i in d['prices']:
-                tmp_list = []
-                high_price = i['highPrice'][price_compare]
-                low_price = i['lowPrice'][price_compare]
-                volume = i['lastTradedVolume']
-                #---------------------------------
-                if low_price != None:
-                    tmp_list.append(float(low_price))
-                    tmp_list.append(float(volume))
-                    x.append(tmp_list)
-                    # x is Low Price and Volume
-                    y.append(float(high_price))
-                    # y = High Prices
-
-        ###################################################################################
-
-        # Cut down on API Calls by using this again!
+        print ("-----------------DEBUG-----------------")
+        print ("Remaining API Calls left : " + str(igclient.allowance['remainingAllowance']))
+        print ("Time to API Key reset : " + str(humanize_time(int(igclient.allowance['allowanceExpiry']))))
+        print ("-----------------DEBUG-----------------")
 
         price_ranges = []
         closing_prices = []
@@ -347,42 +294,47 @@ for times_round_loop in range(1, 9999):
         print("stopDistance_value for " + str(epic_id) + " will bet set at " + str(float(max_range)))
         print("limitDistance_value for " + str(epic_id) + " will bet set at " + str(float(low_range)))
         if low_range > 10:
-            print("!!DEBUG!! WARNING - Take Profit over high value, Might take a while for this trade!!")
-
-        # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
+            print ("!!DEBUG!! WARNING - Take Profit over high value, Might take a while for this trade!!")
+            
+        # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_2, HOUR_4, DAY, WEEK, MONTH)
+        # This is the high roller, For the price prediction. 
         if high_resolution:
-            resolutions = ['MINUTE_30/30', 'MINUTE_15/30', 'MINUTE_10/30', 'MINUTE_5/30', 'MINUTE_3/30', 'MINUTE_2/30', 'MINUTE/30']
+          resolutions = ['HOUR/30', 'HOUR_2/30', 'HOUR_3/30', 'HOUR_4/30', 'DAY/5']
         else:
-            resolutions = ['MINUTE_30/30', 'MINUTE/30']
-        for resolution in resolutions:
+          resolutions = ['MINUTE_15/30', 'MINUTE_30/30']
+
+          for resolution in resolutions:
             d = igclient.prices(epic_id, resolution)
 
             for i in d['prices']:
                 tmp_list = []
                 high_price = i['highPrice'][price_compare]
                 low_price = i['lowPrice'][price_compare]
+                close_price = i['closePrice'][price_compare]
+                ############################################
                 volume = i['lastTradedVolume']
                 #---------------------------------
+                tmp_list.append(float(high_price))
                 tmp_list.append(float(low_price))
-                tmp_list.append(float(volume))
                 x.append(tmp_list)
-                # x is Low Price and Volume
-                y.append(float(high_price))
-                # y = High Prices
+                #x is Low Price and Volume
+                y.append(float(close_price))
+                #y = High Prices
 
         ###################################################################################
         ###################################################################################
-
+        #Here we just need a value to predict the next one of. 
+        
         if high_resolution:
-            d = igclient.prices(epic_id, 'DAY/1')
-
-            for i in d['prices']:
-                low_price = i['lowPrice'][price_compare]
-                volume = i['lastTradedVolume']
+          d = igclient.prices(epic_id, 'DAY/1')
+        
+          for i in d['prices']:
+            high_price = i['highPrice'][price_compare]
+            low_price = i['lowPrice'][price_compare]
         else:
-            res = fetch_day_highlow(epic_id)
-            low_price = float(res['values']['DAY_LOW'])
-            volume = float(res['values']['LTV'])  # this is (now) an hourly volume - will that be an issue?
+          res = fetch_day_highlow(epic_id)
+          low_price = float(res['values']['DAY_LOW'])
+          high_price = float(res['values']['DAY_HIGH']) # this is (now) an hourly volume - will that be an issue?
 
         #####################################################################
         #########################PREDICTION CODE#############################
@@ -394,8 +346,8 @@ for times_round_loop in range(1, 9999):
         genius_regression_model = LinearRegression()
         genius_regression_model.fit(x, y)
         # Predict the corresponding value of Y for X
-        pred_ict = [low_price, volume]
-        pred_ict = np.asarray(pred_ict)  # To Numpy Array, hacky but good!!
+        pred_ict = [high_price,low_price]
+        pred_ict = np.asarray(pred_ict) #To Numpy Array, hacky but good!! 
         pred_ict = pred_ict.reshape(1, -1)
         price_prediction = genius_regression_model.predict(pred_ict)
         print("PRICE PREDICTION FOR PRICE " + epic_id + " IS : " + str(price_prediction))
