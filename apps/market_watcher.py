@@ -63,6 +63,7 @@ class MarketWatcher():
             else:
                 self.ok = False
                 self.__log('Pass')
+                sleep(2)    # Wait for a while before refresh.
 
     def __get_epic_id(self):
         '''This is to get a random epic in list.'''
