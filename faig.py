@@ -21,6 +21,7 @@ import configparser
 
 from igclient import IGClient
 import igstream
+from apps.market_watcher import MarketWatcher
 
 igclient = IGClient()
 
@@ -120,54 +121,6 @@ def fetch_current_price(epic_id):
     return res
 
 
-def find_next_trade(epic_ids):
-    while(1):
-        random.shuffle(epic_ids)
-        for epic_id in epic_ids:
-            print("!!DEBUG!! : " + str(epic_id), end='')
-            if epic_id in map(lambda x: x['market']['epic'], open_positions['positions']):
-                print(" already have an open position here")
-                continue
-            # systime.sleep(2) # we only get 30 API calls per minute :( but streaming doesn't count, so no sleep
-
-            res = fetch_current_price(epic_id)
-            res['values']['EPIC'] = epic_id
-
-            current_price = res['values']['BID']
-            Price_Change_Day = res['values']['CHANGE']
-
-            if res['values']['CHANGE_PCT'] is None:
-                Price_Change_Day_percent = 0.0
-            else:
-                Price_Change_Day_percent = float(res['values']['CHANGE_PCT'])
-
-            Price_Change_Day_percent_h = float(config['Trade']['Price_Change_Day_percent_high'])
-            Price_Change_Day_percent_l = float(config['Trade']['Price_Change_Day_percent_low'])
-
-            if (Price_Change_Day_percent_h > Price_Change_Day_percent > Price_Change_Day_percent_l) or ((Price_Change_Day_percent_h * -1) < Price_Change_Day_percent < (Price_Change_Day_percent_l * -1)):
-                print(" Day Price Change {}% ".format(str(Price_Change_Day_percent)), end='')
-                bid_price = res['values']['BID']
-                ask_price = res['values']['OFFER']
-                spread = float(bid_price) - float(ask_price)
-
-                if eval(config['Trade']['use_max_spread']) == True:
-                    max_permitted_spread = float(config['Trade']['max_spread'])
-                else:
-                    max_permitted_spread = float(epics[epic_id]['minspread'] * float(config['Trade']['spread_multiplier']) * -1)
-
-                # if spread is less than -2, It's too big
-                if float(spread) > max_permitted_spread:
-                    print(":- GOOD SPREAD {0:.2f}>{1:.2f}".format(spread, max_permitted_spread), end="\n", flush=True)
-                    return res
-                else:
-                    print(":- spread not ok {0:.2f}<={1:.2f}".format(spread, max_permitted_spread), end="\n", flush=True)
-            else:
-                print(": !Price change {}%".format(Price_Change_Day_percent), end="\n", flush=True)
-
-        print("sleeping for 30s, since we've hit the end of the epic list")
-        systime.sleep(30)  # that's all of them
-
-
 def trade_type_buy_short(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark):
     if float(shortPositionPercentage) > float(longPositionPercentage) and float(shortPositionPercentage) > Client_Sentiment_Check:
         return "BUY"
@@ -260,9 +213,11 @@ for times_round_loop in range(1, 9999):
     #*******************************************************************
     Start_loop_time = time()
 
-    d = find_next_trade(epic_ids)  # TODO limit exposure per-epic
-    epic_id = d['values']['EPIC']
-    current_price = float(d['values']['BID'])
+    # Watch market for opportunity.
+    watcher = MarketWatcher(client=igclient, epics=list(epics), change_range=(0.48, 1.9), spread_range=(0.0, 2.0))
+    watcher.watch()
+    epic_id = watcher.epic
+    current_price = watcher.bid
 
     price_compare = "bid"
 
