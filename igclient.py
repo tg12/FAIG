@@ -24,7 +24,7 @@ class IGClient(object):
             import httplib as http_client
     http_client.HTTPConnection.debuglevel = (0, 1)[ self.debug == True]
 
-  def session(self):
+  def session(self, set_default=True):
     data = { "identifier": self.config['Auth']['USERNAME'], "password": self.config['Auth']['PASSWORD'] }
 
     self.headers = { 'Content-Type': 'application/json; charset=utf-8',
@@ -47,6 +47,20 @@ class IGClient(object):
     self.authenticated_headers = self.headers
 
     self.loggedin = True
+
+    #GET ACCOUNTS
+    d = self.accounts()
+
+    for i in d['accounts']:
+      if str(i['accountType']) == self.config['Config']['ACCOUNT_TYPE']:
+        #print ("Spreadbet Account ID is : " + str(i['accountId']))
+        self.accountId = str(i['accountId'])
+        break
+
+    if set_default:
+        #SET SPREAD BET ACCOUNT AS DEFAULT
+        self.update_session({"accountId":self.accountId,"defaultAccount": "True"})
+        #ERROR about account ID been the same, Ignore! 
 
     return ((r, json.loads(r.text))[ self.json == True ])
 

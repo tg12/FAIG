@@ -1,10 +1,6 @@
 #IF YOU FOUND THIS USEFUL, Please Donate some Bitcoin .... 1FWt366i5PdrxCC6ydyhD8iywUHQ2C7BWC
 
-# TODO
-# close from stream
-# don't reopen existing positions (unless it's a sure-thing?)
-
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import time
 import datetime
@@ -34,15 +30,6 @@ config.read("config.conf")
 d = igclient.session()
 igstreamclient = igstream.IGStream(igclient=igclient, loginresponse=d)
 
-#GET ACCOUNTS
-d = igclient.accounts()
-
-for i in d['accounts']:
-    if str(i['accountType']) == "SPREADBET":
-        print ("Spreadbet Account ID is : " + str(i['accountId']))
-        spreadbet_acc_id = str(i['accountId'])
-        igclient.accountId = spreadbet_acc_id
-
 subscription = igstream.Subscription(
     mode="DISTINCT",
     items=["TRADE:"+str(igclient.accountId)],
@@ -52,10 +39,6 @@ def on_item_update(item_update):
     print(item_update)
 igstreamclient.subscribe(subscription=subscription, listener=on_item_update)
  
-#SET SPREAD BET ACCOUNT AS DEFAULT
-r = igclient.update_session({"accountId":spreadbet_acc_id,"defaultAccount": "True"})
-#ERROR about account ID been the same, Ignore! 
-
 # get open positions
 open_positions = igclient.positions()
 
@@ -91,20 +74,9 @@ epic_ids = list(epics.keys())
 #*******************************************************************
 predict_accuracy = float(config['Trade']['predict_accuracy'])
 TIME_WAIT_MULTIPLIER = 60
-#STOP_LOSS_MULTIPLIER = 4 #Not currently in use, 13th Jan
 Client_Sentiment_Check = 69
 profitable_trade_count = 0
 High_Trend_Watermark = 89
-
-
-#******************************************************************************************************************************
-#******************************************************************************************************************************
-#******************************************************************************************************************************
-#"You can use sentiment as a filter. Only taking the setups going against the crowd. You must be in the minority of 40% or less."
-#More information See here :-https://www.reddit.com/r/Forex/comments/7wehbq/how_much_does_client_sentiment_sway_your_decisions/
-#******************************************************************************************************************************
-#******************************************************************************************************************************
-#******************************************************************************************************************************
 
 print ("START TIME : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
 
@@ -485,21 +457,7 @@ for times_round_loop in range(1, 9999):
         #MUST NOTE :- IF THIS PRICE IS - i.e NOT HIT TARGET YET, CONVERSELY IF THIS PRICE IS POSITIVE IT IS ALREADY ABOVE PREDICTION!!!
         #print ("TRUE GUARANTEED STOP LOSS DISTANCE WILL BE SET AT : " + str(stopDistance_value))
         #print ("Price Difference Away (Point's) : " + str(price_diff))
-        
-        ############################
-        #NEW METHOD OF SETTING LIMIT - BETA CODE!! TEST CAREFULLY!! 
-        ############################
-        
-        # tmp_price_diff = price_diff * -1
-        # take_profit_limit = float(low_range) + (float(tmp_price_diff)) / 4
-        # true_profit = float(take_profit_limit) * float(size_value)
-        # limitDistance_value = int(take_profit_limit)
-        
-        # print ("!!!DEBUG!!! !!!DEBUG!!! !!!DEBUG!!! !!!DEBUG!!!")
-        # print ("Profit is set at :- " + str(true_profit))
-        # print ("!!!DEBUG!!! !!!DEBUG!!! !!!DEBUG!!! !!!DEBUG!!!")
-        
-                   
+                           
         ################################################################
         #########################ORDER CODE#############################
         ################################################################
