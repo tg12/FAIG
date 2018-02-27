@@ -348,13 +348,15 @@ for times_round_loop in range(1, 9999):
                 tmp_list = []
                 high_price = i['highPrice'][price_compare]
                 low_price = i['lowPrice'][price_compare]
+                close_price = i['closePrice'][price_compare]
+                ############################################
                 volume = i['lastTradedVolume']
                 #---------------------------------
+                tmp_list.append(float(high_price))
                 tmp_list.append(float(low_price))
-                tmp_list.append(float(volume))
                 x.append(tmp_list)
                 #x is Low Price and Volume
-                y.append(float(high_price))
+                y.append(float(close_price))
                 #y = High Prices
 
         ###################################################################################
@@ -365,12 +367,12 @@ for times_round_loop in range(1, 9999):
           d = igclient.prices(epic_id, 'DAY/1')
         
           for i in d['prices']:
+            high_price = i['highPrice'][price_compare]
             low_price = i['lowPrice'][price_compare]
-            volume = i['lastTradedVolume']
         else:
           res = fetch_day_highlow(epic_id)
           low_price = float(res['values']['DAY_LOW'])
-          volume = float(res['values']['LTV']) # this is (now) an hourly volume - will that be an issue?
+          high_price = float(res['values']['DAY_HIGH']) # this is (now) an hourly volume - will that be an issue?
 
         #####################################################################
         #########################PREDICTION CODE#############################
@@ -382,7 +384,7 @@ for times_round_loop in range(1, 9999):
         genius_regression_model = LinearRegression()
         genius_regression_model.fit(x,y)
         # Predict the corresponding value of Y for X
-        pred_ict = [low_price,volume]
+        pred_ict = [high_price,low_price]
         pred_ict = np.asarray(pred_ict) #To Numpy Array, hacky but good!! 
         pred_ict = pred_ict.reshape(1, -1)
         price_prediction = genius_regression_model.predict(pred_ict)
