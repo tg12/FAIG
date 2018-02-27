@@ -76,7 +76,7 @@ expiry_value = "DFB"
 guaranteedStop_value = True
 currencyCode_value = "GBP"
 forceOpen_value = True
-stopDistance_value = "150" #Initial Stop loss, Worked out later per trade
+stopDistance_value = str(config['Trade']['stopDistance_value']) #Initial Stop loss, Worked out later per trade
 
 epics = json.loads(config['Epics']['EPICS'])
 epic_ids = list(epics.keys())
