@@ -61,7 +61,7 @@ open_positions = igclient.positions()
 #SET INITIAL VARIABLES, SOME ARE CALCUALTED LATER
 limitDistance_value = "4" 
 orderType_value = "MARKET"
-size_value = "2"
+size_value = "1"
 expiry_value = "DFB"
 guaranteedStop_value = True
 currencyCode_value = "GBP"
@@ -280,70 +280,23 @@ for times_round_loop in range(1, 9999):
         x = [] #This is Low Price, Volume
         y = [] #This is High Price
 
-        if high_resolution:
-          d = igclient.prices(epic_id, 'DAY/30')          
-          
-          #I only need this API call for real world values
-          remaining_allowance = d['allowance']['remainingAllowance']
-          reset_time = humanize_time(int(d['allowance']['allowanceExpiry']))
+        d = igclient.prices(epic_id, 'DAY/1')  
+        # I only need this API call to read my allowances, 
+        # Token call to here..../prices/{epic}/{resolution}/{numPoints}    
+ 
+        remaining_allowance = d['allowance']['remainingAllowance']
+        reset_time = humanize_time(int(d['allowance']['allowanceExpiry']))
                   
-          print ("-----------------DEBUG-----------------")
-          print ("Remaining API Calls left : " + str(remaining_allowance))
-          print ("Time to API Key reset : " + str(reset_time))
-          print ("-----------------DEBUG-----------------")
-          
-          # day_moving_avg_30 = []
-          for i in d['prices']:
-              tmp_list = []
-              high_price = i['highPrice'][price_compare]
-              low_price = i['lowPrice'][price_compare]
-              open_price = i['openPrice'][price_compare]
-              close_price = i['closePrice'][price_compare]
-              volume = i['lastTradedVolume']
-              #---------------------------------
-              tmp_list.append(float(low_price))
-              tmp_list.append(float(volume))
-              x.append(tmp_list)
-              #x is Low Price and Volume
-              y.append(float(high_price))
-              #y = High Prices
-              # price_change_on_day = close_price - open_price
-              #print ("DEBUG price_change_day : " + str(price_change_on_day))
-              # day_moving_avg_30.append(float(price_change_on_day))
-              
-          # avg_price_movement_day = np.mean(day_moving_avg_30)
-          # print ("-----------------DEBUG-----------------")
-          # print ("DEBUG average movement over last 30 days : " + str(avg_price_movement_day)) 
-          # print ("-----------------DEBUG-----------------")
-        
+        print ("-----------------DEBUG-----------------")
+        print ("Remaining API Calls left : " + str(remaining_allowance))
+        print ("Time to API Key reset : " + str(reset_time))
+        print ("-----------------DEBUG-----------------")
+       
         ############################################################
-
-        # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
-        if high_resolution:
-          resolutions = ['HOUR_4/30', 'HOUR_3/30', 'HOUR_2/30', 'HOUR/30']
-        else:
-          resolutions = ['HOUR_4/30']
+        resolutions = ['DAY/14'] #This is just for the Average True Range, Base it on the last 14 days trading. (14 is the default in ATR)
         for resolution in resolutions:
-            d = igclient.prices(epic_id, resolution)
-            
-            for i in d['prices']:
-                tmp_list = []
-                high_price = i['highPrice'][price_compare]
-                low_price = i['lowPrice'][price_compare]
-                volume = i['lastTradedVolume']
-                #---------------------------------
-                if low_price != None:
-                    tmp_list.append(float(low_price))
-                    tmp_list.append(float(volume))
-                    x.append(tmp_list)
-                    #x is Low Price and Volume
-                    y.append(float(high_price))
-                    #y = High Prices
-            
-        ###################################################################################
-        
-        #Cut down on API Calls by using this again! 
-        
+          d = igclient.prices(epic_id, resolution)
+
         price_ranges = []
         closing_prices = []
         TR_prices = []
@@ -382,11 +335,12 @@ for times_round_loop in range(1, 9999):
         if low_range > 10:
             print ("!!DEBUG!! WARNING - Take Profit over high value, Might take a while for this trade!!")
             
-        # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_3, HOUR_4, DAY, WEEK, MONTH)
+        # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_2, HOUR_4, DAY, WEEK, MONTH)
+        # This is the high roller, For the price prediction. 
         if high_resolution:
-          resolutions = ['MINUTE_30/30', 'MINUTE_15/30', 'MINUTE_10/30', 'MINUTE_5/30', 'MINUTE_3/30', 'MINUTE_2/30', 'MINUTE/30']
+          resolutions = ['HOUR/30', 'HOUR_2/30', 'HOUR_3/30', 'HOUR_4/30', 'DAY/5']
         else:
-          resolutions = ['MINUTE_30/30', 'MINUTE/30']
+          resolutions = ['MINUTE_15/30', 'MINUTE_30/30']
         for resolution in resolutions:
             d = igclient.prices(epic_id, resolution)
             
@@ -405,7 +359,8 @@ for times_round_loop in range(1, 9999):
 
         ###################################################################################
         ###################################################################################
-
+        #Here we just need a value to predict the next one of. 
+        
         if high_resolution:
           d = igclient.prices(epic_id, 'DAY/1')
         
