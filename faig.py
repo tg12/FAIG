@@ -1,5 +1,9 @@
 #IF YOU FOUND THIS USEFUL, Please Donate some Bitcoin .... 1FWt366i5PdrxCC6ydyhD8iywUHQ2C7BWC
 
+# TODO
+# close from stream
+# don't reopen existing positions (unless it's a sure-thing?)
+
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import time
@@ -51,6 +55,9 @@ igstreamclient.subscribe(subscription=subscription, listener=on_item_update)
 #SET SPREAD BET ACCOUNT AS DEFAULT
 r = igclient.update_session({"accountId":spreadbet_acc_id,"defaultAccount": "True"})
 #ERROR about account ID been the same, Ignore! 
+
+# get open positions
+open_positions = igclient.positions()
 
 ###################################################################################
 ##########################END OF LOGIN CODE########################################
@@ -138,6 +145,9 @@ def find_next_trade(epic_ids):
     random.shuffle(epic_ids)
     for epic_id in epic_ids:
       print("!!DEBUG!! : " + str(epic_id), end='')
+      if epic_id in map(lambda x: x['market']['epic'], open_positions['positions']):
+        print( " already have an open position here")
+        continue
       #systime.sleep(2) # we only get 30 API calls per minute :( but streaming doesn't count, so no sleep
 
       res = fetch_current_price(epic_id)
@@ -520,9 +530,11 @@ for times_round_loop in range(1, 9999):
     else:
       DIRECTION_TO_CLOSE = 'SELL'
       DIRECTION_TO_COMPARE = 'bid'
-      limitDistance_value *= -1
+      #limitDistance_value *= -1
 
     data = {"direction":DIRECTION_TO_TRADE,"epic": epic_id, "limitDistance":str(limitDistance_value), "orderType":orderType_value, "size":size_value,"expiry":expiry_value,"guaranteedStop":guaranteedStop_value,"currencyCode":currencyCode_value,"forceOpen":forceOpen_value,"stopDistance":stopDistance_value}
+    data = igclient.handleDealingRules(data)
+
     #igclient.setdebug(True)
     d = igclient.positions_otc(data)
     
@@ -553,6 +565,7 @@ for times_round_loop in range(1, 9999):
     # let account stream provide updates, and let limit close it (for now)
     # TODO: monitor trades with stream thread or waste of a stream?
     systime.sleep(random.randint(1, TIME_WAIT_MULTIPLIER)) #Obligatory Wait before doing next order
+    open_positions = igclient.positions()
     continue
     
     igclient.setdebug(True)

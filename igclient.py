@@ -79,8 +79,12 @@ class IGClient(object):
   def prices(self, epic_id, resolution):
     return self._handlereq( requests.get(self.API_ENDPOINT + '/prices/' + epic_id + '/' + resolution, headers=self.authenticated_headers) )
 
-  def positions(self, deal_id):
-    return self._handlereq( requests.get(self.API_ENDPOINT + '/positions/' + deal_id, headers=self.authenticated_headers) )
+  def positions(self, deal_id=None):
+    if deal_id is None:
+      url = '/positions'
+    else:
+      url = '/positions/' + deal_id
+    return self._handlereq( requests.get(self.API_ENDPOINT + url, headers=self.authenticated_headers) )
 
   def positions_otc(self, data):
     return self._handlereq( requests.post(self.API_ENDPOINT + '/positions/otc', data=json.dumps(data), headers=self.authenticated_headers) )
@@ -90,3 +94,52 @@ class IGClient(object):
 
   def confirms(self, deal_ref):
     return self._handlereq( requests.get(self.API_ENDPOINT + '/confirms/' + deal_ref, headers=self.authenticated_headers) )
+
+  def handleDealingRules(self, data):
+
+    market = self.markets(data['epic'])
+    dealingRules = market['dealingRules']
+
+    current_price = float(market['snapshot']['bid'])
+
+    r = 'marketOrderPreference'
+    if dealingRules[r] == 'NOT_AVAILABLE':
+      print("!!ERROR!! This market is not available for this dealing account")
+
+    r = 'maxStopOrLimitDistance'
+    if dealingRules[r]['unit'] == 'PERCENTAGE':
+      if current_price/100 * float(dealingRules[r]['value']) < float(data['limitDistance']):
+        data['limitDistance'] = str(format(current_price/100 * float(dealingRules[r]['value']), '.2f'))
+    elif dealingRules[r]['unit'] == 'POINTS':
+      if float(dealingRules[r]['value']) < float(data['limitDistance']):
+        data['limitDistance'] = str(dealingRules[r]['value'])
+
+    if data['guaranteedStop'] == True:
+      r = 'minControlledRiskStopDistance'
+    else: # data['guaranteedStop'] == False
+      r = 'minNormalStopOrLimitDistance'
+    if dealingRules[r]['unit'] == 'PERCENTAGE':
+      if current_price/100 * float(dealingRules[r]['value']) > float(data['stopDistance']):
+        data['stopDistance'] = str(format(current_price/100 * float(dealingRules[r]['value']), '.2f'))
+    elif dealingRules[r]['unit'] == 'POINTS':
+      if float(dealingRules[r]['value']) > float(data['stopDistance']):
+        data['stopDistance'] = str(dealingRules[r]['value'])
+
+    r = 'minDealSize'
+    if dealingRules[r]['unit'] == 'POINTS':
+      if float(dealingRules[r]['value']) > float(data['size']):
+        data['size'] = str(dealingRules[r]['value'])
+    elif dealingRules[r]['unit'] == 'PERCENTAGE':
+      pass # err...what? we have to buy sell a percentage of everything?
+
+    # minStepDistance
+    # hmmm...i'm not doing this one :D
+    # if our bid is smaller than the permitted amount, that's because:
+    # we have no faith in the step being big enough;
+    # or we don't have permission to make a step that big
+    # either way, we shouldn't change it just to let the trade go through
+    # it should fail 
+
+    # trailingStopsPreference # TODO
+
+    return data
