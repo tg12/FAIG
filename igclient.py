@@ -12,6 +12,7 @@ class IGClient(object):
     self.config.read("config.conf")
     self.auth = {}
     self.debug = False
+    self.allowance = {}
 
     self.API_ENDPOINT = self.config['Config']['API_ENDPOINT']
     self.API_KEY = self.config['Config']['API_KEY']
@@ -91,7 +92,12 @@ class IGClient(object):
     return self._handlereq( requests.get(self.API_ENDPOINT + '/clientsentiment/'+market_id, headers=self.authenticated_headers) )
 
   def prices(self, epic_id, resolution):
-    return self._handlereq( requests.get(self.API_ENDPOINT + '/prices/' + epic_id + '/' + resolution, headers=self.authenticated_headers) )
+    r = self._handlereq( requests.get(self.API_ENDPOINT + '/prices/' + epic_id + '/' + resolution, headers=self.authenticated_headers) )
+    try:
+      self.allowance = r['allowance']
+    except Exception:
+      pass
+    return r
 
   def positions(self, deal_id=None):
     if deal_id is None:

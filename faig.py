@@ -279,23 +279,16 @@ for times_round_loop in range(1, 9999):
         #THIS IS YOUR TRAINING DATA
         x = [] #This is Low Price, Volume
         y = [] #This is High Price
-
-        d = igclient.prices(epic_id, 'DAY/1')  
-        # I only need this API call to read my allowances, 
-        # Token call to here..../prices/{epic}/{resolution}/{numPoints}    
- 
-        remaining_allowance = d['allowance']['remainingAllowance']
-        reset_time = humanize_time(int(d['allowance']['allowanceExpiry']))
-                  
-        print ("-----------------DEBUG-----------------")
-        print ("Remaining API Calls left : " + str(remaining_allowance))
-        print ("Time to API Key reset : " + str(reset_time))
-        print ("-----------------DEBUG-----------------")
        
         ############################################################
         resolutions = ['DAY/14'] #This is just for the Average True Range, Base it on the last 14 days trading. (14 is the default in ATR)
         for resolution in resolutions:
           d = igclient.prices(epic_id, resolution)
+
+        print ("-----------------DEBUG-----------------")
+        print ("Remaining API Calls left : " + str(igclient.allowance['remainingAllowance']))
+        print ("Time to API Key reset : " + str(humanize_time(int(igclient.allowance['allowanceExpiry']))))
+        print ("-----------------DEBUG-----------------")
 
         price_ranges = []
         closing_prices = []
