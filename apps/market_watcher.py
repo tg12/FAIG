@@ -13,7 +13,7 @@ class MarketWatcher():
 
     There are 2 types of information to observe.
     1) When absolute price change is within range.
-    2) When spread is smaller than a limit.
+    2) When spread is within range.
 
     '''
     ok = False  # Whether price changes obey rules.
@@ -33,7 +33,7 @@ class MarketWatcher():
     min_spread = None
     max_spread = None
 
-    def __init__(self, client, epics, change_range=(0.48, 1.9), spread_range=(0, 2)):
+    def __init__(self, client, epics, change_range=(0.48, 1.9), spread_range=(0.0, 2.0)):
 
         assert isinstance(epics, list)
 
