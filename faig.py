@@ -211,9 +211,7 @@ def determine_trade_direction():
         elif score > predict_accuracy and float(current_price) > float(price_prediction):
             #!!!!Above Predicted Target!!!!
             return trade_type_buy_long(shortPositionPercentage, longPositionPercentage,  Client_Sentiment_Check, High_Trend_Watermark)
-        elif float(score) < float(predict_accuracy) and price_diff < 0 and shortPositionPercentage > longPositionPercentage:
-            print ("!!DEBUG!! PREDICTION IS PROBABLY RUBBISH!!...: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-            #systime.sleep(Prediction_Wait_Timer)
+        elif float(score) < float(predict_accuracy) and price_diff < 0 and float(shortPositionPercentage) > float(longPositionPercentage):
             print ("!!DEBUG!! TAKE SHORT TRADE ON RUBBISH PREDICTION!! " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
             limitDistance_value = int(price_diff * score * float(cautious_trader)) # vary according to certainty and greed
             if limitDistance_value == 0:
@@ -230,9 +228,7 @@ def determine_trade_direction():
             return trade_type_buy_long(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark)          
         elif score > predict_accuracy and float(current_price) < float(price_prediction):
             return trade_type_buy_long(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark)
-        elif float(score) < float(predict_accuracy) and price_diff < 0 and shortPositionPercentage > longPositionPercentage:
-            print ("!!DEBUG!! PREDICTION IS PROBABLY RUBBISH!!...: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-            #systime.sleep(Prediction_Wait_Timer)
+        elif float(score) < float(predict_accuracy) and price_diff < 0 and float(shortPositionPercentage) > float(longPositionPercentage):
             print ("!!DEBUG!! TAKE SHORT TRADE ON RUBBISH PREDICTION!! " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
             limitDistance_value = int(price_diff * score * float(cautious_trader)) # vary according to certainty and greed
             if limitDistance_value == 0:
