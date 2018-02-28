@@ -333,7 +333,7 @@ for times_round_loop in range(1, 9999):
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_2, HOUR_4, DAY, WEEK, MONTH)
         # This is the high roller, For the price prediction. 
         if high_resolution:
-          resolutions = ['HOUR/5', 'HOUR_2/5', 'HOUR_3/5', 'HOUR_4/5', 'DAY/5']
+          resolutions = ['HOUR/24', 'HOUR_2/10', 'HOUR_3/10', 'HOUR_4/10', 'DAY/5']
         else:
           resolutions = ['MINUTE_15/30', 'MINUTE_30/30']
         for resolution in resolutions:
