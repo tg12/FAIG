@@ -255,7 +255,6 @@ for times_round_loop in range(1, 9999):
 
 #*******************************************************************
     Start_loop_time = time()
-
     d = find_next_trade(epic_ids) # TODO limit exposure per-epic
     epic_id = d['values']['EPIC']
     current_price = float(d['values']['BID'])
@@ -284,6 +283,7 @@ for times_round_loop in range(1, 9999):
     DIRECTION_TO_TRADE = None
     while DIRECTION_TO_TRADE is None:
         print ("!!Internal Notes only - Top of Loop!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+        systime.sleep(1.5)
         # Your input data, X and Y are lists (or Numpy Arrays)
         #THIS IS YOUR TRAINING DATA
         x = [] #This is Low Price, Volume
@@ -336,7 +336,8 @@ for times_round_loop in range(1, 9999):
         print ("limitDistance_value for " + str(epic_id) + " will bet set at " + str(float(low_range)))
         if low_range > 10:
             print ("!!DEBUG!! WARNING - Take Profit over high value, Might take a while for this trade!!")
-            
+        systime.sleep(1.5)
+        
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_2, HOUR_4, DAY, WEEK, MONTH)
         # This is the high roller, For the price prediction. 
         if high_resolution:
@@ -588,8 +589,7 @@ for times_round_loop in range(1, 9999):
         systime.sleep(random.randint(1, TIME_WAIT_MULTIPLIER))
         pass
     
-        #systime.sleep(1)
-            
+           
     if PROFIT_OR_LOSS > 0:
         profitable_trade_count = int(profitable_trade_count) + 1
         print ("DEBUG : ASSUME PROFIT!! Profitable Trade Count " + str(profitable_trade_count))
