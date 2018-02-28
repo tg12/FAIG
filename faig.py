@@ -76,7 +76,8 @@ predict_accuracy = float(config['Trade']['predict_accuracy'])
 TIME_WAIT_MULTIPLIER = 60
 Client_Sentiment_Check = 69
 profitable_trade_count = 0
-High_Trend_Watermark = 89
+High_Trend_Watermark = 89 
+cautious_trader = 0.1 #Let's not miss out on some profits! 
 
 print ("START TIME : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
 
@@ -214,15 +215,14 @@ def determine_trade_direction():
             print ("!!DEBUG!! PREDICTION IS PROBABLY RUBBISH!!...: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
             #systime.sleep(Prediction_Wait_Timer)
             print ("!!DEBUG!! TAKE SHORT TRADE ON RUBBISH PREDICTION!! " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-            return "SELL"
-            cautious_trader = 0.1
             limitDistance_value = int(price_diff * score * float(cautious_trader)) # vary according to certainty and greed
             if limitDistance_value == 0:
                 limitDistance_value = 1 #Hacky AF for some weird currency pairs!! 
-                
+            #####################################################################    
             if limitDistance_value < 0:
                 limitDistance_value += -1
             print ("Cautious trade: " + str(limitDistance_value))
+            return "SELL"
             
     
     else: # b_contrarian == False:
@@ -235,15 +235,14 @@ def determine_trade_direction():
             print ("!!DEBUG!! PREDICTION IS PROBABLY RUBBISH!!...: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
             #systime.sleep(Prediction_Wait_Timer)
             print ("!!DEBUG!! TAKE SHORT TRADE ON RUBBISH PREDICTION!! " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-            return "SELL"
-            cautious_trader = 0.1
             limitDistance_value = int(price_diff * score * float(cautious_trader)) # vary according to certainty and greed
             if limitDistance_value == 0:
                 limitDistance_value = 1 #Hacky AF for some weird currency pairs!! 
-                
+            #####################################################################        
             if limitDistance_value < 0:
                 limitDistance_value += -1
             print ("Cautious trade: " + str(limitDistance_value))
+            return "SELL"
   else:
     # no client sentiment, we only care about price
     #print ("price_diff:{} score:{} current_price:{} limitDistance_value:{} predict_accuracy:{} price_prediction:{}".format(price_diff, score, current_price, limitDistance_value, predict_accuracy, price_prediction))
