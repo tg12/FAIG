@@ -214,7 +214,7 @@ def determine_trade_direction():
             print ("!!DEBUG!! PREDICTION IS PROBABLY RUBBISH!!...: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
             #systime.sleep(Prediction_Wait_Timer)
             print ("!!DEBUG!! TAKE SHORT TRADE ON RUBBISH PREDICTION!! " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-            DIRECTION_TO_TRADE = 'SELL'
+            return "SELL"
             cautious_trader = 0.1
             limitDistance_value = int(price_diff * score * float(cautious_trader)) # vary according to certainty and greed
             if limitDistance_value < 0:
@@ -232,7 +232,7 @@ def determine_trade_direction():
             print ("!!DEBUG!! PREDICTION IS PROBABLY RUBBISH!!...: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
             #systime.sleep(Prediction_Wait_Timer)
             print ("!!DEBUG!! TAKE SHORT TRADE ON RUBBISH PREDICTION!! " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-            DIRECTION_TO_TRADE = 'SELL'
+            return "SELL"
             cautious_trader = 0.1
             limitDistance_value = int(price_diff * score * float(cautious_trader)) # vary according to certainty and greed
             if limitDistance_value < 0:
