@@ -337,9 +337,9 @@ for times_round_loop in range(1, 9999):
         else:
           resolutions = ['MINUTE_15/30', 'MINUTE_30/30']
         for resolution in resolutions:
-            igclient.setdebug(True)
+            #igclient.setdebug(True)
             d = igclient.prices(epic_id, resolution)
-            igclient.setdebug(False)
+            #igclient.setdebug(False)
             
             for i in d['prices']:
                 tmp_list = []
@@ -444,7 +444,9 @@ for times_round_loop in range(1, 9999):
       #limitDistance_value *= -1
 
     data = {"direction":DIRECTION_TO_TRADE,"epic": epic_id, "limitDistance":str(limitDistance_value), "orderType":orderType_value, "size":size_value,"expiry":expiry_value,"guaranteedStop":guaranteedStop_value,"currencyCode":currencyCode_value,"forceOpen":forceOpen_value,"stopDistance":stopDistance_value}
+    igclient.setdebug(True)
     data = igclient.handleDealingRules(data)
+    igclient.setdebug(False)
 
     #igclient.setdebug(True)
     d = igclient.positions_otc(data)
