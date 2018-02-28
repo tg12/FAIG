@@ -345,7 +345,9 @@ for times_round_loop in range(1, 9999):
         else:
           resolutions = ['MINUTE_15/30', 'MINUTE_30/30']
         for resolution in resolutions:
+            igclient.setdebug(True)
             d = igclient.prices(epic_id, resolution)
+            igclient.setdebug(False)
             
             for i in d['prices']:
                 tmp_list = []
