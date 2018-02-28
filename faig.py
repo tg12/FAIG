@@ -204,40 +204,32 @@ def get_market_id(epic_id):
 
 def determine_trade_direction():
   if use_clientsentiment:
+  
+    direction_to_return = None
+    
+    if price_diff < 0 and score > predict_accuracy and float(current_price) < float(price_prediction):
+        #Below prediction, Buy towards!!
+       direction_to_return = trade_type_buy_long(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark)
+    elif score > predict_accuracy and float(current_price) > float(price_prediction):
+        #!!!!Above Predicted Target!!!!
+        direction_to_return = trade_type_buy_short(shortPositionPercentage, longPositionPercentage,  Client_Sentiment_Check, High_Trend_Watermark)
+    elif float(score) < float(predict_accuracy) and price_diff < 0 and float(shortPositionPercentage) > float(longPositionPercentage):
+        print ("!!DEBUG!! TAKE SHORT TRADE ON RUBBISH PREDICTION!! " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+        limitDistance_value = int(price_diff * score * float(cautious_trader)) # vary according to certainty and greed
+        if limitDistance_value == 0:
+            limitDistance_value = 1 #Hacky AF for some weird currency pairs!! 
+        #####################################################################    
+        if limitDistance_value < 0:
+            limitDistance_value += -1
+        print ("Cautious trade: " + str(limitDistance_value))
+        direction_to_return = "SELL"
+  
     if b_contrarian == True:
-        #print ("!!DEBUG!! b_contrarian SET!!")
-        if price_diff < 0 and score > predict_accuracy and float(current_price) < float(price_prediction):
-           return trade_type_buy_short(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark)
-        elif score > predict_accuracy and float(current_price) > float(price_prediction):
-            #!!!!Above Predicted Target!!!!
-            return trade_type_buy_long(shortPositionPercentage, longPositionPercentage,  Client_Sentiment_Check, High_Trend_Watermark)
-        elif float(score) < float(predict_accuracy) and price_diff < 0 and float(shortPositionPercentage) > float(longPositionPercentage):
-            print ("!!DEBUG!! TAKE SHORT TRADE ON RUBBISH PREDICTION!! " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-            limitDistance_value = int(price_diff * score * float(cautious_trader)) # vary according to certainty and greed
-            if limitDistance_value == 0:
-                limitDistance_value = 1 #Hacky AF for some weird currency pairs!! 
-            #####################################################################    
-            if limitDistance_value < 0:
-                limitDistance_value += -1
-            print ("Cautious trade: " + str(limitDistance_value))
+        if direction_to_return == "SELL":
+            return "BUY"
+        else:
             return "SELL"
- 
-    else: # b_contrarian == False:
-        #print ("!!DEBUG!! b_contrarian is false!! :- You are following the client sentiment")
-        if price_diff < 0 and score > predict_accuracy and float(current_price) < float(price_prediction):
-            return trade_type_buy_long(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark)          
-        elif score > predict_accuracy and float(current_price) < float(price_prediction):
-            return trade_type_buy_long(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark)
-        elif float(score) < float(predict_accuracy) and price_diff < 0 and float(shortPositionPercentage) > float(longPositionPercentage):
-            print ("!!DEBUG!! TAKE SHORT TRADE ON RUBBISH PREDICTION!! " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-            limitDistance_value = int(price_diff * score * float(cautious_trader)) # vary according to certainty and greed
-            if limitDistance_value == 0:
-                limitDistance_value = 1 #Hacky AF for some weird currency pairs!! 
-            #####################################################################        
-            if limitDistance_value < 0:
-                limitDistance_value += -1
-            print ("Cautious trade: " + str(limitDistance_value))
-            return "SELL"
+
   else:
     # no client sentiment, we only care about price
     #print ("price_diff:{} score:{} current_price:{} limitDistance_value:{} predict_accuracy:{} price_prediction:{}".format(price_diff, score, current_price, limitDistance_value, predict_accuracy, price_prediction))
