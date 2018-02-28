@@ -227,7 +227,7 @@ def determine_trade_direction():
     if b_contrarian == True:
         if direction_to_return == "SELL":
             return "BUY"
-        else:
+        elif direction_to_return == "BUY":
             return "SELL"
 
   else:
