@@ -437,7 +437,7 @@ for times_round_loop in range(1, 9999):
         
         if DIRECTION_TO_TRADE is None:
             #No trade direction
-            continue
+            break
 
         #Three things, Price difference is less than target, Accuracy is OK, Current Price is less than Price Prediction
         #Added a fourth thing "contrarian indicator"
