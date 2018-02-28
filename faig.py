@@ -207,22 +207,19 @@ def determine_trade_direction():
         #print ("!!DEBUG!! b_contrarian SET!!")
         if price_diff < 0 and score > predict_accuracy and float(current_price) < float(price_prediction):
            return trade_type_buy_short(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark)
-        elif float(price_diff) > float(limitDistance_value) and score > predict_accuracy and float(current_price) > float(price_prediction):
+        elif score > predict_accuracy and float(current_price) > float(price_prediction):
             #!!!!Above Predicted Target!!!!
-            #Tight limit (Take Profit)
-            return trade_type_buy_short(shortPositionPercentage, longPositionPercentage,  Client_Sentiment_Check, High_Trend_Watermark)
+            return trade_type_buy_long(shortPositionPercentage, longPositionPercentage,  Client_Sentiment_Check, High_Trend_Watermark)
         else:
-            print ("!!DEBUG!! NO CRITERIA YET - SLEEPING!!: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-            systime.sleep(Prediction_Wait_Timer)
-            print ("!!DEBUG!! NO CRITERIA!! " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+            print ("!!DEBUG!! PREDICTION IS PROBABLY RUBBISH!!...: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+            #systime.sleep(Prediction_Wait_Timer)
+            print ("!!DEBUG!! TAKE SHORT TRADE ON RUBBISH PREDICTION!! " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
     
     else: # b_contrarian == False:
         #print ("!!DEBUG!! b_contrarian is false!! :- You are following the client sentiment")
         if price_diff < 0 and score > predict_accuracy and float(current_price) < float(price_prediction):
             return trade_type_buy_long(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark)          
-        elif float(price_diff) > float(limitDistance_value) and score > predict_accuracy and float(current_price) > float(price_prediction):
-            #!!!!Above Predicted Target!!!!
-            #Tight limit (Take Profit)
+        elif score > predict_accuracy and float(current_price) < float(price_prediction):
             return trade_type_buy_long(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark)
         else:
             print ("!!DEBUG!! NO CRITERIA YET - SLEEPING!!: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
@@ -417,21 +414,28 @@ for times_round_loop in range(1, 9999):
         #############Predict Accuracy isn't that great. ################
         ################################################################
         Prediction_Wait_Timer = int(TIME_WAIT_MULTIPLIER) #Wait
-
-        if float(score) < float(predict_accuracy):
-            # NOT ACCURATE ENOUGH (YET)
-            print ("!!DEBUG!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-            print ("!!DEBUG!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-            systime.sleep(Prediction_Wait_Timer)
-            print ("!!DEBUG!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
-            break
-
-        #Three things, Price difference is less than target, Accuracy is OK, Current Price is less than Price Prediction
-        #Added a fourth thing "contrarian indicator"
         
         print ("price_diff:{} score:{} current_price:{} limitDistance_value:{} predict_accuracy:{} price_prediction:{}".format(price_diff, score, current_price, limitDistance_value, predict_accuracy, price_prediction))
         DIRECTION_TO_TRADE = determine_trade_direction()
 
+        if float(score) < float(predict_accuracy) and price_diff < 0:
+            #Nah!, Rubbish prediction and price is not above prediction...Safe to sell??
+            ############################################################################
+            #print ("!!DEBUG!! : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+            #print ("!!DEBUG!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+            #systime.sleep(Prediction_Wait_Timer)
+            #print ("!!DEBUG!! Prediction Wait Algo: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+            DIRECTION_TO_TRADE = 'SELL'
+            cautious_trader = 0.1
+            limitDistance_value = int(price_diff * score * float(cautious_trader)) # vary according to certainty and greed
+            if limitDistance_value < 0:
+                limitDistance_value += -1
+            print ("Cautious trade: " + str(limitDistance_value))
+            #break
+
+        #Three things, Price difference is less than target, Accuracy is OK, Current Price is less than Price Prediction
+        #Added a fourth thing "contrarian indicator"
+        
     # LET'S DO THIS
     if DIRECTION_TO_TRADE == 'SELL':
       DIRECTION_TO_CLOSE = 'BUY'
