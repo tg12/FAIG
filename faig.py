@@ -392,7 +392,6 @@ for times_round_loop in range(1, 9999):
             
         price_diff = current_price - price_prediction
         
-        #limitDistance_value = int((low_range/2) * score) #  vary according to our certainty
         limitDistance_value = int(price_diff * score * float(config['Trade']['greed'])) # vary according to certainty and greed
         if float(limitDistance_value) < 0:
             limitDistance_value = limitDistance_value * -1 
