@@ -1,6 +1,18 @@
 import configparser
 import requests
 import json
+import time
+
+def trackcall(f):
+  # tracks number of recent api calls (in last 60s) and sleeps accordingly
+  def wrap(*args, **kwargs):
+    while len(args[0].recent_calls) >= 30-1:
+      time.sleep(1)
+      args[0].recent_calls = [x for x in args[0].recent_calls if x > int(time.time()-60)]
+      #args[0].recent_calls = filter(lambda x: x > int(time.time())-60, args[0].recent_calls)
+    args[0].recent_calls.append(int(time.time()))
+    return f(*args, **kwargs)
+  return wrap
 
 class IGClient(object):
 
@@ -13,6 +25,7 @@ class IGClient(object):
     self.auth = {}
     self.debug = False
     self.allowance = {}
+    self.recent_calls = []
 
     self.API_ENDPOINT = self.config['Config']['API_ENDPOINT']
     self.API_KEY = self.config['Config']['API_KEY']
@@ -25,6 +38,7 @@ class IGClient(object):
             import httplib as http_client
     http_client.HTTPConnection.debuglevel = (0, 1)[ self.debug == True]
 
+  @trackcall
   def session(self, set_default=True):
     data = { "identifier": self.config['Auth']['USERNAME'], "password": self.config['Auth']['PASSWORD'] }
 
@@ -79,18 +93,22 @@ class IGClient(object):
     delete_headers.update({ '_method': "DELETE" })
     return delete_headers
 
+  @trackcall
   def accounts(self):
     return self._handlereq( requests.get(self.API_ENDPOINT + '/accounts', headers=self.authenticated_headers) )
 
+  @trackcall
   def update_session(self, data):
     return self._handlereq( requests.put(self.API_ENDPOINT + '/session', data=data, headers=self.authenticated_headers) )
 
   def markets(self, epic_id):
     return self._handlereq( requests.get(self.API_ENDPOINT + '/markets/' + epic_id, headers=self.authenticated_headers) )
 
+  @trackcall
   def clientsentiment(self, market_id):
     return self._handlereq( requests.get(self.API_ENDPOINT + '/clientsentiment/'+market_id, headers=self.authenticated_headers) )
 
+  @trackcall
   def prices(self, epic_id, resolution):
     r = self._handlereq( requests.get(self.API_ENDPOINT + '/prices/' + epic_id + '/' + resolution, headers=self.authenticated_headers) )
     try:
@@ -99,6 +117,7 @@ class IGClient(object):
       pass
     return r
 
+  @trackcall
   def positions(self, deal_id=None):
     if deal_id is None:
       url = '/positions'
@@ -106,12 +125,15 @@ class IGClient(object):
       url = '/positions/' + deal_id
     return self._handlereq( requests.get(self.API_ENDPOINT + url, headers=self.authenticated_headers) )
 
+  @trackcall
   def positions_otc(self, data):
     return self._handlereq( requests.post(self.API_ENDPOINT + '/positions/otc', data=json.dumps(data), headers=self.authenticated_headers) )
 
+  @trackcall
   def positions_otc_close(self, data):
     return self._handlereq( requests.post(self.API_ENDPOINT + '/positions/otc', data=json.dumps(data), headers=self._authheadersfordelete()) )
 
+  @trackcall
   def confirms(self, deal_ref):
     return self._handlereq( requests.get(self.API_ENDPOINT + '/confirms/' + deal_ref, headers=self.authenticated_headers) )
 
