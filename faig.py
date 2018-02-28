@@ -211,7 +211,7 @@ def determine_trade_direction():
         elif score > predict_accuracy and float(current_price) > float(price_prediction):
             #!!!!Above Predicted Target!!!!
             return trade_type_buy_long(shortPositionPercentage, longPositionPercentage,  Client_Sentiment_Check, High_Trend_Watermark)
-        elif float(score) < float(predict_accuracy) and price_diff < 0:
+        elif float(score) < float(predict_accuracy) and price_diff < 0 and shortPositionPercentage > longPositionPercentage:
             print ("!!DEBUG!! PREDICTION IS PROBABLY RUBBISH!!...: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
             #systime.sleep(Prediction_Wait_Timer)
             print ("!!DEBUG!! TAKE SHORT TRADE ON RUBBISH PREDICTION!! " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
@@ -230,7 +230,7 @@ def determine_trade_direction():
             return trade_type_buy_long(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark)          
         elif score > predict_accuracy and float(current_price) < float(price_prediction):
             return trade_type_buy_long(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark)
-        elif float(score) < float(predict_accuracy) and price_diff < 0:
+        elif float(score) < float(predict_accuracy) and price_diff < 0 and shortPositionPercentage > longPositionPercentage:
             print ("!!DEBUG!! PREDICTION IS PROBABLY RUBBISH!!...: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
             #systime.sleep(Prediction_Wait_Timer)
             print ("!!DEBUG!! TAKE SHORT TRADE ON RUBBISH PREDICTION!! " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
@@ -437,6 +437,7 @@ for times_round_loop in range(1, 9999):
         
         if DIRECTION_TO_TRADE is None:
             #No trade direction
+            print ("!!DEBUG!! Literally NO decent trade direction could be determined")
             break
 
         #Three things, Price difference is less than target, Accuracy is OK, Current Price is less than Price Prediction
