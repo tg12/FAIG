@@ -222,7 +222,7 @@ def determine_trade_direction():
         if limitDistance_value < 0:
             limitDistance_value += -1
         print ("Cautious trade: " + str(limitDistance_value))
-        direction_to_return = "SELL"
+        return "SELL"
   
     if b_contrarian == True:
         if direction_to_return == "SELL":
