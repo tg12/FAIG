@@ -217,6 +217,9 @@ def determine_trade_direction():
             return "SELL"
             cautious_trader = 0.1
             limitDistance_value = int(price_diff * score * float(cautious_trader)) # vary according to certainty and greed
+            if limitDistance_value == 0:
+                limitDistance_value = 1 #Hacky AF for some weird currency pairs!! 
+                
             if limitDistance_value < 0:
                 limitDistance_value += -1
             print ("Cautious trade: " + str(limitDistance_value))
@@ -235,6 +238,9 @@ def determine_trade_direction():
             return "SELL"
             cautious_trader = 0.1
             limitDistance_value = int(price_diff * score * float(cautious_trader)) # vary according to certainty and greed
+            if limitDistance_value == 0:
+                limitDistance_value = 1 #Hacky AF for some weird currency pairs!! 
+                
             if limitDistance_value < 0:
                 limitDistance_value += -1
             print ("Cautious trade: " + str(limitDistance_value))
