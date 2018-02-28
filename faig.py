@@ -448,8 +448,11 @@ for times_round_loop in range(1, 9999):
 
     #igclient.setdebug(True)
     d = igclient.positions_otc(data)
-    
-    deal_ref = d['dealReference']
+    try:
+        deal_ref = d['dealReference']
+    except:
+        continue
+        
     systime.sleep(2)
     # MAKE AN ORDER
 
@@ -458,7 +461,7 @@ for times_round_loop in range(1, 9999):
     #igclient.setdebug(False)
     DEAL_ID = d['dealId']
     print("DEAL ID : {} - {} - {}".format(str(d['dealId']), d['dealStatus'], d['reason']))
-    
+   
     #######################################################################################
     #This gets triggered if IG want a daft amount in your account for the margin, More than you specified initially. This happens sometimes... deal with it! 
     #This is fine, Whilst it is a bit hacky basically start over again.
