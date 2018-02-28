@@ -160,10 +160,10 @@ def find_next_trade(epic_ids):
     systime.sleep(30) # that's all of them
 
 def trade_type_buy_short(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark):
-  if float(shortPositionPercentage) > float(longPositionPercentage) and float(shortPositionPercentage) > Client_Sentiment_Check:
-      return "BUY"
-  elif float(longPositionPercentage) > float(shortPositionPercentage) and float(longPositionPercentage) > Client_Sentiment_Check:
+  if float(shortPositionPercentage) > float(longPositionPercentage) and float(shortPositionPercentage) >= Client_Sentiment_Check:
       return "SELL"
+  elif float(longPositionPercentage) > float(shortPositionPercentage) and float(longPositionPercentage) >= Client_Sentiment_Check:
+      return "BUY"
   elif longPositionPercentage >= High_Trend_Watermark:
       return "BUY"
   elif shortPositionPercentage >= High_Trend_Watermark:
@@ -173,9 +173,9 @@ def trade_type_buy_short(shortPositionPercentage, longPositionPercentage, Client
       print ("!!DEBUG shortPositionPercentage:{} longPositionPercentage:{} Client_Sentiment_Check:{} High_Trend_Watermark:{}".format(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark))
 
 def trade_type_buy_long(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark):
-  if float(longPositionPercentage) > float(shortPositionPercentage) and float(longPositionPercentage) > Client_Sentiment_Check:
+  if float(longPositionPercentage) > float(shortPositionPercentage) and float(longPositionPercentage) >= Client_Sentiment_Check:
     return "BUY"
-  elif float(shortPositionPercentage) > float(longPositionPercentage) and float(shortPositionPercentage) > Client_Sentiment_Check:
+  elif float(shortPositionPercentage) > float(longPositionPercentage) and float(shortPositionPercentage) >= Client_Sentiment_Check:
     return "SELL"
   elif longPositionPercentage >= High_Trend_Watermark:
     return "BUY"
@@ -211,7 +211,6 @@ def determine_trade_direction():
             #!!!!Above Predicted Target!!!!
             #Tight limit (Take Profit)
             return trade_type_buy_short(shortPositionPercentage, longPositionPercentage,  Client_Sentiment_Check, High_Trend_Watermark)
-            # limitDistance_value = "2"
         else:
             print ("!!DEBUG!! NO CRITERIA YET - SLEEPING!!: " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
             systime.sleep(Prediction_Wait_Timer)
