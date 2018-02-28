@@ -223,8 +223,7 @@ def determine_trade_direction():
                 limitDistance_value += -1
             print ("Cautious trade: " + str(limitDistance_value))
             return "SELL"
-            
-    
+ 
     else: # b_contrarian == False:
         #print ("!!DEBUG!! b_contrarian is false!! :- You are following the client sentiment")
         if price_diff < 0 and score > predict_accuracy and float(current_price) < float(price_prediction):
