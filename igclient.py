@@ -16,12 +16,14 @@ def trackcall(f):
 
 class IGClient(object):
 
-  def __init__(self):
+  def __init__(self, config=None):
     self.loggedin = False
     self.json = True # return json or obj
-    self.config = configparser.ConfigParser()
-    self.config.read("default.conf")
-    self.config.read("config.conf")
+    if config is None:
+      config = configparser.ConfigParser()
+      config.read("default.conf")
+      config.read("config.conf")
+    self.config = config
     self.auth = {}
     self.debug = False
     self.allowance = {}
