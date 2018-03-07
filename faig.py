@@ -52,7 +52,6 @@ open_positions = igclient.positions()
 # orderType_value = "MARKET"
 # size_value = "5"
 # expiry_value = "DFB"
-# guaranteedStop_value = True
 # currencyCode_value = "GBP"
 # forceOpen_value = True
 # stopDistance_value = "150"
@@ -63,7 +62,6 @@ limitDistance_value = "4"
 orderType_value = "MARKET"
 size_value = "1"
 expiry_value = "DFB"
-guaranteedStop_value = True
 currencyCode_value = "GBP"
 forceOpen_value = True
 stopDistance_value = str(config['Trade']['stopDistance_value']) #Initial Stop loss, Worked out later per trade
@@ -443,7 +441,7 @@ for times_round_loop in range(1, 9999):
       DIRECTION_TO_COMPARE = 'bid'
       #limitDistance_value *= -1
 
-    data = {"direction":DIRECTION_TO_TRADE,"epic": epic_id, "limitDistance":str(limitDistance_value), "orderType":orderType_value, "size":size_value,"expiry":expiry_value,"guaranteedStop":guaranteedStop_value,"currencyCode":currencyCode_value,"forceOpen":forceOpen_value,"stopDistance":stopDistance_value}
+    data = {"direction":DIRECTION_TO_TRADE,"epic": epic_id, "limitDistance":str(limitDistance_value), "orderType":orderType_value, "size":size_value,"expiry":expiry_value,"currencyCode":currencyCode_value,"forceOpen":forceOpen_value,"stopDistance":stopDistance_value}
     igclient.setdebug(True)
     data = igclient.handleDealingRules(data)
     igclient.setdebug(False)
