@@ -170,6 +170,7 @@ def trade_type_buy_short(shortPositionPercentage, longPositionPercentage, Client
   else:
       print ("!!DEBUG No Trade This time BS")
       print ("!!DEBUG shortPositionPercentage:{} longPositionPercentage:{} Client_Sentiment_Check:{} High_Trend_Watermark:{}".format(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark))
+      return None
 
 def trade_type_buy_long(shortPositionPercentage, longPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark):
   if float(longPositionPercentage) > float(shortPositionPercentage) and float(longPositionPercentage) >= Client_Sentiment_Check:
@@ -183,7 +184,8 @@ def trade_type_buy_long(shortPositionPercentage, longPositionPercentage, Client_
   else:
     print ("!!DEBUG No Trade This time BL")
     print ("!!DEBUG longPositionPercentage:{} shortPositionPercentage:{} Client_Sentiment_Check:{} High_Trend_Watermark:{}".format(longPositionPercentage, shortPositionPercentage, Client_Sentiment_Check, High_Trend_Watermark))
-
+    return None
+    
 use_clientsentiment = eval(config['Trade']['use_clientsentiment'])
 b_contrarian = eval(config['Trade']['b_contrarian']) #THIS MUST BE SET IF use_clientsentiment == True
 high_resolution = eval(config['Trade']['high_resolution'])
@@ -219,6 +221,16 @@ def determine_trade_direction():
         #####################################################################    
         if limitDistance_value < 0:
             limitDistance_value += -1
+        print ("Cautious trade: " + str(limitDistance_value))
+        return "BUY"
+    elif float(score) < float(predict_accuracy) and price_diff < 0 and float(shortPositionPercentage) < float(longPositionPercentage):
+        print ("!!DEBUG!! TAKE SHORT TRADE ON RUBBISH PREDICTION!! " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))
+        limitDistance_value = int(price_diff * score * float(cautious_trader)) # vary according to certainty and greed
+        if limitDistance_value == 0:
+            limitDistance_value = 1 #Hacky AF for some weird currency pairs!! 
+        #####################################################################    
+        if limitDistance_value < 0:
+            limitDistance_value *= -1
         print ("Cautious trade: " + str(limitDistance_value))
         return "SELL"
   
@@ -442,9 +454,9 @@ for times_round_loop in range(1, 9999):
       #limitDistance_value *= -1
 
     data = {"direction":DIRECTION_TO_TRADE,"epic": epic_id, "limitDistance":str(limitDistance_value), "orderType":orderType_value, "size":size_value,"expiry":expiry_value,"currencyCode":currencyCode_value,"forceOpen":forceOpen_value,"stopDistance":stopDistance_value}
-    igclient.setdebug(True)
+    #igclient.setdebug(True)
     data = igclient.handleDealingRules(data)
-    igclient.setdebug(False)
+    #igclient.setdebug(False)
 
     #igclient.setdebug(True)
     d = igclient.positions_otc(data)
