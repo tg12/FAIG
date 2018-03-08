@@ -162,7 +162,7 @@ class IGClient(object):
       if float(dealingRules[r]['value']) < float(data['limitDistance']):
         data['limitDistance'] = str(dealingRules[r]['value'])
 
-    if data['guaranteedStop'] == True:
+    if 'guaranteedStop' in data and data['guaranteedStop'] == True:
       r = 'minControlledRiskStopDistance'
     else: # data['guaranteedStop'] == False
       r = 'minNormalStopOrLimitDistance'
