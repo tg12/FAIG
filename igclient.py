@@ -129,9 +129,9 @@ class IGClient(object):
 
   @trackcall
   def positions_otc(self, data):
-    if self.config['Trade']['always_guarantee_stops']:
+    if eval(self.config['Trade']['always_guarantee_stops']):
        data['guaranteedStop'] = True
-    if self.config['Trade']['never_guarantee_stops']:
+    if eval(self.config['Trade']['never_guarantee_stops']):
        data['guaranteedStop'] = False
     return self._handlereq( requests.post(self.API_ENDPOINT + '/positions/otc', data=json.dumps(data), headers=self.authenticated_headers) )
 
