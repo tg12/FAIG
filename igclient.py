@@ -16,12 +16,14 @@ def trackcall(f):
 
 class IGClient(object):
 
-  def __init__(self):
+  def __init__(self, config=None):
     self.loggedin = False
     self.json = True # return json or obj
-    self.config = configparser.ConfigParser()
-    self.config.read("default.conf")
-    self.config.read("config.conf")
+    if config is None:
+      config = configparser.ConfigParser()
+      config.read("default.conf")
+      config.read("config.conf")
+    self.config = config
     self.auth = {}
     self.debug = False
     self.allowance = {}
@@ -127,6 +129,10 @@ class IGClient(object):
 
   @trackcall
   def positions_otc(self, data):
+    if eval(self.config['Trade']['always_guarantee_stops']):
+       data['guaranteedStop'] = True
+    if eval(self.config['Trade']['never_guarantee_stops']):
+       data['guaranteedStop'] = False
     return self._handlereq( requests.post(self.API_ENDPOINT + '/positions/otc', data=json.dumps(data), headers=self.authenticated_headers) )
 
   @trackcall
@@ -156,7 +162,7 @@ class IGClient(object):
       if float(dealingRules[r]['value']) < float(data['limitDistance']):
         data['limitDistance'] = str(dealingRules[r]['value'])
 
-    if data['guaranteedStop'] == True:
+    if ('guaranteedStop' in data and data['guaranteedStop'] == True) or self.config['Trade']['always_guarantee_stops']:
       r = 'minControlledRiskStopDistance'
     else: # data['guaranteedStop'] == False
       r = 'minNormalStopOrLimitDistance'
