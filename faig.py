@@ -37,8 +37,6 @@ stopDistance_value = str(config['Trade']['stopDistance_value'])
 epics = json.loads(config['Epics']['EPICS'])
 
 #*******************************************************************
-caution = float(config['Trade']['caution']) #Let's not miss out on some profits! 
-
 print ("START TIME : " + str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")))    
 
 high_resolution = eval(config['Trade']['high_resolution'])
