@@ -5,7 +5,7 @@
 3. Cross Platform (Linux and Windows)
 4. Python3
 
-**We have a Discord Server for Help, Support and Chat .... https://discord.gg/NU56TS**
+**We have a Discord Server for Help, Support and Chat .... https://discord.gg/ZfwukPz**
 
 **More Information can be found on Reddit ....https://www.reddit.com/r/UKInvesting/comments/7q67cw/faig_fully_automated_ig_trading_a_python_script/**
 
