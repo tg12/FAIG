@@ -9,6 +9,8 @@ Requires a valid IG Index Account - https://www.ig.com/uk/welcome-page
 
 Requires you to install the packages listed in the requirements.txt file
 
+Copy default.conf to config.conf and add all settings there
+
 More information/discussions and questions here
 https://www.reddit.com/r/UKInvesting/comments/7q67cw/faig_fully_automated_ig_trading_a_python_script/
 
