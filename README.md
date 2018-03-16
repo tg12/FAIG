@@ -5,10 +5,11 @@
 3. Cross Platform (Linux and Windows)
 4. Python3
 
+Copy default.conf to config.conf and add all settings there
+
 **We have a Discord Server for Help, Support and Chat .... https://discord.gg/ZfwukPz**
 
 **More Information can be found on Reddit ....https://www.reddit.com/r/UKInvesting/comments/7q67cw/faig_fully_automated_ig_trading_a_python_script/**
-
 
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WQ6V6K8ZY6D84">
   <img src="https://www.paypalobjects.com/en_US/GB/i/btn/btn_donateCC_LG.gif" alt="Donate with PayPal" />
