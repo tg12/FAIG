@@ -4,6 +4,8 @@ python-apt==1.4.0b3
 pyxdg==0.25
 PyYAML==5.1
 requests==2.18.1
+PyYAML==3.12
+requests==2.20.0
 scikit-learn==0.19.1
 scipy==1.0.0
 sklearn==0.0
