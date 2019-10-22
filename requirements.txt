@@ -2,7 +2,7 @@ numpy==1.14.0
 pygobject==3.24.1
 python-apt==1.4.0b3
 pyxdg==0.25
-PyYAML==3.12
+PyYAML==5.1
 requests==2.18.1
 scikit-learn==0.19.1
 scipy==1.0.0
