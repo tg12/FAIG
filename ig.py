@@ -24,18 +24,19 @@ def on_item_update(item_update):
 
 
 class API(IGClient):
+
     def __init__(self):
         super().__init__()
         d = super().session()
         self.igstreamclient = igstream.IGStream(igclient=self, loginresponse=d)
 
         subscription = igstream.Subscription(
-            mode="DISTINCT", items=["TRADE:" + str(self.accountId)], fields=["OPU"]
-        )
+            mode="DISTINCT",
+            items=["TRADE:" + str(self.accountId)],
+            fields=["OPU"])
 
-        self.igstreamclient.subscribe(
-            subscription=subscription, listener=on_item_update
-        )
+        self.igstreamclient.subscribe(subscription=subscription,
+                                      listener=on_item_update)
         self.market_ids = {}
 
         # get open positions
@@ -107,18 +108,13 @@ class API(IGClient):
 
         # CONFIRM MARKET ORDER
         d = self.confirms(deal_ref)
-        print(
-            "DEAL ID : {} - {} - {}".format(
-                str(d["dealId"]), d["dealStatus"], d["reason"]
-            )
-        )
+        print("DEAL ID : {} - {} - {}".format(str(d["dealId"]), d["dealStatus"],
+                                              d["reason"]))
 
-        if (
-            str(d["reason"]) == "ATTACHED_ORDER_LEVEL_ERROR"
-            or str(d["reason"]) == "MINIMUM_ORDER_SIZE_ERROR"
-            or str(d["reason"]) == "INSUFFICIENT_FUNDS"
-            or str(d["reason"]) == "MARKET_OFFLINE"
-        ):
+        if (str(d["reason"]) == "ATTACHED_ORDER_LEVEL_ERROR" or
+                str(d["reason"]) == "MINIMUM_ORDER_SIZE_ERROR" or
+                str(d["reason"]) == "INSUFFICIENT_FUNDS" or
+                str(d["reason"]) == "MARKET_OFFLINE"):
             print(
                 "!!DEBUG!! Not enough wonga in your account for this type of trade!!, Try again!!"
             )
@@ -145,9 +141,8 @@ class API(IGClient):
             random.shuffle(epic_ids)
             for epic_id in epic_ids:
                 print(str(epic_id), end="")
-                if epic_id in map(
-                    lambda x: x["market"]["epic"], self.open_positions["positions"]
-                ):
+                if epic_id in map(lambda x: x["market"]["epic"],
+                                  self.open_positions["positions"]):
                     print(" already have an open position here")
                     continue
                 # systime.sleep(2) # we only get 30 API calls per minute :( but
@@ -162,26 +157,22 @@ class API(IGClient):
                 if res["values"]["CHANGE_PCT"] is None:
                     Price_Change_Day_percent = 0.0
                 else:
-                    Price_Change_Day_percent = float(res["values"]["CHANGE_PCT"])
+                    Price_Change_Day_percent = float(
+                        res["values"]["CHANGE_PCT"])
 
                 Price_Change_Day_percent_h = float(
-                    self.config["Trade"]["Price_Change_Day_percent_high"]
-                )
+                    self.config["Trade"]["Price_Change_Day_percent_high"])
                 Price_Change_Day_percent_l = float(
-                    self.config["Trade"]["Price_Change_Day_percent_low"]
-                )
+                    self.config["Trade"]["Price_Change_Day_percent_low"])
 
-                if (
-                    Price_Change_Day_percent_h
-                    > Price_Change_Day_percent
-                    > Price_Change_Day_percent_l
-                ) or (
-                    (Price_Change_Day_percent_h * -1)
-                    < Price_Change_Day_percent
-                    < (Price_Change_Day_percent_l * -1)
-                ):
+                if (Price_Change_Day_percent_h > Price_Change_Day_percent >
+                        Price_Change_Day_percent_l) or (
+                            (Price_Change_Day_percent_h * -1) <
+                            Price_Change_Day_percent <
+                            (Price_Change_Day_percent_l * -1)):
                     print(
-                        " Day Price Change {}% ".format(str(Price_Change_Day_percent)),
+                        " Day Price Change {}% ".format(
+                            str(Price_Change_Day_percent)),
                         end="",
                     )
                     bid_price = res["values"]["BID"]
@@ -189,20 +180,19 @@ class API(IGClient):
                     spread = float(bid_price) - float(ask_price)
 
                     if eval(self.config["Trade"]["use_max_spread"]):
-                        max_permitted_spread = float(self.config["Trade"]["max_spread"])
+                        max_permitted_spread = float(
+                            self.config["Trade"]["max_spread"])
                     else:
                         max_permitted_spread = float(
-                            epics[epic_id]["minspread"]
-                            * float(self.config["Trade"]["spread_multiplier"])
-                            * -1
-                        )
+                            epics[epic_id]["minspread"] *
+                            float(self.config["Trade"]["spread_multiplier"]) *
+                            -1)
 
                     # if spread is less than -2, It's too big
                     if float(spread) > max_permitted_spread:
                         print(
                             ":- GOOD SPREAD {0:.2f}>{1:.2f}".format(
-                                spread, max_permitted_spread
-                            ),
+                                spread, max_permitted_spread),
                             end="\n",
                             flush=True,
                         )
@@ -210,8 +200,7 @@ class API(IGClient):
                     else:
                         print(
                             ":- spread not ok {0:.2f}<={1:.2f}".format(
-                                spread, max_permitted_spread
-                            ),
+                                spread, max_permitted_spread),
                             end="\n",
                             flush=True,
                         )
@@ -284,7 +273,9 @@ class API(IGClient):
         # Price resolution (MINUTE, MINUTE_2, MINUTE_3, MINUTE_5, MINUTE_10, MINUTE_15, MINUTE_30, HOUR, HOUR_2, HOUR_2, HOUR_4, DAY, WEEK, MONTH)
         # This is the high roller, For the price prediction.
         if high_resolution:
-            resolutions = ["HOUR/5", "HOUR_2/5", "HOUR_3/5", "HOUR_4/5", "DAY/5"]
+            resolutions = [
+                "HOUR/5", "HOUR_2/5", "HOUR_3/5", "HOUR_4/5", "DAY/5"
+            ]
         else:
             resolutions = ["HOUR_4/5", "MINUTE_30/5"]
         for resolution in resolutions:

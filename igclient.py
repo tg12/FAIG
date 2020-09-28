@@ -32,6 +32,7 @@ def trackcall(f):
 
 
 class IGClient(object):
+
     def __init__(self, config=None):
         self.loggedin = False
         self.json = True  # return json or obj
@@ -79,8 +80,7 @@ class IGClient(object):
                 self.API_ENDPOINT + "/session",
                 data=json.dumps(data),
                 headers=self.session_headers,
-            )
-        )
+            ))
         self.json = curr_json  # set it back
         headers_json = dict(r.headers)
         for h in ["CST", "X-SECURITY-TOKEN"]:
@@ -102,7 +102,10 @@ class IGClient(object):
 
         if set_default:
             # SET SPREAD BET ACCOUNT AS DEFAULT
-            self.update_session({"accountId": self.accountId, "defaultAccount": "True"})
+            self.update_session({
+                "accountId": self.accountId,
+                "defaultAccount": "True"
+            })
             # ERROR about account ID been the same, Ignore!
 
         return (r, json.loads(r.text))[self.json]
@@ -124,10 +127,8 @@ class IGClient(object):
     @trackcall
     def accounts(self):
         return self._handlereq(
-            requests.get(
-                self.API_ENDPOINT + "/accounts", headers=self.authenticated_headers
-            )
-        )
+            requests.get(self.API_ENDPOINT + "/accounts",
+                         headers=self.authenticated_headers))
 
     @trackcall
     def update_session(self, data):
@@ -136,16 +137,14 @@ class IGClient(object):
                 self.API_ENDPOINT + "/session",
                 data=data,
                 headers=self.authenticated_headers,
-            )
-        )
+            ))
 
     def markets(self, epic_id):
         return self._handlereq(
             requests.get(
                 self.API_ENDPOINT + "/markets/" + epic_id,
                 headers=self.authenticated_headers,
-            )
-        )
+            ))
 
     @trackcall
     def clientsentiment(self, market_id):
@@ -153,8 +152,7 @@ class IGClient(object):
             requests.get(
                 self.API_ENDPOINT + "/clientsentiment/" + market_id,
                 headers=self.authenticated_headers,
-            )
-        )
+            ))
 
     @trackcall
     def prices(self, epic_id, resolution):
@@ -162,8 +160,7 @@ class IGClient(object):
             requests.get(
                 self.API_ENDPOINT + "/prices/" + epic_id + "/" + resolution,
                 headers=self.authenticated_headers,
-            )
-        )
+            ))
         try:
             self.allowance = r["allowance"]
         except Exception:
@@ -177,8 +174,8 @@ class IGClient(object):
         else:
             url = "/positions/" + deal_id
         return self._handlereq(
-            requests.get(self.API_ENDPOINT + url, headers=self.authenticated_headers)
-        )
+            requests.get(self.API_ENDPOINT + url,
+                         headers=self.authenticated_headers))
 
     @trackcall
     def positions_otc(self, data):
@@ -191,8 +188,7 @@ class IGClient(object):
                 self.API_ENDPOINT + "/positions/otc",
                 data=json.dumps(data),
                 headers=self.authenticated_headers,
-            )
-        )
+            ))
 
     @trackcall
     def positions_otc_close(self, data):
@@ -201,8 +197,7 @@ class IGClient(object):
                 self.API_ENDPOINT + "/positions/otc",
                 data=json.dumps(data),
                 headers=self._authheadersfordelete(),
-            )
-        )
+            ))
 
     @trackcall
     def confirms(self, deal_ref):
@@ -210,8 +205,7 @@ class IGClient(object):
             requests.get(
                 self.API_ENDPOINT + "/confirms/" + deal_ref,
                 headers=self.authenticated_headers,
-            )
-        )
+            ))
 
     def handleDealingRules(self, data):
 
@@ -222,33 +216,34 @@ class IGClient(object):
 
         r = "marketOrderPreference"
         if dealingRules[r] == "NOT_AVAILABLE":
-            print("!!ERROR!! This market is not available for this dealing account")
+            print(
+                "!!ERROR!! This market is not available for this dealing account"
+            )
 
         r = "maxStopOrLimitDistance"
         if dealingRules[r]["unit"] == "PERCENTAGE":
             if current_price / 100 * float(dealingRules[r]["value"]) < float(
-                data["limitDistance"]
-            ):
+                    data["limitDistance"]):
                 data["limitDistance"] = str(
-                    format(current_price / 100 * float(dealingRules[r]["value"]), ".2f")
-                )
+                    format(
+                        current_price / 100 * float(dealingRules[r]["value"]),
+                        ".2f"))
         elif dealingRules[r]["unit"] == "POINTS":
             if float(dealingRules[r]["value"]) < float(data["limitDistance"]):
                 data["limitDistance"] = str(dealingRules[r]["value"])
 
-        if ("guaranteedStop" in data and data["guaranteedStop"]) or self.config[
-            "Trade"
-        ]["always_guarantee_stops"]:
+        if ("guaranteedStop" in data and data["guaranteedStop"]
+           ) or self.config["Trade"]["always_guarantee_stops"]:
             r = "minControlledRiskStopDistance"
         else:  # data['guaranteedStop'] == False
             r = "minNormalStopOrLimitDistance"
         if dealingRules[r]["unit"] == "PERCENTAGE":
             if current_price / 100 * float(dealingRules[r]["value"]) > float(
-                data["stopDistance"]
-            ):
+                    data["stopDistance"]):
                 data["stopDistance"] = str(
-                    format(current_price / 100 * float(dealingRules[r]["value"]), ".2f")
-                )
+                    format(
+                        current_price / 100 * float(dealingRules[r]["value"]),
+                        ".2f"))
         elif dealingRules[r]["unit"] == "POINTS":
             if float(dealingRules[r]["value"]) > float(data["stopDistance"]):
                 data["stopDistance"] = str(dealingRules[r]["value"])

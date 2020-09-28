@@ -19,7 +19,7 @@ while True:
     prediction.current_price = float(d["values"]["BID"])
     prediction.set_marketdata(api.clientsentiment(epic_id))
     if (
-        prediction.quick_check() is None
+            prediction.quick_check() is None
     ):  # no point pulling in market data (right now), we'll reject this later on anyway
         continue  # find a different trade
 
@@ -27,16 +27,17 @@ while True:
         (x, y) = api.fetch_lg_prices(epic_id)
         (high_price, low_price) = api.fetch_lg_highlow(epic_id)
 
-        prediction.linear_regression(
-            x=x, y=y, high_price=high_price, low_price=low_price
-        )
+        prediction.linear_regression(x=x,
+                                     y=y,
+                                     high_price=high_price,
+                                     low_price=low_price)
     else:
-        sys.exit(
-            "Trading Algorithm: {} not found".format(api.config["Trade"]["algorithm"])
-        )
+        sys.exit("Trading Algorithm: {} not found".format(
+            api.config["Trade"]["algorithm"]))
 
     if prediction.direction_to_trade is None:
-        print("!!DEBUG!! Literally NO decent trade direction could be determined")
+        print(
+            "!!DEBUG!! Literally NO decent trade direction could be determined")
         continue
 
     api.placeOrder(prediction)

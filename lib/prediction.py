@@ -14,14 +14,15 @@ import numpy as np
 
 
 class Prediction(object):
+
     def __init__(self, config):
         self.config = config
         self.predict_accuracy = float(config["Trade"]["predict_accuracy"])
         self.use_clientsentiment = eval(config["Trade"]["use_clientsentiment"])
         self.clientsentiment_contrarian = eval(
-            config["Trade"]["clientsentiment_contrarian"]
-        )
-        self.clientsentiment_value = float(config["Trade"]["clientsentiment_value"])
+            config["Trade"]["clientsentiment_contrarian"])
+        self.clientsentiment_value = float(
+            config["Trade"]["clientsentiment_value"])
         self.hightrend_watermark = float(config["Trade"]["hightrend_watermark"])
         self.greed = float(config["Trade"]["greed"])
 
@@ -51,8 +52,10 @@ class Prediction(object):
         }
 
     def set_marketdata(self, market_data):
-        self.longPositionPercentage = float(market_data["longPositionPercentage"])
-        self.shortPositionPercentage = float(market_data["shortPositionPercentage"])
+        self.longPositionPercentage = float(
+            market_data["longPositionPercentage"])
+        self.shortPositionPercentage = float(
+            market_data["shortPositionPercentage"])
 
     def quick_check(self):
         if self.use_clientsentiment:
@@ -63,15 +66,11 @@ class Prediction(object):
         return self.direction_to_trade
 
     def trade_type_by_sentiment(self):
-        if (
-            self.shortPositionPercentage > self.longPositionPercentage
-            and self.shortPositionPercentage >= self.clientsentiment_value
-        ):
+        if (self.shortPositionPercentage > self.longPositionPercentage and
+                self.shortPositionPercentage >= self.clientsentiment_value):
             self.direction_to_trade = "SELL"
-        elif (
-            self.longPositionPercentage > self.shortPositionPercentage
-            and self.longPositionPercentage >= self.clientsentiment_value
-        ):
+        elif (self.longPositionPercentage > self.shortPositionPercentage and
+              self.longPositionPercentage >= self.clientsentiment_value):
             self.direction_to_trade = "BUY"
         elif self.shortPositionPercentage >= self.hightrend_watermark:
             self.direction_to_trade = "SELL"
@@ -80,13 +79,13 @@ class Prediction(object):
         else:
             print("No Trade This time")
             print(
-                "!!DEBUG shortPositionPercentage:{} longPositionPercentage:{} clientsentiment_value:{} hightrend_watermark:{}".format(
+                "!!DEBUG shortPositionPercentage:{} longPositionPercentage:{} clientsentiment_value:{} hightrend_watermark:{}"
+                .format(
                     self.shortPositionPercentage,
                     self.longPositionPercentage,
                     self.clientsentiment_value,
                     self.hightrend_watermark,
-                )
-            )
+                ))
             return None
 
     def trade_type_by_priceprediction(self):
@@ -111,19 +110,18 @@ class Prediction(object):
         price_diff = float(current_price - price_prediction)
 
         print(
-            "price_diff:{} score:{} current_price:{} limitDistance:{} predict_accuracy:{} price_prediction:{}".format(
+            "price_diff:{} score:{} current_price:{} limitDistance:{} predict_accuracy:{} price_prediction:{}"
+            .format(
                 price_diff,
                 score,
                 current_price,
                 self.limitDistance,
                 self.predict_accuracy,
                 price_prediction,
-            )
-        )
+            ))
 
-        self.limitDistance = round(
-            price_diff * score * self.greed, 1
-        )  # vary according to certainty and greed
+        self.limitDistance = round(price_diff * score * self.greed,
+                                   1)  # vary according to certainty and greed
         if self.limitDistance < 0:
             self.limitDistance *= -1
         if self.limitDistance == 0:
@@ -159,12 +157,8 @@ class Prediction(object):
         pred_ict = np.asarray(pred_ict)  # To Numpy Array, hacky but good!!
         pred_ict = pred_ict.reshape(1, -1)
         self.price_prediction = genius_regression_model.predict(pred_ict)
-        print(
-            "PRICE PREDICTION FOR PRICE "
-            + self.epic_id
-            + " IS : "
-            + str(self.price_prediction)
-        )
+        print("PRICE PREDICTION FOR PRICE " + self.epic_id + " IS : " +
+              str(self.price_prediction))
 
         self.score = genius_regression_model.score(x, y)
         predictions = {

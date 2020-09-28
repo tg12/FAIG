@@ -38,13 +38,8 @@ if PY3:
         return iter(d.items())
 
     def wait_for_input():
-        input(
-            "{0:-^80}\n".format(
-                "HIT CR TO UNSUBSCRIBE AND DISCONNECT FROM \
-LIGHTSTREAMER"
-            )
-        )
-
+        input("{0:-^80}\n".format("HIT CR TO UNSUBSCRIBE AND DISCONNECT FROM \
+LIGHTSTREAMER"))
 
 else:
     from urllib import urlopen as _urlopen, urlencode
@@ -59,11 +54,8 @@ else:
 
     def wait_for_input():
         raw_input(
-            "{0:-^80}\n".format(
-                "HIT CR TO UNSUBSCRIBE AND DISCONNECT FROM \
-LIGHTSTREAMER"
-            )
-        )
+            "{0:-^80}\n".format("HIT CR TO UNSUBSCRIBE AND DISCONNECT FROM \
+LIGHTSTREAMER"))
 
 
 CONNECTION_URL_PATH = "lightstreamer/create_session.txt"
@@ -132,12 +124,10 @@ class Subscription(object):
         curr_item = self._items_map.get(item_pos, {})
         # Update the map with new values, merging with the
         # previous ones if any.
-        self._items_map[item_pos] = dict(
-            [
-                (k, self._decode(v, curr_item.get(k)))
-                for k, v in list(undecoded_item.items())
-            ]
-        )
+        self._items_map[item_pos] = dict([
+            (k, self._decode(v, curr_item.get(k)))
+            for k, v in list(undecoded_item.items())
+        ])
         # Make an item info as a new event to be passed to listeners
         item_info = {
             "pos": item_pos,
@@ -188,7 +178,8 @@ class LSClient(object):
             self._control_url = self._base_url
         else:
             parsed_custom_address = parse_url("//" + custom_address)
-            self._control_url = parsed_custom_address._replace(scheme=self._base_url[0])
+            self._control_url = parsed_custom_address._replace(
+                scheme=self._base_url[0])
 
     def _control(self, params):
         """Create a Control Connection to send control commands
@@ -230,8 +221,8 @@ class LSClient(object):
         Session.
         """
         self._stream_connection = self._call(
-            self._control_url, BIND_URL_PATH, {"LS_session": self._session["SessionId"]}
-        )
+            self._control_url, BIND_URL_PATH,
+            {"LS_session": self._session["SessionId"]})
 
         self._bind_counter += 1
         stream_line = self._read_from_stream()
@@ -306,17 +297,15 @@ class LSClient(object):
         self._subscriptions[self._current_subscription_key] = subscription
 
         # Send the control request to perform the subscription
-        server_response = self._control(
-            {
-                "LS_session": self._session["SessionId"],
-                "LS_table": self._current_subscription_key,
-                "LS_op": OP["ADD"],
-                # "LS_data_adapter": subscription.adapter,
-                "LS_mode": subscription.mode,
-                "LS_schema": " ".join(subscription.field_names),
-                "LS_id": " ".join(subscription.item_names),
-            }
-        )
+        server_response = self._control({
+            "LS_session": self._session["SessionId"],
+            "LS_table": self._current_subscription_key,
+            "LS_op": OP["ADD"],
+            # "LS_data_adapter": subscription.adapter,
+            "LS_mode": subscription.mode,
+            "LS_schema": " ".join(subscription.field_names),
+            "LS_id": " ".join(subscription.item_names),
+        })
         log.debug("Server response ---> <{0}>".format(server_response))
         return self._current_subscription_key
 
@@ -325,9 +314,10 @@ class LSClient(object):
         specified subscription_key.
         """
         if subcription_key in self._subscriptions:
-            server_response = self._control(
-                {"LS_Table": subcription_key, "LS_op": OP["DELETE"]}
-            )
+            server_response = self._control({
+                "LS_Table": subcription_key,
+                "LS_op": OP["DELETE"]
+            })
             log.debug("Server response ---> <{0}>".format(server_response))
 
             if server_response == OK_CMD:
@@ -336,7 +326,8 @@ class LSClient(object):
             else:
                 log.warning("Server error:" + server_response)
         else:
-            log.warning("No subscription key {0} found!".format(subcription_key))
+            log.warning(
+                "No subscription key {0} found!".format(subcription_key))
 
     def _forward_update_message(self, update_message):
         """Forwards the real time update to the relative
@@ -414,6 +405,7 @@ class LSClient(object):
 
 
 class IGStream(object):
+
     def __init__(self, igclient=None, loginresponse=None):
         from igclient import IGClient
 
@@ -427,12 +419,8 @@ class IGStream(object):
         self.loginresponse = loginresponse
         SERVER = self.loginresponse["lightstreamerEndpoint"]
         ACCOUNTID = self.loginresponse["currentAccountId"]
-        PASSWORD = (
-            "CST-"
-            + self.igclient.auth["CST"]
-            + "|XST-"
-            + self.igclient.auth["X-SECURITY-TOKEN"]
-        )
+        PASSWORD = ("CST-" + self.igclient.auth["CST"] + "|XST-" +
+                    self.igclient.auth["X-SECURITY-TOKEN"])
 
         # Establishing a new connection to Lightstreamer Server
         log.debug("Starting connection")
@@ -440,7 +428,8 @@ class IGStream(object):
         try:
             self.lightstreamer_client.connect()
         except Exception as e:
-            print("Unable to connect to Lightstreamer Server: {}".format(SERVER))
+            print(
+                "Unable to connect to Lightstreamer Server: {}".format(SERVER))
             print(traceback.format_exc())
             sys.exit(1)
 
@@ -459,7 +448,8 @@ class IGStream(object):
         count = 0
         while 1:
             count += 1
-            if len(self.lightstreamer_client._subscriptions[sub_key]._results) > 0:
+            if len(self.lightstreamer_client._subscriptions[sub_key]._results
+                  ) > 0:
                 break
             elif count > 10000:  # if nothing after 10s, bail
                 break

@@ -34,9 +34,11 @@ class MarketWatcher:
     min_spread = None
     max_spread = None
 
-    def __init__(
-        self, client, epics, change_range=(0.48, 1.9), spread_range=(0.0, 2.0)
-    ):
+    def __init__(self,
+                 client,
+                 epics,
+                 change_range=(0.48, 1.9),
+                 spread_range=(0.0, 2.0)):
 
         assert isinstance(epics, list)
 
@@ -60,7 +62,8 @@ class MarketWatcher:
         while not self.ok:
             self.epic = self.__get_epic_id()
             self.__update_market_data()
-            if self.__price_change_is_in_range() and self.__spread_is_in_range():
+            if self.__price_change_is_in_range() and self.__spread_is_in_range(
+            ):
                 self.ok = True
                 self.__log("Hit")
             else:
@@ -119,7 +122,8 @@ class MarketWatcher:
 
     def __log(self, msg):
         logging.info(
-            "epic: {epic}, price: {bid}/{ask}, spread: {spread}, price change: {price_change}, percentage change: {percent_change} -> {msg}".format(
+            "epic: {epic}, price: {bid}/{ask}, spread: {spread}, price change: {price_change}, percentage change: {percent_change} -> {msg}"
+            .format(
                 msg=msg,
                 epic=self.epic,
                 bid=int(self.bid),
@@ -127,5 +131,4 @@ class MarketWatcher:
                 spread=int(self.spread),
                 price_change=round(self.price_change, 2),
                 percent_change=round(self.percent_change, 2),
-            )
-        )
+            ))
