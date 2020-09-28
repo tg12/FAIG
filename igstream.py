@@ -29,7 +29,7 @@ PY2 = sys.version_info[0] == 2
 
 if PY3:
     from urllib.request import urlopen as _urlopen
-    from urllib.parse import (urlparse as parse_url, urljoin, urlencode)
+    from urllib.parse import urlparse as parse_url, urljoin, urlencode
 
     def _url_encode(params):
         return urlencode(params).encode("utf-8")
@@ -38,11 +38,16 @@ if PY3:
         return iter(d.items())
 
     def wait_for_input():
-        input("{0:-^80}\n".format("HIT CR TO UNSUBSCRIBE AND DISCONNECT FROM \
-LIGHTSTREAMER"))
+        input(
+            "{0:-^80}\n".format(
+                "HIT CR TO UNSUBSCRIBE AND DISCONNECT FROM \
+LIGHTSTREAMER"
+            )
+        )
+
 
 else:
-    from urllib import (urlopen as _urlopen, urlencode)
+    from urllib import urlopen as _urlopen, urlencode
     from urlparse import urlparse as parse_url
     from urlparse import urljoin
 
@@ -53,19 +58,24 @@ else:
         return d.iteritems()
 
     def wait_for_input():
-        raw_input("{0:-^80}\n".format("HIT CR TO UNSUBSCRIBE AND DISCONNECT FROM \
-LIGHTSTREAMER"))
+        raw_input(
+            "{0:-^80}\n".format(
+                "HIT CR TO UNSUBSCRIBE AND DISCONNECT FROM \
+LIGHTSTREAMER"
+            )
+        )
+
 
 CONNECTION_URL_PATH = "lightstreamer/create_session.txt"
 BIND_URL_PATH = "lightstreamer/bind_session.txt"
 CONTROL_URL_PATH = "lightstreamer/control.txt"
 
 OP = {
-    'ADD': 'add',  # Request parameter to create and activate a new Table.
+    "ADD": "add",  # Request parameter to create and activate a new Table.
     # Request parameter to delete a previously created Table.
-    'DELETE': 'delete',
+    "DELETE": "delete",
     # Request parameter to force closure of an existing session.
-    'DESTROY': "destroy"
+    "DESTROY": "destroy",
 }
 
 # List of possible server responses
@@ -95,7 +105,7 @@ class Subscription(object):
         Lightstremar Text Protocol specifications.
         """
         if value == "$":
-            return u''
+            return u""
         elif value == "#":
             return None
         elif not value:
@@ -113,7 +123,7 @@ class Subscription(object):
         a new item event.
         """
         # Tokenize the item line as sent by Lightstreamer
-        toks = item_line.rstrip('\r\n').split('|')
+        toks = item_line.rstrip("\r\n").split("|")
         undecoded_item = dict(list(zip(self.field_names, toks[1:])))
 
         # Retrieve the previous item stored into the map, if present.
@@ -122,15 +132,17 @@ class Subscription(object):
         curr_item = self._items_map.get(item_pos, {})
         # Update the map with new values, merging with the
         # previous ones if any.
-        self._items_map[item_pos] = dict([
-            (k, self._decode(v, curr_item.get(k))) for k, v
-            in list(undecoded_item.items())
-        ])
+        self._items_map[item_pos] = dict(
+            [
+                (k, self._decode(v, curr_item.get(k)))
+                for k, v in list(undecoded_item.items())
+            ]
+        )
         # Make an item info as a new event to be passed to listeners
         item_info = {
-            'pos': item_pos,
-            'name': self.item_names[item_pos - 1],
-            'values': self._items_map[item_pos]
+            "pos": item_pos,
+            "name": self.item_names[item_pos - 1],
+            "values": self._items_map[item_pos],
         }
 
         self._results.append(item_info)
@@ -157,9 +169,7 @@ class LSClient(object):
     def _encode_params(self, params):
         """Encode the parameter for HTTP POST submissions, but
         only for non empty values..."""
-        return _url_encode(
-            dict([(k, v) for (k, v) in _iteritems(params) if v])
-        )
+        return _url_encode(dict([(k, v) for (k, v) in _iteritems(params) if v]))
 
     def _call(self, base_url, url, body):
         """Open a network connection and performs HTTP Post
@@ -178,9 +188,7 @@ class LSClient(object):
             self._control_url = self._base_url
         else:
             parsed_custom_address = parse_url("//" + custom_address)
-            self._control_url = parsed_custom_address._replace(
-                scheme=self._base_url[0]
-            )
+            self._control_url = parsed_custom_address._replace(scheme=self._base_url[0])
 
     def _control(self, params):
         """Create a Control Connection to send control commands
@@ -203,17 +211,18 @@ class LSClient(object):
             self._base_url,
             CONNECTION_URL_PATH,
             {
-                "LS_op2": 'create',
-                "LS_cid": 'mgQkwtwdysogQz2BJ4Ji kOj2Bg',
+                "LS_op2": "create",
+                "LS_cid": "mgQkwtwdysogQz2BJ4Ji kOj2Bg",
                 "LS_adapter_set": self._adapter_set,
                 "LS_user": self._user,
-                "LS_password": self._password}
+                "LS_password": self._password,
+            },
         )
 
         while True:
             stream_line = self._read_from_stream()
             self._handle_stream(stream_line)
-            if ':' not in stream_line:
+            if ":" not in stream_line:
                 break
 
     def bind(self):
@@ -221,11 +230,7 @@ class LSClient(object):
         Session.
         """
         self._stream_connection = self._call(
-            self._control_url,
-            BIND_URL_PATH,
-            {
-                "LS_session": self._session["SessionId"]
-            }
+            self._control_url, BIND_URL_PATH, {"LS_session": self._session["SessionId"]}
         )
 
         self._bind_counter += 1
@@ -238,7 +243,7 @@ class LSClient(object):
             while True:
                 next_stream_line = self._read_from_stream()
                 if next_stream_line:
-                    [param, value] = next_stream_line.split(':', 1)
+                    [param, value] = next_stream_line.split(":", 1)
                     self._session[param] = value
                 else:
                     break
@@ -286,7 +291,7 @@ class LSClient(object):
         the connect() invocation.
         """
         if self._stream_connection is not None:
-            server_response = self._control({"LS_op": OP['DESTROY']})
+            server_response = self._control({"LS_op": OP["DESTROY"]})
             if server_response == OK_CMD:
                 # There is no need to explicitly close the connection,
                 # since it is handled by thread completion.
@@ -301,15 +306,17 @@ class LSClient(object):
         self._subscriptions[self._current_subscription_key] = subscription
 
         # Send the control request to perform the subscription
-        server_response = self._control({
-            "LS_session": self._session['SessionId'],
-            "LS_table": self._current_subscription_key,
-            "LS_op": OP['ADD'],
-            #"LS_data_adapter": subscription.adapter,
-            "LS_mode": subscription.mode,
-            "LS_schema": " ".join(subscription.field_names),
-            "LS_id": " ".join(subscription.item_names),
-        })
+        server_response = self._control(
+            {
+                "LS_session": self._session["SessionId"],
+                "LS_table": self._current_subscription_key,
+                "LS_op": OP["ADD"],
+                # "LS_data_adapter": subscription.adapter,
+                "LS_mode": subscription.mode,
+                "LS_schema": " ".join(subscription.field_names),
+                "LS_id": " ".join(subscription.item_names),
+            }
+        )
         log.debug("Server response ---> <{0}>".format(server_response))
         return self._current_subscription_key
 
@@ -318,10 +325,9 @@ class LSClient(object):
         specified subscription_key.
         """
         if subcription_key in self._subscriptions:
-            server_response = self._control({
-                "LS_Table": subcription_key,
-                "LS_op": OP['DELETE']
-            })
+            server_response = self._control(
+                {"LS_Table": subcription_key, "LS_op": OP["DELETE"]}
+            )
             log.debug("Server response ---> <{0}>".format(server_response))
 
             if server_response == OK_CMD:
@@ -330,15 +336,14 @@ class LSClient(object):
             else:
                 log.warning("Server error:" + server_response)
         else:
-            log.warning(
-                "No subscription key {0} found!".format(subcription_key))
+            log.warning("No subscription key {0} found!".format(subcription_key))
 
     def _forward_update_message(self, update_message):
         """Forwards the real time update to the relative
         Subscription instance for further dispatching to its listeners.
         """
         log.debug("Received update message ---> <{0}>".format(update_message))
-        tok = update_message.split(',', 1)
+        tok = update_message.split(",", 1)
         table, item = int(tok[0]), tok[1]
         if table in self._subscriptions:
             self._subscriptions[table].notifyupdate(item)
@@ -409,7 +414,6 @@ class LSClient(object):
 
 
 class IGStream(object):
-
     def __init__(self, igclient=None, loginresponse=None):
         from igclient import IGClient
 
@@ -421,10 +425,14 @@ class IGStream(object):
             loginresponse = igclient.session()
         self.igclient = igclient
         self.loginresponse = loginresponse
-        SERVER = self.loginresponse['lightstreamerEndpoint']
-        ACCOUNTID = self.loginresponse['currentAccountId']
-        PASSWORD = 'CST-' + \
-            self.igclient.auth['CST'] + '|XST-' + self.igclient.auth['X-SECURITY-TOKEN']
+        SERVER = self.loginresponse["lightstreamerEndpoint"]
+        ACCOUNTID = self.loginresponse["currentAccountId"]
+        PASSWORD = (
+            "CST-"
+            + self.igclient.auth["CST"]
+            + "|XST-"
+            + self.igclient.auth["X-SECURITY-TOKEN"]
+        )
 
         # Establishing a new connection to Lightstreamer Server
         log.debug("Starting connection")
@@ -445,16 +453,13 @@ class IGStream(object):
             pass
 
         # set the subscription
-        sub_key = self.subscribe(
-            subscription=subscription,
-            listener=do_nothing)
+        sub_key = self.subscribe(subscription=subscription, listener=do_nothing)
 
         # wait for input THIS IS BLOCKING
         count = 0
-        while(1):
+        while 1:
             count += 1
-            if len(
-                    self.lightstreamer_client._subscriptions[sub_key]._results) > 0:
+            if len(self.lightstreamer_client._subscriptions[sub_key]._results) > 0:
                 break
             elif count > 10000:  # if nothing after 10s, bail
                 break
