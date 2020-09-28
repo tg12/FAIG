@@ -10,6 +10,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+
 def humanize_time(secs):
     mins, secs = divmod(secs, 60)
     hours, mins = divmod(mins, 60)

@@ -61,9 +61,11 @@ BIND_URL_PATH = "lightstreamer/bind_session.txt"
 CONTROL_URL_PATH = "lightstreamer/control.txt"
 
 OP = {
-    'ADD': 'add', # Request parameter to create and activate a new Table.
-    'DELETE': 'delete', # Request parameter to delete a previously created Table.
-    'DESTROY': "destroy" # Request parameter to force closure of an existing session.
+    'ADD': 'add',  # Request parameter to create and activate a new Table.
+    # Request parameter to delete a previously created Table.
+    'DELETE': 'delete',
+    # Request parameter to force closure of an existing session.
+    'DESTROY': "destroy"
 }
 
 # List of possible server responses
@@ -73,7 +75,6 @@ LOOP_CMD = "LOOP"
 ERROR_CMD = "ERROR"
 SYNC_ERROR_CMD = "SYNC ERROR"
 OK_CMD = "OK"
-
 
 
 class Subscription(object):
@@ -202,14 +203,14 @@ class LSClient(object):
             self._base_url,
             CONNECTION_URL_PATH,
             {
-             "LS_op2": 'create',
-             "LS_cid": 'mgQkwtwdysogQz2BJ4Ji kOj2Bg',
-             "LS_adapter_set": self._adapter_set,
-             "LS_user": self._user,
-             "LS_password": self._password}
+                "LS_op2": 'create',
+                "LS_cid": 'mgQkwtwdysogQz2BJ4Ji kOj2Bg',
+                "LS_adapter_set": self._adapter_set,
+                "LS_user": self._user,
+                "LS_password": self._password}
         )
 
-        while 1:
+        while True:
             stream_line = self._read_from_stream()
             self._handle_stream(stream_line)
             if ':' not in stream_line:
@@ -223,8 +224,8 @@ class LSClient(object):
             self._control_url,
             BIND_URL_PATH,
             {
-             "LS_session": self._session["SessionId"]
-             }
+                "LS_session": self._session["SessionId"]
+            }
         )
 
         self._bind_counter += 1
@@ -234,10 +235,10 @@ class LSClient(object):
     def _handle_stream(self, stream_line):
         if stream_line == OK_CMD:
             # Parsing session inkion
-            while 1:
+            while True:
                 next_stream_line = self._read_from_stream()
                 if next_stream_line:
-                    [param,value] = next_stream_line.split(':',1)
+                    [param, value] = next_stream_line.split(':', 1)
                     self._session[param] = value
                 else:
                     break
@@ -250,7 +251,7 @@ class LSClient(object):
             self._stream_connection_thread = threading.Thread(
                 name="STREAM-CONN-THREAD-{0}".format(self._bind_counter),
                 target=self._receive
-                #args=(self._results[self._current_subscription_key])
+                # args=(self._results[self._current_subscription_key])
             )
             self._stream_connection_thread.setDaemon(True)
             self._stream_connection_thread.start()
@@ -329,7 +330,8 @@ class LSClient(object):
             else:
                 log.warning("Server error:" + server_response)
         else:
-            log.warning("No subscription key {0} found!".format(subcription_key))
+            log.warning(
+                "No subscription key {0} found!".format(subcription_key))
 
     def _forward_update_message(self, update_message):
         """Forwards the real time update to the relative
@@ -405,22 +407,24 @@ class LSClient(object):
             log.debug("Binding to this active session")
             self.bind()
 
+
 class IGStream(object):
 
-    def __init__(self,igclient=None, loginresponse = None):
+    def __init__(self, igclient=None, loginresponse=None):
         from igclient import IGClient
 
         logging.basicConfig(level=logging.INFO)
 
         # reuse login if possible,  else create session
-        if igclient == None or loginresponse == None:
+        if igclient is None or loginresponse is None:
             igclient = IGClient()
             loginresponse = igclient.session()
         self.igclient = igclient
         self.loginresponse = loginresponse
         SERVER = self.loginresponse['lightstreamerEndpoint']
         ACCOUNTID = self.loginresponse['currentAccountId']
-        PASSWORD = 'CST-' + self.igclient.auth['CST'] + '|XST-' + self.igclient.auth['X-SECURITY-TOKEN']
+        PASSWORD = 'CST-' + \
+            self.igclient.auth['CST'] + '|XST-' + self.igclient.auth['X-SECURITY-TOKEN']
 
         # Establishing a new connection to Lightstreamer Server
         log.debug("Starting connection")
@@ -441,15 +445,18 @@ class IGStream(object):
             pass
 
         # set the subscription
-        sub_key = self.subscribe(subscription=subscription, listener=do_nothing)
+        sub_key = self.subscribe(
+            subscription=subscription,
+            listener=do_nothing)
 
         # wait for input THIS IS BLOCKING
         count = 0
         while(1):
             count += 1
-            if len(self.lightstreamer_client._subscriptions[sub_key]._results) > 0:
+            if len(
+                    self.lightstreamer_client._subscriptions[sub_key]._results) > 0:
                 break
-            elif count > 10000: # if nothing after 10s, bail 
+            elif count > 10000:  # if nothing after 10s, bail
                 break
             else:
                 time.sleep(000.1)
@@ -462,7 +469,6 @@ class IGStream(object):
 
         return ret[0]
 
-
     def subscribe(self, subscription, listener):
 
         # Adding the "on_item_update" function to Subscription
@@ -471,7 +477,6 @@ class IGStream(object):
         # Registering the Subscription
         sub_key = self.lightstreamer_client.subscribe(subscription)
         return sub_key
-
 
     def unsubscribe(self, sub_key):
         # Unsubscribing from Lightstreamer by using the subscription key
