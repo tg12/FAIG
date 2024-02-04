@@ -113,7 +113,7 @@ SYNC_ERROR_CMD = "SYNC ERROR"
 OK_CMD = "OK"
 
 
-class Subscription(object):
+class Subscription:
     """Represents a Subscription to be submitted to a Lightstreamer Server."""
 
     def __init__(self, mode, items, fields, adapter=""):
@@ -175,7 +175,7 @@ class Subscription(object):
             on_item_update(item_info)
 
 
-class LSClient(object):
+class LSClient:
     """Manages the communication with Lightstreamer Server"""
 
     def __init__(self, base_url, adapter_set="", user="", password=""):
@@ -438,7 +438,7 @@ class LSClient(object):
             self.bind()
 
 
-class IGStream(object):
+class IGStream:
 
     def __init__(self, igclient=None, loginresponse=None):
         from igclient import IGClient

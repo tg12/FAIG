@@ -47,7 +47,7 @@ SOFTWARE.'''
 import numpy as np
 
 
-class Prediction(object):
+class Prediction:
 
     def __init__(self, config):
         self.config = config

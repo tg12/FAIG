@@ -78,7 +78,7 @@ class MarketWatcher:
 
         def is_valid_range(x):
             assert isinstance(x, (tuple, list))
-            assert all([isinstance(i, float) and i >= 0 for i in x])
+            assert all(isinstance(i, float) and i >= 0 for i in x)
             return True
 
         assert is_valid_range(change_range)

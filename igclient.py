@@ -65,7 +65,7 @@ def trackcall(f):
     return wrap
 
 
-class IGClient(object):
+class IGClient:
 
     def __init__(self, config=None):
         self.loggedin = False
